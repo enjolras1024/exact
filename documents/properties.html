@@ -1,0 +1,214 @@
+<!DOCTYPE html>
+<html>
+<head lang="en">
+  <meta charset="UTF-8">
+  <title>Exact</title>
+
+  <link href="../css/codemirror.css" rel="stylesheet">
+  <link href="../css/alice.css" rel="stylesheet">
+  <link href="../css/defaults.css" rel="stylesheet">
+
+
+</head>
+<body>
+<header class="header">
+  <nav class="nav-bar">
+    <h3 class="brand"><a href="../" class="logo">Exact</a></h3>
+    <ul class="menu-bar">
+      <li><a href="../examples/todomvc/" class="menu-item"> Examples </a></li>
+      <li><a href="#" class="menu-item  active"> Documents </a></li>
+      <li><a href="#" class="menu-item"> Downloads </a></li>
+      <li><a href="#" class="menu-item"> Blogs </a></li>
+      <li><a href="#" class="menu-item"> GitHub </a></li>
+    </ul>
+  </nav>
+</header>
+<div class="main">
+  <aside class="side-bar">
+    <div class="card">
+      <h4>Overview</h4>
+      <ul class="list">
+        <li><a href="./" class="link">Introduction</a></li>
+        <li><a href="./installation.html" class="link">Installation</a></li>
+      </ul>
+    </div>
+    <div class="card">
+      <h4>Events</h4>
+      <ul class="list">
+        <li><a href="./events.html#on-off" class="link">On / Off</a></li>
+        <li><a href="./events.html#send-emit" class="link">Send / Emit</a></li>
+        <li><a href="./events.html#keys-of-event" class="link">Keys of Event</a></li>
+      </ul>
+    </div>
+    <div class="card">
+      <h4>Properties</h4>
+      <ul class="list">
+        <li><a href="./properties.html#setting-property" class="link">Setting Property</a></li>
+        <li><a href="./properties.html#declaring-descriptors" class="link">Declaring Descriptors</a></li>
+        <li><a href="./properties.html#adding-validation" class="link">Adding Validation</a></li>
+        <li><a href="./properties.html#dirty-checking" class="link">Dirty Checking</a></li>
+        <li><a href="./properties.html#property-changed-event" class="link">Property-Changed Event</a></li>
+      </ul>
+    </div>
+    <div class="card">
+      <h4>Models</h4>
+      <ul class="list">
+        <li><a href="./models.html#store-for-object" class="link">Store for Object</a></li>
+        <li><a href="./models.html#collection-for-array" class="link">Collection for Array</a></li>
+      </ul>
+    </div>
+    <div class="card">
+      <h4>Components</h4>
+      <ul class="list">
+        <li><a href="./shadow-skin-template.html" class="link">Shadow & Skin & Template</a></li>
+        <li><a href="./components.html#using-template-strings-as-texts" class="link">Using Template Strings as Texts</a></li>
+        <li><a href="./components.html#setting-attributes-of-elements" class="link">Setting Attributes of Elements</a></li>
+        <li><a href="./components.html#syntax-of-events-style-class" class="link">Syntax of Events, Style, Class</a></li>
+        <li><a href="./children-and-contents" class="link">Children and Contents</a></li>
+        <li><a href="./lifecycle-and-hooks.html" class="link">Lifecycle and Hooks</a></li>
+        <li><a href="./lists-and-itemadapters.html" class="link">Lists and ItemAdapters</a></li>
+        <li><a href="./form-inputs.html" class="link">Form Inputs</a></li>
+      </ul>
+    </div>
+    <div class="card">
+      <h4>Bindings</h4>
+      <ul class="list">
+        <li><a href="./bindings.html#syntax" class="link">Syntax</a></li>
+        <li><a href="./bindings.html#key-terms" class="link">Key Terms</a></li>
+        <li><a href="./bindings.html#optional-filters" class="link">Optional Filters</a></li>
+        <li><a href="./bindings.html#javaScript-expressions" class="link">JavaScript Expressions</a></li>
+      </ul>
+    </div>
+    <div class="card">
+      <h4>Tips</h4>
+      <ul class="list">
+        <li><a href="./data-flow.html" class="link">Data Flow</a></li>
+        <li><a href="./using-mixins.html" class="link">Using Mixins</a></li>
+        <li><a href="./merging-descriptors.html" class="link">Merging Descriptors</a></li>
+        <li><a href="./binding-instance-methods.html" class="link">Binding Instance Methods</a></li>
+        <li><a href="./using-res-to-manage-resources.html" class="link">Using RES to Manage resources</a></li>
+        <li><a href="./using-objectutil-to-update-and-clone.html" class="link">Using ObjectUtil to Update or Clone</a></li>
+      </ul>
+    </div>
+  </aside>
+  <article class="article">
+    <a id="setting-property"></a>
+    <h2>Properties</h2>
+    <p>Exact使用定制的、渐进增强的`set`方法，在设置属性值的前后，为一些类的对象提供验证、脏检查或更改通知的功能实现。
+      当然，我们也可以使用ES5中的Object.defineProperty定义某个属性的setter，并在setter方法中选择性启用验证、脏检查或更改通知的功能。
+    Exact为定义这样的setter提供了便捷的实现方式。</p>
+    <h4 >Setting Property</h4>
+    <p>用实例方法`set`来设置一个或多个属性。
+      在设置属性值的前后，可能会引发验证、脏检查或更改通知，这是在类的静态方法`set`中具体实现的。在继承或混入时，该静态方法可被扩展甚至重写。
+      例如，Component是对Element的增强，Component.set中实现了验证、脏检查或更改通知的功能，而Element.set中只实现了脏检查的功能。
+      </p>
+    <a id="declaring-descriptors"></a>
+    <div class="code-box">
+      <pre class="code-behind js-mode">
+  // 假设没有为component的属性`active`添加验证
+  component.set('active', false);
+  component.set('title', 'nothing');
+  component.set({
+    active: true,     // `active`被标记为脏，会send('changed.active')
+    title: 'nothing'  // `title`没有脏，不会send('changed.title')
+  });
+
+  element.set('active', false);
+  element.set('title', 'nothing');
+  element.set({
+    active: true,     // `active`被标记为脏，但不会send('changed.active')
+    title: 'nothing'  // `title`没有脏，也不会send('changed.title')
+  });</pre>
+    </div>
+    <h4>Declaring Descriptors</h4>
+    <p>在Exact内部，当`set`方法可用时，总是使用`set`方法来设置属性值。同时，Exact不妨碍我们使用ES5中的setter来实现`set`方法相同的功能，更为此提供了便捷的实现方式。
+      只要在类的静态属性descriptors中声明一些属性名，Exact就会在初始化时使用Object.defineProperty为这些属性定义一对getter/setter，
+      使我们在用点语法为属性赋值时，亦能完成脏检查等功能。例如：</p>
+
+    <div class="code-box">
+      <pre class="code-behind">
+  var SubComponent = Exact.defineClass({
+    // 默认构造函数会调用父类构造函数
+    // constructor: function() {
+    //   Exact.Component.call(this);
+    // },
+    extend: Exact.Component,
+    statics: {
+      descriptors: [
+        'title',
+        'active'
+      ]
+    }
+  };</pre>
+    </div>
+    <p>这里使用了Exact的全局方法defineClass，但并没有使用什么魔法。你依然可以用你喜欢的方式定义一个类，例如使用ES6的语法糖。
+      重要的是，在子类构造函数中调用了父类的构造函数。</p>
+    <a id="adding-validation"></a>
+    <div class="code-box">
+      <pre class="code-behind js-mode">
+  // 在ES6中
+  class SubComponent extends Exact.Component {
+    // 默认构造函数会调用父类构造函数
+    // constructor() {
+    //   super();
+    // }
+  }
+  SubComponent.descriptors = ['title', 'active'];
+
+  // 或者，在ES5中
+  function SubComponent() {
+    Exact.Component.call(this); // 调用父类构造函数
+  }
+  SubComponent.prototype = Object.create(Exact.Component);
+  SubComponent.constructor = SubComponent;
+  SubComponent.descriptors = ['title', 'active'];</pre>
+    </div>
+    <h4>Adding Validation</h4>
+    <p>一些场景下，我们在为某个属性赋值之前，可能需要验证一下值的类型或其他因素。为此，我们可以在descriptors的最后这样进行定义：</p>
+    <div class="code-box">
+      <pre class="code-behind js-mode">
+  SubComponent.descriptors = ['a', 'b', {
+    // 对于boolean、number、string类型
+    title: 'string',
+    amount: 'number',
+    active: 'boolean',
+    sex: 'string number boolean', // '男'/'女'、1/0、true/false 都能作为sex的值
+
+    // 对于Object类型
+    date: Date,
+    data: Array,
+    tool: Knife, // Knife是类的构造函数
+
+    // 以上是类型验证，亦可以自定义一个验证函数
+    score: {
+      type: 'number',
+      validate: function(value) {
+        if (value < 0 || value > 100) {
+          return new Error('out of the range 0~100');
+        }
+      }
+    },
+    username: {
+      pattern: /^[a-zA-Z0-9]{1,32}$/,
+      validate: function(value) {
+        // ...
+      }
+    }
+  }];</pre>
+    </div>
+    <a id="dirty-checking"></a>
+    <p>username属性验证失败时，不会将新值赋给username，而会向外派发 invalid.username 的事件。</p>
+    <h4>Dirty Checking</h4>
+    <h4>Property-Changed Event</h4>
+  </article>
+</div>
+<!--<footer class="footer">
+  <p>Released under the MIT license<br>
+    © 2015 Chen Junyong. All rights reserved.</p>
+</footer>-->
+
+<script src="../js/codemirror.js"></script>
+<script src="../js/javascript-mode.js"></script>
+<script src="../js/code-format.js"></script>
+</body>
+</html>
