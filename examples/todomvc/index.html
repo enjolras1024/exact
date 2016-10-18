@@ -1,109 +1,26 @@
 <!DOCTYPE html>
-<html>
-<head lang="en">
+<html lang="en">
+<head>
   <meta charset="UTF-8">
-  <title>Exact</title>
-
-  <link href="../../stylesheets/codemirror.css" rel="stylesheet">
-  <link href="../../stylesheets/alice.css" rel="stylesheet">
-
-  <link href="../../stylesheets/defaults.css" rel="stylesheet">
-
-  
+  <title>Eaglet · TodoMVC</title>
+  <link rel="stylesheet" href="base.css">
+  <link rel="stylesheet" href="index.css">
   <style>
-    .tab-header {
-      height: 30px;
-      width: 100%;
-      border-bottom: solid 1px #0af;
-    }
-
-    .tab-bar {
-      margin: 0;
-      float: right;
-    }
-
-    .tab-bar > li {
-      float: left;
-      list-style: none;
-      margin: 0;
-      padding: 0;
-    }
-
-    .tab-item {
-      padding: 5px 10px;
-      line-height: 30px;
-      color: #888;
-    }
-
-    .tab-item:hover, .tab-item:active {
-      color: #222;
-      /*border-bottom: solid 2px #666;*/
-    }
-
-    .tab-item.active{
-      color: #222;
-    }
-
-    .tab-content {
-      /*display: none;*/
-      height: 500px;
-      overflow-y: scroll;
-    }
-
-    .frame {
-      border: none;
-      height: 100%;
-      width: 100%;
+    .template {
+      display: none;
     }
   </style>
 </head>
 <body>
-<header class="header">
-  <nav class="nav-bar">
-    <h3 class="brand"><a href="../../" class="logo">Exact</a></h3>
-    <ul class="menu-bar">
-      <li><a href="#" class="menu-item active"> Examples </a></li>
-      <li><a href="../../documents/" class="menu-item"> Documents </a></li>
-      <li><a href="#" class="menu-item"> Downloads </a></li>
-      <li><a href="#" class="menu-item"> Blogs </a></li>
-      <li><a href="#" class="menu-item"> GitHub </a></li>
-    </ul>
-  </nav>
-</header>
-<div class="main">
-  <aside class="side-bar">
-    <div class="card">
-      <h4>Examples</h4>
-      <ul class="list">
-        <li><a href="" class="link">TodoMVC</a></li>
-      </ul>
-    </div>
 
-  </aside>
-  <article class="article">
-    <h2>TodoMVC</h2>
-    <header class="tab-header">
-      <ul class="tab-bar">
-        <li><a href="#" class="tab-item active"> Result </a></li>
-        <li><a href="#" class="tab-item"> HTML </a></li>
-        <li><a href="#" class="tab-item"> JavaScript </a></li>
-        <li><a href="#" class="tab-item"> CSS </a></li>
-      </ul>
-    </header>
-    <section class="tab-content">
-      <iframe src="todomvc.html" class="frame"></iframe>
-    </section>
-    <section class="tab-content">
-      <div class="code-box">
-        <script type="text/html" class="code-behind xml-mode">
   <div class="template ">
     <section class="todoapp">
       <header class="header">
         <h1>todos</h1>
-        <input class="new-todo" placeholder="What needs to be done?" autofocus keyup.enter="@{ onEnter }">
+        <input class="new-todo" placeholder="What needs to be done?" autofocus keyup.enter="@{onEnter}">
       </header>
       <section class="main" >
-        <input class="toggle-all" id="toggle-all" type="checkbox" checked="${$.allDone @}" x-on="click: onCheck">
+        <input class="toggle-all" id="toggle-all" type="checkbox" checked="${$.allDone @}" click="@{onCheck}">
         <label for="toggle-all">Mark all as complete</label>
         <ul class="todo-list" x-id="list" x-type="List" item-adapter="&{ENJ.Adapter}" items="${$.todos | $.filtering @}">
         </ul>
@@ -112,7 +29,7 @@
         <span class="todo-count">
           <strong x-id="strong">`${$.remainingCount}`</strong>`${$.remainingCount | pluralize('item')} left`
         </span>
-        <ul class="filters" x-on="click: onSelect">
+        <ul class="filters" click="@{onSelect}">
           <li>
             <a x-class="selected: ${$.filter === 'all'}" href="#/">All</a>
           </li>
@@ -123,7 +40,7 @@
             <a x-class="selected: ${$.filter === 'completed'}" href="#/completed">Completed</a>
           </li>
         </ul>
-        <button class="clear-completed" x-on="click: @{$.clearCompleted()}"
+        <button class="clear-completed" click="@{$.clearCompleted()}"
                 x-style="display: ${$.todos.length > $.remainingCount | display @};" >Clear completed</button>
       </footer>
     </section>
@@ -132,234 +49,17 @@
   <ul class="template">
     <li class="adapter" x-class="todo: true; completed: ${$.item.completed}; editing: ${$.item.selected};">
       <div class="view">
-        <input class="toggle" type="checkbox" x-on="change: onToggle" checked="${$.item.completed}">
-        <label x-on="dblclick: @{$.edit()};">`${$.item.title}`</label>
-        <button class="destroy" x-on="click: onDestroy;"></button>
+        <!--checked="#{$.item.completed::change}"-->
+        <input class="toggle" type="checkbox" change="@{onToggle}" checked="${$.item.completed}">
+        <label dblclick="@{$.edit()}">`${$.item.title}`</label>
+        <button class="destroy" click="@{onDestroy}"></button>
       </div>
-      <input class="edit" x-on="blur: onBlur; keyup.enter: @{$.onSubmit(event.target.value)}; keyup.escape: onEsc;" x-id="editor" value="${$.item.title}">
+      <input class="edit"  x-id="editor" value="${$.item.title}"
+             blur="@{onBlur}" keyup.enter="@{$.onSubmit(event.target.value)}" keyup.escape="@{onEsc}">
     </li>
   </ul>
-        </script>
 
-      </div>
-    </section>
-    <section class="tab-content">
-      <div class="code-box">
-      <pre class="code-behind js-mode">
-  var ENJ = {};
-
-  var Skin = Exact.Skin;
-  var Store = Exact.Store;
-  var Collection = Exact.Collection;
-  var Component = Exact.Component;
-
-  var defineClass = Exact.defineClass;
-
-  ENJ.Adapter = defineClass({
-    extend: Component,
-
-    statics: {
-      $template: Skin.query(document, '.template .adapter')
-    },
-
-    register: function() {
-      Exact.help(this).bind('onSubmit', 'onEdit', 'onEnter', 'onEsc', 'onBlur', 'onDestroy', 'onToggle');
-    },
-
-    edit: function() {
-      this.backup = this.item.title;
-      this.item.set('selected', true);
-
-      this.editor.set('value', this.backup);
-      this.editor.focus();
-    },
-
-    onEsc: function(event) {
-      this.cancel = true;
-      this.editor.blur();
-    },
-
-    onEnter: function(event) {
-      this.onSubmit(event.target.value);
-    },
-
-    onBlur: function(event) {
-      if (this.cancel) {
-        this.onSubmit(this.backup);
-        this.cancel = false;
-      } else {
-        this.onSubmit(event.target.value);
-      }
-    },
-
-    onSubmit: function(title) {
-      this.item.set({
-        selected: false,
-        title: title
-      });
-    },
-
-    onToggle: function() {
-      this.item.set('completed', !this.item.completed);
-    },
-
-    onDestroy: function() {
-      this.emit('destroy', this.item);
-    }
-  });
-
-  ENJ.TodoApp = defineClass({
-    extend: Component,
-
-    statics: {
-      imports: {
-        ENJ: ENJ,
-        List: Exact.List,
-        display: function(visible) {
-          return visible ? '' : 'none';
-        },
-        pluralize: function(num, str) {
-          return ' ' + str + (num > 1 ? 's': '');
-        }
-      },
-      $template: Skin.query(document, '.template .todoapp')
-    },
-
-    defaults: function() {
-      return {
-        remainingCount: 0
-      }
-    },
-
-    filtering: function(todos) {
-      var filter = this.filter || 'all';
-      return todos.filter(function(todo) {
-        return filter === 'all' || (filter === 'completed' ? todo.completed : !todo.completed);
-      });
-    },
-
-    ready: function() {
-      var invalidate = this.invalidate;
-      var removeTodo = this.removeTodo;
-
-      this.todos.onChange = invalidate;
-
-      this.list.on('itemAdded', function(event, todo, adapter) {
-        todo.on('changed.completed', invalidate);
-        adapter.on('destroy', removeTodo);
-      });
-    },
-
-    register: function() {
-      this.todos = new Collection();
-      Exact.help(this).bind('onEnter', 'onCheck', 'onSelect', 'allDone', 'filtering', 'removeTodo');
-    },
-
-    refresh: function() {
-      this.set('remainingCount', this.todos.filter(function(item){
-        return !item.completed;
-      }).length);
-    },
-
-    get allDone() {
-      return this.todos.length > 0 && this.todos.filter(function(item){
-        return item.completed;
-      }).length === this.todos.length;
-    },
-
-    removeTodo: function(todo) {
-      this.todos.splice(this.todos.indexOf(todo), 1);
-    },
-
-    clearCompleted: function() {
-      console.log('clearCompleted', this);
-      for (var i = this.todos.length - 1; i >= 0; --i) {
-        if (this.todos[i].completed) {
-          this.todos.splice(i, 1);
-        }
-      }
-    },
-
-    onCheck: function(event) {
-      this.todos.forEach(function(todo) {
-        todo.set('completed', event.target.checked);
-      });
-    },
-
-    onEnter: function(event) {
-      var value = event.target.value.trim();
-
-      event.target.value = '';
-
-      this.todos.push(new Store({
-        completed: false,
-        selected: false,
-        title: value
-      }));
-    },
-
-    onSelect: function(event) {
-      var el =  event.target;
-      if (el.tagName.toLowerCase() === 'a') {
-        this.set('filter', el.textContent.toLowerCase());
-      }
-    }
-  });
-
-  var todoApp = Component.create(ENJ.TodoApp);
-
-  //document.getElementById('app-shell').appendChild(todoApp.$skin);
-  document.body.appendChild(todoApp.$skin);
-
-</pre>
-
-      </div>
-    </section>
-
-    <section class="tab-content">
-
-    </section>
-  </article>
-
-</div>
-
-<script src="../../javascripts/codemirror.js"></script>
-<script src="../../javascripts/xml-mode.js"></script>
-<script src="../../javascripts/javascript-mode.js"></script>
-<script src="../../javascripts/code-format.js"></script>
-
-<script>
-  var tabItems = document.getElementsByClassName('tab-item');
-  var tabContents = document.getElementsByClassName('tab-content');
-  var selectedIndex = 0;
-
-
-  
-  for (var i = 0; i < tabItems.length; ++i) {
-    tabContents[i].style.display = 'none';
-    tabItems[i].addEventListener('click', onClick);
-  }
-
-  tabContents[selectedIndex].style.display = '';
-  
-  function onClick(event) {
-    for (var i = 0; i < tabItems.length; ++i) {
-      if (tabItems[i] === event.target) {
-        tabItems[selectedIndex].className = 'tab-item';
-        tabContents[selectedIndex].style.display = 'none';
-
-        selectedIndex = i;
-
-        tabItems[selectedIndex].className = 'tab-item active';
-        tabContents[selectedIndex].style.display = '';
-        break;
-      }
-    }
-  }
-</script>
-<!--<footer class="footer">
-  <p>Released under the MIT license<br>
-    © 2015 Chen Junyong. All rights reserved.</p>
-</footer>-->
+  <script src="../../javascripts/exact.js"></script>
+  <script src="index.js"></script>
 </body>
 </html>
