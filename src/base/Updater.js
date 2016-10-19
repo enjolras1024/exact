@@ -7,7 +7,7 @@
 
   var setImmediate = Exact.setImmediate;
 
-  var pool = [], cursor = 0, /*count = 0,*/ waiting = false, running = false;
+  var pool = [], queue = [], cursor = 0, /*count = 0,*/ waiting = false, running = false;
 
   /**
    *
@@ -21,7 +21,7 @@
     constructor: Updater,
 
     statics: {
-      add: function(target) {
+      insert: function(target) {
         if (!target) { return; }
 
         var i, n = pool.length, id = target.guid;
@@ -50,6 +50,10 @@
           //  Exact.Shadow.refreshed = 0;
           //}
         }
+      },
+
+      append: function(target) {
+        queue.push(target);
       }
     }
   });
@@ -69,12 +73,19 @@
       ++cursor;
     }
 
+    for (var i = 0, n = queue.length; i < n; ++i) {
+      target = queue[i];
+
+      target.render();
+    }
+
     //if (__DEV__ === 'development') {
     //  console.log('==== executed', pool.length, '==== refreshed', Exact.Shadow.refreshed, '====');
     //}
 
     waiting = false;
     running = false;
+    queue.splice(0);
     pool.splice(0); //pool.length = 0;
     cursor = 0;
     //pool.push.apply(pool, pool);

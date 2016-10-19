@@ -1537,7 +1537,7 @@
 
   var setImmediate = Exact.setImmediate;
 
-  var pool = [], cursor = 0, /*count = 0,*/ waiting = false, running = false;
+  var pool = [], queue = [], cursor = 0, /*count = 0,*/ waiting = false, running = false;
 
   /**
    *
@@ -1551,7 +1551,7 @@
     constructor: Updater,
 
     statics: {
-      add: function(target) {
+      insert: function(target) {
         if (!target) { return; }
 
         var i, n = pool.length, id = target.guid;
@@ -1580,6 +1580,10 @@
           //  Exact.Shadow.refreshed = 0;
           //}
         }
+      },
+
+      append: function(target) {
+        queue.push(target);
       }
     }
   });
@@ -1599,12 +1603,19 @@
       ++cursor;
     }
 
+    for (var i = 0, n = queue.length; i < n; ++i) {
+      target = queue[i];
+
+      target.render();
+    }
+
     //if ('development' === 'development') {
     //  console.log('==== executed', pool.length, '==== refreshed', Exact.Shadow.refreshed, '====');
     //}
 
     waiting = false;
     running = false;
+    queue.splice(0);
     pool.splice(0); //pool.length = 0;
     cursor = 0;
     //pool.push.apply(pool, pool);
@@ -2468,18 +2479,6 @@
     return collection;
   }
 
-  ///**
-  // * props getter
-  // *
-  // * @returns {Cache}
-  // */
-  //function getProps() {
-  //  if (!this._props) {
-  //    ObjectUtil_defineProp(this, '_props', {value: createCache(this)});
-  //  }
-  //  return this._props;
-  //}
-
   /**
    * props getter
    *
@@ -2570,9 +2569,8 @@
   }
 
   function extract(children) {
-    var i, n, m, $skin, child, $children;
+    var i, n, $skin, child, $children;
 
-    m = 0;
     n = children.length;
 
     $children = [];
@@ -2580,12 +2578,9 @@
     for (i = 0; i < n; ++i) {
       child = children[i];
       $skin = child.$skin;
-      //TODO: child.ignored
-      if ((child instanceof Shadow) && $skin) {
+
+      if (/*(child instanceof Shadow) && */!child.excluded && $skin) {
         $children.push($skin);
-        //if (Skin.canExtend($skin)) {
-        //  $skin.toIndex = m++; //
-        //}
       }
     }
 
@@ -2607,6 +2602,22 @@
 //    extend: Context,
     mixins: [Accessor.prototype, DirtyChecker.prototype],
 
+    /**
+     * Make this shadow invalid and register it to the batchUpdater.
+     *
+     * @returns {self}
+     */
+    invalidate: function invalidate(key, val, old) { //TODO: as static method, maybe
+
+      if (!this.isInvalid /*&& this.isDirty()*/) {
+        console.log('invalidate', this.toString());
+        this.isInvalid = true;
+        Updater.insert(this);
+      }
+
+      return this;
+    },
+
     update: function update() { //TODO: enumerable = false
       if (!this.isInvalid) { return; } // TODO: _secrets, is.invalid, is.refreshed,
 
@@ -2621,29 +2632,68 @@
         this.send('refreshed');//TODO: beforeRefresh, refreshing
       }
 
-      //if (shadow.render) {
-      //  shadow.render();
-      //}
-
-      Shadow.render(this);
-
-      Shadow.clean(this);
+      Updater.append(this);
+      //Shadow.render(this);
+      //Shadow.clean(this);
     },
 
-    /**
-     * Make this shadow invalid and register it to the batchUpdater.
-     *
-     * @returns {self}
-     */
-    invalidate: function invalidate(key, val, old) { //TODO: as static method, maybe
+    render: function render() {
+//        if (!shadow.isInvalid) { return; }
 
-      if (!this.isInvalid /*&& this.isDirty()*/) {
-        console.log('invalidate', this.toString());
-        this.isInvalid = true;
-        Updater.add(this);
+      var $skin = this.$skin,
+        props = this,
+        attrs = this._attrs,
+        style = this._style,
+        classes = this._classes,
+        children = this._children,
+        dirty = null;
+
+      if (props && props._dirty) { //TODO: textContent => children
+        dirty = props._dirty;
+        Shadow.clean(props);
+
+        Skin.renderProps($skin, props, dirty);
       }
 
-      return this;
+      if (Skin.isElement($skin)) {
+        if (attrs && attrs._dirty) {
+          dirty = attrs._dirty;
+          Cache.clean(attrs);
+
+          Skin.renderAttrs($skin, attrs, dirty);
+        }
+
+        if (style && style._dirty) {
+          dirty = style._dirty;
+          Cache.clean(style);
+
+          Skin.renderStyle($skin, style, dirty);
+        }
+
+        if (classes && classes._dirty) {
+          dirty = classes._dirty;
+          Cache.clean(classes);
+
+          Skin.renderClasses($skin, classes, dirty);
+        }
+
+        if (children && children.isInvalid) {
+          Collection.clean(children);
+
+          var $removed = Skin.renderChildren($skin, extract(children));
+
+          if ($removed && $removed.length > 0) {
+            for (var i = 0, n = $removed.length; i < n; ++i) {
+              var $parent = Skin.getParent($removed[i]);
+              if (!$parent) {
+                var shadow = Shadow.getShadow($removed[i]);
+                Shadow.release(shadow);
+              }
+            }
+          }
+          // It is a little hard for IE 8
+        }
+      }
     },
 
     //TODO: debug
@@ -2669,34 +2719,7 @@
       });
     },
 
-    //reset: function reset(props) {
-    //  var key, all = {}, _propSet = this.constructor._propSet, descriptors = this._descriptors_;
-    //
-    //  if (descriptors) {
-    //    for (key in descriptors) {
-    //      if (descriptors.hasOwnProperty(key)) {
-    //        all[key] = undefined;
-    //      }
-    //    }
-    //  }
-    //
-    //  if (typeof this.defaults === 'function') {
-    //    var defaults = this.defaults();
-    //  }
-    //
-    //  ObjectUtil_assign(all, defaults, props);
-    //
-    //  for (key in _propSet) {
-    //    if (_propSet.hasOwnProperty(key) && !all.hasOwnProperty(key)) {
-    //      delete this[key];
-    //    }
-    //  }
-    //
-    //  this.set(all);
-    //},
-
     statics: {
-      //mixins: [Accessor],
 
       set: function set(key, val, old, shadow, descriptors) { // TODO: params
         var changed = Accessor_set.call(this, key, val, old, shadow, descriptors);
@@ -2706,22 +2729,18 @@
 
           shadow.invalidate(key, this[key], old);//TODO:
         }
-
-        //shadow.constructor._propSet[key] = true; // mark
  
         return changed;
       },
 
 
       /**
-       * @abstract
        * @param {Shadow} shadow
        * @param {string} tag
        * @param {Object} props
        */
       initialize: function initialize(shadow, tag, props) {
 //        throw new Error('initialize() must be implemented by subclass!');
-        shadow.guid = ++uid;
 
         Shadow.initSkin(shadow, tag);
 
@@ -2729,14 +2748,11 @@
           defineMembersOf(shadow);
         }
 
+        shadow.guid = ++uid;
         shadow.update = shadow.update.bind(shadow);
+        shadow.render = shadow.render.bind(shadow);
         shadow.invalidate = shadow.invalidate.bind(shadow);
         //shadow._update = Shadow.update.bind(null, shadow);
-
-        //var constructor = shadow.constructor;
-        //if (!constructor._propSet) {
-        //  ObjectUtil_defineProp(constructor, '_propSet', {value: {}});
-        //}
 
         Accessor.initialize(shadow, props);
       },
@@ -2760,71 +2776,6 @@
       },
 
       /**
-       * Auto render the props, style, classes and children to the $skin.
-       *
-       * @param {Shadow} shadow
-       */
-      render: function render(shadow) {
-//        if (!shadow.isInvalid) { return; }
-
-        var $skin = shadow.$skin,
-          props = shadow,
-          attrs = shadow._attrs,
-          style = shadow._style,
-          classes = shadow._classes,
-          children = shadow._children,
-          dirty = null;
-
-        if (props && shadow._dirty) { //TODO: textContent => children
-          dirty = shadow._dirty;
-          //Shadow.clean(props);
-          Skin.renderProps($skin, props, dirty);
-        }
-
-        if (Skin.isElement($skin)) {
-          if (attrs && attrs._dirty) { //TODO: textContent => children
-            dirty = attrs._dirty;
-            Cache.clean(attrs);
-
-            Skin.renderAttrs($skin, attrs, dirty);
-          }
-
-          //TODO: requestAnimationFrame
-          if (style && style._dirty) {
-            dirty = style._dirty;
-            Cache.clean(style);
-
-            Skin.renderStyle($skin, style, dirty);
-          }
-
-          if (classes && classes._dirty) {
-            dirty = classes._dirty;
-            Cache.clean(classes);
-
-            Skin.renderClasses($skin, classes, dirty);
-          }
-
-          if (children && children.isInvalid) {
-            Collection.clean(children);
-
-            var $removed = Skin.renderChildren($skin, extract(children));
-
-            if ($removed && $removed.length > 0) {
-              for (var i = 0, n = $removed.length; i < n; ++i) {
-                var $parent = Skin.getParent($removed[i]);
-                if (!$parent) {
-                  shadow = Shadow.getShadow($removed[i]);
-                  Shadow.release(shadow);
-                }
-              }
-            }
-            // It is a little hard for IE 8
-          }
-        }
-      },
-
-      /**
-       * @abstract
        * @param {Shadow} shadow
        */
       release: function release(shadow) {
@@ -2894,10 +2845,6 @@
       addEventListenerFor: function (shadow, type, useCapture) {
         var action = shadow._actions[type], $skin;
 
-//        if (Skin.useTopEventDelegate) {
-//          return;
-//        }
-
         $skin = shadow.$skin;
 
         if (Skin.mayDispatchEvent($skin, type)) {//TODO: No problem?
@@ -2914,10 +2861,6 @@
       removeEventListenerFor: function (shadow, type, useCapture) {
         var actions = shadow._actions, action = actions[type], $skin;
 
-//      if (Exact.useTopEventDelegate) {
-//        return;
-//      }
-
         $skin = shadow.$skin;
 
         if (Skin.mayDispatchEvent($skin, type)) {
@@ -2929,53 +2872,6 @@
 
     }
   });
-
-  var finalStaticMethods = [
-    'update', 'refresh', 'initSkin', 'getShadow', 'findShadow', 'findShadows', 'getParentShadow'
-  ];
-
-  for (var i = 0; i < finalStaticMethods.length; ++i) {
-    ObjectUtil_defineProp(Shadow, finalStaticMethods[i], {writable: false, enumerable: false, configurable: true});
-  }
-
-
-
-//  function listener(event) {
-//
-//    var i, n, path, target;
-//
-//    event = Skin.getFixedDOMEvent(event);
-//
-//    target = event.target;
-//
-//    path = [target];
-//
-//    while (target.parentNode) {
-//      target = target.parentNode;
-//      path.push(target);
-//    }
-//
-//    if (event.bubbles) {
-//      for (i = 0; i < n; ++i) {
-//        if (event.shouldStop) { break; }
-//        Shadow.getShadow(path[i]).send(event);
-//      }
-//    } else { //TODO: useCapture
-//      for (i = n - 1; i >= 0; --i) {
-//        if (event.shouldStop) { break; }
-//        Shadow.getShadow(path[i]).send(event);
-//      }
-//    }
-//  }
-//
-//  if (document) {
-//    var i, n, events = ['click'], addEventListener;
-//
-//    for (i = 0, n = events.length; i < n; ++i) {
-//      addEventListener = document.addEventListener || document.attachEvent;
-//      addEventListener.call(document, events[i], listener);
-//    }
-//  }
 
   Exact.Shadow = Shadow;
   
