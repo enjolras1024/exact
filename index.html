@@ -2,15 +2,18 @@
 <html>
 <head lang="en">
   <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
   <title>Exact</title>
 
   <link href="./stylesheets/defaults.css" rel="stylesheet">
+  <!--<link href="./stylesheets/index.css" rel="stylesheet">-->
 
 </head>
 <body>
   <header class="header">
     <nav class="nav-bar">
       <h3 class="brand active"><a href="../" class="logo" >Exact</a></h3>
+      <a class="menu-btn"></a>
       <ul class="menu-bar">
         <li><a href="./examples/todomvc.html" class="menu-item"> Examples </a></li>
         <li><a href="./documents/" class="menu-item"> Documents </a></li>
@@ -23,7 +26,8 @@
   <div class="face">
     <section class="panel">
       <!-- <h1 class="brand">Exact</h1> -->
-      <p class="desc">A JavaScript Library for Building Web UIs</p>
+      <!--<p class="desc">A JavaScript Library for Building Web UIs</p>-->
+      <p class="desc">An Event-driven Framework for Building User Interfaces with Simple APIs in a Flexible Way</p>
       <div class="button-bar">
         <a href="#" class="button">Download Now</a>
         <a href="#" class="button">Learn More >></a>
@@ -32,22 +36,30 @@
   </div>
   <div class="content">
     <div class="panel">
-      <div class="row">
-        <section class="col-4">
-          <h3><span class="glyphicon glyphicon-fire"></span> Elements + Components </h3>
-          <p >Exact elements are shadows of DOM elements. A component is a shadow of DOM tree, composed of texts, elements and custom components. When you update the shadow tree, Exact helps you render the dirty parts of a DOM tree in batch mode.</p>
-        </section>
-        
-        <section class="col-4">
-          <h3><span class="glyphicon glyphicon-leaf"></span>  Declaration | Procedure </h3>
-          <p >Usually you can declaratively define a rich template (including expressions) for a component class. The once compiled template will be used for initialization. Or sometimes you just need a pure template and add children, event listeners in later procudure (after initialization).</p>
-        </section>
+      <section class="col-4">
+        <h3>Events &amp; Bindings</h3>
+        <p>Exact is event-driven firstly. Custom events are supported in Exact, besides DOM events.</p>
+        <p>Exact is data-driven based on custom property-changed events. Data bindings and template strings are used for passing data in an intuitive way. Bindings will work when some property-changed events are dispatched.</p>
+      </section>
 
-         <section class="col-4">
-           <h3><span class="glyphicon glyphicon-send"></span> Events &amp; Bindings </h3>
-           <p >Events make the UIs live and controllable. One-way, two-way bindings and template strings are used for passing data in an intuitive way. And you can detect each property-changed event without using bindings, since they are base on custom events.</p>
-         </section>
-      </div>
+      <section class="col-4">
+        <h3>Elements + Components </h3>
+        <p >Exact elements, which have attributes, classes, style and children, are shadows of DOM elements. An Exact component, as the enhanced edition of Exact element, is composed of texts, elements and custom components.</p>
+        <p>When you update the shadow tree, Exact helps you render the dirty parts of a DOM tree in a batch mode asynchronously.</p>
+      </section>
+
+      <section class="col-4">
+        <h3>Declaration | Procedure </h3>
+        <p >Usually you can declaratively define a rich template, which includes expressions, for a component class. The once compiled template will be used for initializing a component.</p>
+        <p >Or sometimes you just need an empty template, and add some children, event handlers, data bindings in later procudure (after initialization).</p>
+      </section>
+
+
+
+      <!--<section class="col-4">
+        <h3>Events &amp; Bindings </h3>
+        <p >Events make the UIs live and controllable. One-way, two-way bindings and template strings are used for passing data in an intuitive way. And you can detect each property-changed event without using bindings, since they are base on custom events.</p>
+      </section>-->
     </div>
 
     <div class="panel">
@@ -58,5 +70,6 @@
     <p>Released under the MIT license<br>
         © 2015 Chen Junyong. All rights reserved.</p>
   </footer>
+  <script src="./javascripts/menu.js"></script>
 </body>
 </html>

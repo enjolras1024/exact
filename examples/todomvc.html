@@ -2,12 +2,13 @@
 <html>
 <head lang="en">
   <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
   <title>Exact</title>
 
   <link href="../stylesheets/codemirror.css" rel="stylesheet">
   <link href="../stylesheets/alice.css" rel="stylesheet">
-
   <link href="../stylesheets/defaults.css" rel="stylesheet">
+  <!--<link href="../stylesheets/index.css" rel="stylesheet">-->
 
   
   <style>
@@ -60,7 +61,8 @@
 <body>
 <header class="header">
   <nav class="nav-bar">
-    <h3 class="brand"><a href="../../" class="logo">Exact</a></h3>
+    <h3 class="brand"><a href="../" class="logo">Exact</a></h3>
+    <a class="menu-btn"></a>
     <ul class="menu-bar">
       <li><a href="#" class="menu-item active"> Examples </a></li>
       <li><a href="../documents/" class="menu-item"> Documents </a></li>
@@ -80,6 +82,7 @@
     </div>
 
   </aside>
+  <a class="side-btn">&gt;</a>
   <article class="article">
     <h2>TodoMVC</h2>
     <header class="tab-header">
@@ -329,7 +332,7 @@
 <script src="../javascripts/xml-mode.js"></script>
 <script src="../javascripts/javascript-mode.js"></script>
 <script src="../javascripts/code-format.js"></script>
-
+<script src="../javascripts/menu.js"></script>
 <script>
   var tabItems = document.getElementsByClassName('tab-item');
   var tabContents = document.getElementsByClassName('tab-content');
