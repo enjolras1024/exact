@@ -1,7 +1,7 @@
 body {
   margin: 0;
   font-size: 10px;
-  font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
+  font-family: "Helvetica Neue", Helvetica, Arial, "Microsoft Yahei", sans-serif;
 }
 
 a, a:link, a:hover, a:visited {
@@ -119,7 +119,7 @@ ul > li {
 }
 
 .side-bar {
-  width: 220px;
+  width: 250px;
   top: 48px;
   bottom: 0;
   float: left;
@@ -129,6 +129,8 @@ ul > li {
   overflow-y: scroll;
   box-shadow: 2px 2px 2px #888;
 }
+
+
 
 .side-btn {
   display: none;
@@ -148,9 +150,9 @@ ul > li {
   color: #444;
 }
 
-/*.link:hover, .link.active {*/
-/*color: #06d;*/
-/*}*/
+.link:hover/*, .link.active*/ {
+color: #06d;
+}
 
 /*h4 {*/
 /*margin: 10px 0;*/
@@ -158,14 +160,14 @@ ul > li {
 /*}*/
 
 .article {
-  padding: 10px 40px;
+  padding: 10px 0 10px 40px;
   width: 660px;
   float: right;
   color: #333;
 }
 
 .article p {
-  /*line-height: 2.0em;*/
+  line-height: 1.5em;
   font-size: 1.5em;
 }
 
@@ -200,7 +202,7 @@ ul > li {
   width: 50%;
   float: right;
   text-align: center;
-  margin: 10px 0;
+  margin: 20px 0;
 }
 
 .button {
@@ -223,7 +225,7 @@ ul > li {
 }
 
 .col-4 {
-  height: 240px;
+  height: 270px;
   width: 300px;
   margin: 10px;
   float: left;
@@ -239,6 +241,7 @@ ul > li {
 .col-4 p {
   margin: 10px 0;
   font-size: 1.6em;
+  line-height: 1.25em;
 }
 
 .code-box {
@@ -366,7 +369,7 @@ ul > li {
   .button-bar {
     width: auto;
     float: none;
-    margin: 10px 0;
+    margin: 20px 0;
   }
 
   .col-4 {

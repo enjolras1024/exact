@@ -16,7 +16,7 @@
       value: sources[i].textContent,
       theme: 'alice',
       mode:  mode,
-      lineNumbers: false,
+      lineNumbers: true,
       readOnly: 'nocursor'
     });
   }
