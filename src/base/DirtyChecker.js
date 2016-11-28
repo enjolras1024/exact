@@ -55,12 +55,12 @@
         } else {
           delete object._dirty[key];
         }
-      },
+      }/*,
 
       hasDirty: function hasDirty(object, key) { // hasDirtyAttr, hasDirty
         var _dirty = object._dirty;
         return _dirty ? (key === undefined || _dirty.hasOwnProperty(key)) : false;
-      }
+      }*/
     },
 
     /**

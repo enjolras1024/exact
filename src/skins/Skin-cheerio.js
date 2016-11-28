@@ -132,18 +132,19 @@
       },
 
       getAttrs: function($skin) {
-        var name, attrs = [], attribs = $skin[0].attribs;
-
-        for (name in attribs) {
-          if (attribs.hasOwnProperty(name)) {
-            attrs.push({
-              name: name,
-              value: attribs[name]
-            });
-          }
-        }
-
-        return attrs;
+        return $skin[0].attribs;
+        //var name, attrs = [], attribs = $skin[0].attribs;
+        //
+        //for (name in attribs) {
+        //  if (attribs.hasOwnProperty(name)) {
+        //    attrs.push({
+        //      name: name,
+        //      value: attribs[name]
+        //    });
+        //  }
+        //}
+        //
+        //return attrs;
       },
 
       hasAttr: function($skin, name) {
@@ -206,12 +207,12 @@
       //  return  window.getComputedStyle($skin[0]);
       //},
 
-      setStyleItem: function($skin, name, value) {
+      setStyleProp: function($skin, name, value) {
         //TODO: name = toCamelCase(name);
         $skin.css(name, value);
       },
 
-      removeStyleItem: function($skin, name) {
+      removeStyleProp: function($skin, name) {
         $skin.css(name, '');
       },
 
@@ -346,9 +347,9 @@
             value = style[key];
 
             if (value) {
-              Skin.setStyleItem($skin, key, value);
+              Skin.setStyleProp($skin, key, value);
             } else {
-              Skin.removeStyleItem($skin, key);
+              Skin.removeStyleProp($skin, key);
             }
           }
         }

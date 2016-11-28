@@ -67,17 +67,17 @@
         return new ClassRef(props);
       },
 
-      destroy: function destroy(component) {
-        var i, n, child, children = component.children;
-
-        for (i = 0, n = children.length; i < n; ++i) {
-          child = children[i];
-          child.constructor.destroy(child);
-        }
-
-        component.off();
-        Shadow.clean(component);
-      },
+      //destroy: function destroy(component) {
+      //  var i, n, child, children = component.children;
+      //
+      //  for (i = 0, n = children.length; i < n; ++i) {
+      //    child = children[i];
+      //    child.constructor.destroy(child);
+      //  }
+      //
+      //  component.off();
+      //  Shadow.clean(component);
+      //},
 
       release: function release(component) {
         var i, children = component._children;
@@ -129,11 +129,12 @@
 
         //props.tag = template.tag;
 
-        Shadow.initialize(component, template.tag, props);
+        Shadow.initialize(component, props, template.tag, template.ns);
 //        Accessor.initialize(component);
 
         HTMXTemplate.compile(template, component);
 
+        component._secrets.final = true;
         component.send('initialized');
       }
 
@@ -148,6 +149,15 @@
      * @abstract
      */
     ready: function ready() {},
+
+    update: function update() { //TODO: enumerable = false
+      base.update.call(this);
+
+      if (this.isInvalid) {
+        //shadow.send('refresh');//TODO: beforeRefresh, refreshing
+        this.send('refreshed');//TODO: beforeRefresh, refreshing
+      }
+    },
 
     /**
      * @abstract

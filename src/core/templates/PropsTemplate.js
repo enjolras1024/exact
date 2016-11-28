@@ -2,20 +2,19 @@
 // src/core/templates/StyleTemplate.js
 //######################################################################################################################
 (function() {
-  
+
   'use strict';
 
   var ObjectUtil_assign = Exact.ObjectUtil.assign;
   var ObjectUtil_defineProp = Exact.ObjectUtil.defineProp;
 
-  function StyleXTemplate(literals, expressions) {
-    this.literals = literals;
-    this.expressions = expressions; //this.expressions = null;
-
-    //ObjectUtil_assign(this, literals);
-    //ObjectUtil_defineProp(this, 'expression', {value: expressions});
+  function PropsTemplate(literals, expressions) {
+    ObjectUtil_assign(this, literals);
+    ObjectUtil_defineProp(this, 'expressions', {
+      value: expressions, writable: true, enumerable: false, configurable: true
+    });
   }
 
-  Exact.StyleXTemplate = StyleXTemplate;
+  Exact.PropsTemplate = PropsTemplate;
 
 })();

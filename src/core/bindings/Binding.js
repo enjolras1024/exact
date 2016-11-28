@@ -68,7 +68,6 @@
           //targetEvent: targetEvent
         });
 
-
         binding.exec({dispatcher: source});
 
         if (mode > 0/* && binding.life*/) {
@@ -87,6 +86,8 @@
       },
 
       clean: function(binding) {
+        if (binding.mode <= 0) { return; }
+
         if (binding.scopeEvent) {
           binding.scope.off(binding.scopeEvent, binding.exec);
         } else if (binding.scopePaths) {
@@ -167,23 +168,50 @@
     }
   }
 
+  //function normalize(paths, scope) {
+  //  //var descriptors = scope._descriptors_;
+  //
+  //  //if (!descriptors) { return; }
+  //
+  //  var i, j, n, prop, source, descriptors;
+  //
+  //  for (i = 0, n = paths.length; i < n; ++i) {
+  //    var path = paths[i];
+  //
+  //    j = path.lastIndexOf('.');
+  //    if (j < 0) {
+  //      prop = path;
+  //      source = scope;
+  //    } else {
+  //      prop = path.slice(j + 1);
+  //      source = RES.search(path.slice(0, j), scope, true);
+  //    }
+  //
+  //    descriptors = source._descriptors_;
+  //
+  //    if (prop in descriptors && descriptors[prop].depends) {
+  //
+  //    }
+  //  }
+  //}
+
   function eye(fn, paths, scope, target, binding) {
-    var i, j, n, path, attr, watcher, exec;
+    var i, j, n, path, prop, watcher, exec;
 
     for (i = 0, n = paths.length; i < n; ++i) {
       path = paths[i];//.name;
       j = path.lastIndexOf('.');
       if (j < 0) {
-        attr = path;
+        prop = path;
         watcher = scope;
       } else {
-        attr = path.slice(j + 1);
+        prop = path.slice(j + 1);
         watcher = RES.search(path.slice(0, j), scope, true);
       }
 
       if (watcher && watcher[fn]) {
-
-        watcher[fn]('changed.' + attr, binding.exec);// TODO: binding.invalidate
+        //TODO: check scope._descriptors_[prop].depends
+        watcher[fn]('changed.' + prop, binding.exec);// TODO: binding.invalidate
 
         if (fn === 'on') {
           record(target, binding);

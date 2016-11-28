@@ -30,7 +30,7 @@
       },
 
       initialize: function(text, data) {
-        Shadow.initialize(text, '', {data: data});
+        Shadow.initialize(text, {data: data}, '');
         //Shadow.initialize(text, 'TEXT', {data: data});
       }
     },

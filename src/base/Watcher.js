@@ -188,7 +188,7 @@
         for (i = 0; i < n; ++i) {
           handler = handlers[i];// handlers[ i ]( event.clone() );
 
-          if (event.keyName && event.keyName !== handler.keyName) { continue; }
+          if (handler.keyName && handler.keyName !== event.keyName) { continue; }
 
           if (/*!event.eventPhase ||  */(event.eventPhase === 1) === !!handler.useCapture) {
             exec = handler.exec;
@@ -233,7 +233,7 @@
             register(this, type, value);
           }
         }
-      } else {//  .on('click', context.onClick);
+      } else if (type) {//  .on('click', context.onClick);
         register(this, type, exec, useCapture);
       }
 

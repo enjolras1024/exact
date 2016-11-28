@@ -191,21 +191,21 @@
         this.refresh();
       } //TODO: shouldRefresh()£¬ last chance to update shadow and its children
 
-      if (this.send) {
-        //shadow.send('refresh');//TODO: beforeRefresh, refreshing
-        this.send('refreshed');//TODO: beforeRefresh, refreshing
-      }
-
       Updater.append(this);
       //Shadow.render(this);
       //Shadow.clean(this);
+
+      //if (this.send) {
+      //  //shadow.send('refresh');//TODO: beforeRefresh, refreshing
+      //  this.send('refreshed');//TODO: beforeRefresh, refreshing
+      //}
     },
 
     render: function render() {
-//        if (!shadow.isInvalid) { return; }
+      if (!this.isInvalid) { return; }
 
       var $skin = this.$skin,
-        props = this,
+        props = this, // <--
         attrs = this._attrs,
         style = this._style,
         classes = this._classes,
@@ -214,10 +214,12 @@
 
       if (props && props._dirty) { //TODO: textContent => children
         dirty = props._dirty;
-        Shadow.clean(props);
+        //Shadow.clean(props);
 
-        Skin.renderProps($skin, props, dirty);
+        Skin.renderProps($skin, props, dirty, this._secrets.final);
       }
+
+      Shadow.clean(this);
 
       if (Skin.isElement($skin)) {
         if (attrs && attrs._dirty) {
@@ -249,8 +251,8 @@
           if ($removed && $removed.length > 0) {
             for (var i = 0, n = $removed.length; i < n; ++i) {
               var $parent = Skin.getParent($removed[i]);
-              if (!$parent) {
-                var shadow = Shadow.getShadow($removed[i]);
+              var shadow = Shadow.getShadow($removed[i]);
+              if (!$parent && !shadow.hasOwnProperty('excluded')) {
                 Shadow.release(shadow);
               }
             }
@@ -300,23 +302,24 @@
 
       /**
        * @param {Shadow} shadow
-       * @param {string} tag
        * @param {Object} props
+       * * @param {string} tag
+       * @param {string} ns
        */
-      initialize: function initialize(shadow, tag, props) {
+      initialize: function initialize(shadow, props, tag, ns) {
 //        throw new Error('initialize() must be implemented by subclass!');
+        shadow.guid = ++uid;
+        shadow._secrets = {}; //TODO:
+        shadow.update = shadow.update.bind(shadow); //TODO: defineProp
+        shadow.render = shadow.render.bind(shadow); //TODO: defineProp
+        shadow.invalidate = shadow.invalidate.bind(shadow);
+        //shadow._update = Shadow.update.bind(null, shadow);
 
-        Shadow.initSkin(shadow, tag);
+        Shadow.initSkin(shadow, tag, ns);
 
         if (Skin.isElement(shadow.$skin)) {
           defineMembersOf(shadow);
         }
-
-        shadow.guid = ++uid;
-        shadow.update = shadow.update.bind(shadow);
-        shadow.render = shadow.render.bind(shadow);
-        shadow.invalidate = shadow.invalidate.bind(shadow);
-        //shadow._update = Shadow.update.bind(null, shadow);
 
         Accessor.initialize(shadow, props);
       },
@@ -326,9 +329,10 @@
        *
        * @param {Shadow} shadow
        * @param {string} tag
+       * @param {string} ns ''/'svg'/'math'
        */
-      initSkin: function initSkin(shadow, tag) {
-        ObjectUtil_defineProp(shadow, '$skin', {value: tag/* !== 'TEXT'*/ ? Skin.createElement(tag) : Skin.createText('')}); //TODO: $shin._secrets = {$skin: ...}
+      initSkin: function initSkin(shadow, tag, ns) {
+        ObjectUtil_defineProp(shadow, '$skin', {value: tag/* !== 'TEXT'*/ ? Skin.createElement(tag, ns) : Skin.createText('')}); //TODO: $shin._secrets = {$skin: ...}
 //        shadow.$skin._shadow = shadow; //TODO: strict
         if (Skin.canExtend(shadow.$skin)) {
           ObjectUtil_defineProp(shadow.$skin, '_shadow', {value: shadow});
@@ -337,6 +341,7 @@
 
       clean: function clean(shadow) {
         shadow.isInvalid = false;
+        DirtyChecker_clean(shadow); //delete shadow._dirty;
       },
 
       /**
@@ -407,9 +412,10 @@
 
 
       addEventListenerFor: function (shadow, type, useCapture) {
-        var action = shadow._actions[type], $skin;
+        var $skin = shadow.$skin;
+        if (!$skin) { return; }
 
-        $skin = shadow.$skin;
+        var action = shadow._actions[type];
 
         if (Skin.mayDispatchEvent($skin, type)) {//TODO: No problem?
           action.listener = function (event) {
@@ -423,11 +429,12 @@
       },
 
       removeEventListenerFor: function (shadow, type, useCapture) {
-        var actions = shadow._actions, action = actions[type], $skin;
+        var $skin = shadow.$skin;
+        if (!$skin) { return; }
 
-        $skin = shadow.$skin;
+        var action = shadow._actions[type];
 
-        if (Skin.mayDispatchEvent($skin, type)) {
+        if (action.listener && Skin.mayDispatchEvent($skin, type)) {
           Skin.removeEventListener($skin, type, action.listener, useCapture);
 
           delete action.listener;

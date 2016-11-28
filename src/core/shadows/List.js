@@ -37,7 +37,7 @@
   }
 
   function List() {
-    Component.apply(this, arguments);
+    Component.call(this, arguments);
   }
 
   Exact.defineClass({

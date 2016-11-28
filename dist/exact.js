@@ -11,6 +11,7 @@
 //  } else {
 //    global = global || window || {};
 //    global.Exact = Exact;
+//    Exact.global = global;
 //  }
 //
 //})(typeof global !== 'undefined' ? global : undefined, typeof module !== 'undefined' ? module : undefined);
@@ -121,7 +122,7 @@
   var Array$unshift = Array.prototype.unshift;
 
   var UPDATE_COMMANDS = { //TODO: as outer const
-    '$set': true, '$push': true, '$unshift': true, '$splice': true, '$apply': true
+    '$set': true, '$push': true, '$unshift': true, '$splice': true, '$apply': true, '$assign': true
   };
 
   /**
@@ -150,9 +151,9 @@
     } else if (specs.hasOwnProperty('$push')) {
       Array$push.apply(target, specs['$push']); //TODO: push as outer func
     } else if (specs.hasOwnProperty('$unshift')) {
-      Array$unshift.unshift.apply(target, specs['$unshift']); //TODO: unshift as outer func
+      Array$unshift.apply(target, specs['$unshift']); //TODO: unshift as outer func
     } else if (specs.hasOwnProperty('$splice')) {
-      Array$splice.splice.apply(target, specs['$splice']); //TODO: unshift as outer func
+      Array$splice.apply(target, specs['$splice']); //TODO: unshift as outer func
     } else if (specs.hasOwnProperty('$apply')) {
       target = specs['$apply'](target);
     }
@@ -185,7 +186,7 @@
 })();
 
 //######################################################################################################################
-// src/apis/constants.js
+// src/share/constants.js
 //######################################################################################################################
 (function() {
 
@@ -238,6 +239,12 @@
         res = find(path, this);
       }
 
+      if (!res && !notInGlobal && Exact.global) {
+        res = find(path, Exact.global);
+      }
+
+      //TODO: continue to find(path, window);
+
       return res;
     },
 
@@ -284,7 +291,7 @@
 })();
 
 //######################################################################################################################
-// src/apis/functions.js
+// src/share/functions.js
 //######################################################################################################################
 (function() {
 
@@ -790,20 +797,68 @@
 (function() {
 
   'use strict';
+//TODO: 分解
+  var ObjectUtil = Exact.ObjectUtil;
 
-  var FIX_KEYS = {'for': 'htmlFor', 'class': 'className', 'float': 'cssFloat'};
-
-  var doc = window.document,
-    table = doc.createElement('table'),
-    tableRow = doc.createElement('tr');
-
-  var containers = {
-    '*': doc.createElement('div'),
-    'option': doc.createElement('select'),
-    'tr': doc.createElement('tbody'),
-    'td': tableRow, 'th': tableRow,
-    'tbody': table, 'thead': table, 'tfoot': table
+  var PROPS_SHOULD_BE_USED = {
+    'data': true//, 'value': true, 'checked': true, 'selected': true, 'muted': true, 'multiple': true
   };
+
+  var FIX_KEYS_FROM_JS_TO_HTML = (function(names) {
+    var key, map = {};
+    for (var i = 0, n = names.length; i < n; ++i) {
+      key = names[i];
+      map[key] = key.toLowerCase();
+    }
+    return map;
+  })([
+    'accessKey', 'allowFullScreen', 'allowTransparency', 'autoCapitalize', 'autoComplete', 'autoCorrect', 'autoPlay', 'autoSave',
+    'cellPadding', 'cellSpacing', 'charSet', 'classID', 'colSpan', 'contentEditable', 'contextMenu', 'crossOrigin',
+    'dateTime',
+    'encType',
+    'formAction', 'formEncType', 'formMethod', 'formNoValidate', 'formTarget', 'frameBorder',
+    'hrefLang',
+    'inputMode', 'itemID', 'itemProp', 'itemRef', 'itemType',
+    'keyParams', 'keyType',
+    'marginHeight', 'marginWidth', 'maxLength', 'mediaGroup',
+    'noValidate',
+    'radioGroup', 'readOnly', 'referrerPolicy', 'rowSpan',
+    'spellCheck', 'srcDoc', 'srcLang', 'srcSet',
+    'tabIndex',
+    'useMap'//TODO: ...
+  ]);
+
+  ObjectUtil.assign(
+    FIX_KEYS_FROM_JS_TO_HTML,
+    {
+      'htmlFor': 'for',
+      'cssFloat': 'float',
+      'className': 'class'
+    }
+  );
+
+  var FIX_KEYS_FROM_HTML_TO_JS = (function(map) {
+    var key, obj = {};
+    for (key in map) {
+      if (map.hasOwnProperty(key)){
+        obj[map[key]] = key;
+      }
+    }
+    return obj;
+  })(FIX_KEYS_FROM_JS_TO_HTML);
+
+  var camelCaseCache = ObjectUtil.assign({}, FIX_KEYS_FROM_HTML_TO_JS);
+  var kebabCaseCache = ObjectUtil.assign({}, FIX_KEYS_FROM_JS_TO_HTML);
+
+  var namespaceURIs = {
+    svg: 'http://www.w3.org/2000/svg',
+    html: 'http://www.w3.org/1999/xhtml',
+    math: 'http://www.w3.org/1998/Math/MathML'
+  };
+
+  var cssVendorPrefix = '';
+
+  var doc = window.document;
 
   // In IE 8, text node is not extensible
   var textIsExtensible = true, text = doc.createTextNode(' ');
@@ -814,7 +869,7 @@
     textIsExtensible = false;
   }
   
-  var delegatedEvents = {},
+  var
     preventDefault, _preventDefault,
     stopPropagation, _stopPropagation,
     stopImmediatePropagation, _stopImmediatePropagation;
@@ -860,13 +915,9 @@
     }
   }
 
-  //TODO: 删除不必要的方法
-
   function Skin() {
     throw new Error('');
   }
-
-  //TODO: 把方法拿出来， 免得Skin.xxx()
 
   Exact.defineClass({
     constructor: Skin,
@@ -875,15 +926,26 @@
       /**
        * @required
        */
-      toCamelCase: function(key) {
-        if (FIX_KEYS.hasOwnProperty(key)) {
-          return  FIX_KEYS[key];
+      toCamelCase: function toCamelCase(key) {
+        if (!(key in camelCaseCache)) {
+          //key.replace(/-(.)?/g, function(match, char) {
+          camelCaseCache[key] = key.replace(/-([a-z])?/g, function(match, char) {
+            return char ? char.toUpperCase() : '';
+          });
         }
 
-        //return key.replace(/-(.)?/g, function(match, char) {
-        return key.replace(/-([a-z])?/g, function(match, char) {
-          return char ? char.toUpperCase() : '';
-        });
+        return camelCaseCache[key];
+      },
+
+      toKebabCase: function toKebabCase(key) {
+        if (!(key in kebabCaseCache)) {
+          //key.replace(/-(.)?/g, function(match, char) {
+          kebabCaseCache[key] = key.replace(/([A-Z])/g, function(match, char) {
+            return '-' + char.toLowerCase();
+          });
+        }
+
+        return kebabCaseCache[key];
       },
       //
       //textIsExtensible: function() {
@@ -893,7 +955,7 @@
       /**
        * @required
        */
-      canExtend: function($skin) {
+      canExtend: function canExtend($skin) {
         if (textIsExtensible) {
           return true;
         } else {
@@ -910,171 +972,248 @@
       /**
        * @required
        */
-      isText: function($skin) {
+      isText: function isText($skin) {
         return $skin && $skin.nodeType === 3;
       },
 
       /**
        * @required
        */
-      isComment: function($skin) {
+      isComment: function isComment($skin) {
         return $skin && $skin.nodeType === 8;
       },
 
       /**
        * @required
        */
-      isElement: function($skin) {
+      isElement: function isElement($skin) {
         return $skin && $skin.nodeType === 1;
       },
 
-      isFragment: function($skin) {
+      isFragment: function isFragment($skin) {
         return $skin && $skin.nodeType === 11;
       },
 
       /**
        * @required
        */
-      createText: function(data) {
+      createText: function createText(data) {
         return doc.createTextNode(data);
       },
 
       /**
        * @required
        */
-      createElement: function(tag) {//TODO: cache, clone
-        return doc.createElement(tag);
+      createElement: function createElement(tag, ns) {//TODO: cache, clone
+        return !ns || !doc.createElementNS ? doc.createElement(tag) : doc.createElementNS(namespaceURIs[ns], tag);
       },
 
-      createFragment: function() {
+      createFragment: function createFragment() {
         return doc.createDocumentFragment();
       },
 
       /**
        * @required
        */
-      parse: function(html) {
-        var idx = html.search(/ |>/), tag = html.slice(1, idx);
+      parse: function parse(html) {
+        var i = html.indexOf(' ');
+        var j = html.indexOf('>');
+        var tag = html.slice(1, j < i ? j : i);
+        var type;
 
-        if (!(tag in containers)) { tag = '*'; }
-        var container = containers[tag];
-        container.innerHTML = html;
+        i = html.lastIndexOf('xmlns', j);
+        if (i > 0) {
+          var nsURI = html.slice(i+7, html.indexOf('"', i+7));
+          if (nsURI === namespaceURIs.svg) {
+            type = 'svg';
+          } else if (nsURI === namespaceURIs.math) {
+            type = 'math';
+          }
+        }
 
-        return Skin.getChildrenCopy(container);
+        if (!type) {
+          type = containers[tag] || 'div';
+        }
+
+        var parent = parents[type];
+
+        parent.innerHTML = html;
+
+        return Skin.getChildrenCopy(parent);
       },
 
-      clone: function($skin) {
+      clone: function clone($skin) {
         return $skin.cloneNode(true);
       },
 
       /**
        * @required
        */
-      focus: function($skin) {
+      focus: function focus($skin) {
         return $skin.focus();
       },
 
       /**
        * @required
        */
-      blur: function($skin) {
+      blur: function blur($skin) {
         return $skin.blur();
       },
 
       /**
        * @required
        */
-      hasAttrs: function($skin) {
+      getNameSpace: function getNameSpace($skin) {
+        var nsURI = Skin.getAttr($skin, 'xmlns') || Skin.getProp($skin, 'namespaceURI');
+
+        if (nsURI === namespaceURIs.html) {
+          return '';
+        } else if (nsURI === namespaceURIs.svg) {
+          return 'svg';
+        } else if (nsURI === namespaceURIs.math) {
+          return 'math';
+        }
+      },
+
+      /**
+       * @required
+       */
+      hasAttrs: function hasAttrs($skin) {
         return $skin.hasAttributes ? $skin.hasAttributes() : ($skin.attributes && $skin.attributes.length > 0);
       },
 
       /**
        * @required
        */
-      getAttrs: function($skin) {
-        return $skin.attributes;
+      getAttrs: function getAttrs($skin) {
+        if ($skin._attrs) {
+          return $skin._attrs;
+        }
+
+        if (Skin.isElement($skin)) {
+          var attrs = {}, $attrs = $skin.attributes, $attr;
+
+          for (var i = 0, n = $attrs.length; i < n; ++i) {
+            $attr = $attrs[i];
+            attrs[$attr.name] = $attr.value;
+          }
+
+          $skin._attrs = attrs;
+          //return $skin.attributes;
+          return attrs;
+        }
       },
 
       /**
        * @required
        */
-      hasAttr: function($skin, name) {
+      hasAttr: function hasAttr($skin, name) {
         return $skin.hasAttribute(name);
       },
 
       /**
        * @required
        */
-      getAttr: function($skin, name) {
+      getAttr: function getAttr($skin, name) {
         return $skin.getAttribute(name);
       },
 
       /**
        * @required
        */
-      setAttr: function($skin, name, value) {
-        return $skin.setAttribute(name, value);
+      setAttr: function setAttr($skin, name, value) {
+        var type = typeof value;
+
+        if (type === 'boolean') {
+          if (value) {
+            $skin.setAttribute(name, '');
+          } else {
+            $skin.removeAttribute(name);
+          }
+        } else {
+          $skin.setAttribute(name, value);
+        }
       },
 
       /**
        * @required
        */
-      removeAttr: function($skin, name) {
+      removeAttr: function removeAttr($skin, name) {
         return $skin.removeAttribute(name);
       },
 
-      /**
-       * @required
-       */
-      hasProp: function($skin, name) {
+
+      hasProp: function hasProp($skin, name) {
         return name in $skin;
       },
 
       /**
        * @required
        */
-      getProp: function($skin, name) {
+      getProp: function getProp($skin, name) {
         return $skin[name];
       },
 
       /**
        * @required
        */
-      setProp: function($skin, name, value) {
+      setProp: function setProp($skin, name, value) {
+        //console.log($skin, $skin[name], Object.getOwnPropertyDescriptor($skin, name));
         $skin[name] = value;
       },
 
       /**
        * @required
        */
-      removeProp: function($skin, name) {
+      removeProp: function removeProp($skin, name) {
         delete $skin[name];
       },
 
-      getComputedStyleOf: function($skin) {
+      getComputedStyle: function getComputedStyle($skin) {
         return window.getComputedStyle($skin);
       },
 
       /**
        * @required
        */
-      setStyleItem: function($skin, name, value) {
+      setStyleProp: function setStyleProp($skin, name, value) {
         //TODO: name = toCamelCase(name);
         $skin.style[name] = value;
+
+        if (name in $skin.style) {
+          $skin.style[name] = value;
+        } else {
+          var capitalizedName = name.charAt(0).toUpperCase() + name.slice(1);
+
+          if (!cssVendorPrefix) {
+            var cssVendorPrefixes = ['webkit', 'Webkit', 'Moz', 'ms', 'O'];
+
+            for (var i = 0; i < 5; ++i) {
+              if ((cssVendorPrefixes[i] + capitalizedName) in $skin.style) {
+                cssVendorPrefix = cssVendorPrefixes[i];
+                break;
+              }
+            }
+          }
+
+          $skin.style[cssVendorPrefix + capitalizedName] = value;
+        }
+
+
       },
 
       /**
        * @required
        */
-      removeStyleItem: function($skin, name) {
+      removeStyleProp: function removeStyleProp($skin, name) {
         $skin.style[name] = '';
       },
 
-      normalize: function($skin) {
+      normalize: function normalize($skin) {
         $skin.normalize && $skin.normalize();
       },
 
-      getChildrenNum: function($skin) {
+      getChildrenNum: function getChildrenNum($skin) {
         var children = Skin.getProp($skin, 'childNodes');// || Skin.getChildNodes(node);
         return children.length;
       },
@@ -1082,7 +1221,7 @@
       /**
        * @required
        */
-      getChildrenCopy: function($skin) { // include texts and comments
+      getChildrenCopy: function getChildrenCopy($skin) { // include texts and comments
         var copy = [], children = Skin.getProp($skin, 'childNodes');
 
         copy.push.apply(copy, children);
@@ -1090,68 +1229,68 @@
         return copy;
       },
 
-      getChildAt: function($skin, index) {
+      getChildAt: function getChildAt($skin, index) {
         return Skin.getProp($skin, 'childNodes')[index];
       },
       
       /**
        * @required
        */
-      getParent: function($skin) { // unnecessary, use `getProp`
+      getParent: function getParent($skin) { // unnecessary, use `getProp`
         return $skin.parentNode;
       },
 
       /**
        * @required
        */
-      appendChild: function($skin, child) {
+      appendChild: function appendChild($skin, child) {
         return $skin.appendChild(child);
       },
 
       /**
        * @required
        */
-      insertChild: function($skin, child, before) {
+      insertChild: function insertChild($skin, child, before) {
         return $skin.insertBefore(child, before);
       },
 
       /**
        * @required
        */
-      replaceChild: function($skin, child, existed) {
+      replaceChild: function replaceChild($skin, child, existed) {
         return $skin.replaceChild(child, existed);
       },
 
       /**
        * @required
        */
-      removeChild: function($skin, child) {
+      removeChild: function removeChild($skin, child) {
         return $skin.removeChild(child);
       },
 
-      removeAllChildren: function($skin) {
+      removeAllChildren: function removeAllChildren($skin) {
         Skin.setProp($skin, 'textContent', '');
       },
 
-      query: function($skin, selector) { //find
+      query: function query($skin, selector) { //find
         return $skin.querySelector(selector); //TODO: getElementById...
       },
 
-      queryAll: function($skin, selector) { //select
+      queryAll: function queryAll($skin, selector) { //select
         return $skin.querySelectorAll(selector); //TODO: getElementsByTag...
       },
 
       /**
        * @required
        */
-      mayDispatchEvent: function($skin, type) {//TODO: mayDispatchEvent
+      mayDispatchEvent: function mayDispatchEvent($skin, type) {//TODO: mayDispatchEvent
         return ('on' + type) in $skin;
       },
 
       /**
        * @required
        */
-      getFixedEvent: function(event) {
+      getFixedEvent: function getFixedEvent(event) {
         event = event || window.event;
 
         if (!event.target) {
@@ -1178,7 +1317,7 @@
       /**
        * @required
        */
-      addEventListener: function($skin, type, listener, useCapture) {
+      addEventListener: function addEventListener($skin, type, listener, useCapture) {
         if ($skin.addEventListener) {
           $skin.addEventListener(type, listener, useCapture);
         } else if ($skin.attachEvent) {
@@ -1189,7 +1328,7 @@
       /**
        * @required
        */
-      removeEventListener: function($skin, type, listener, useCapture) {
+      removeEventListener: function removeEventListener($skin, type, listener, useCapture) {
         if ($skin.removeEventListener) {
           $skin.removeEventListener(type, listener, useCapture);
         } else if ($skin.detachEvent) {
@@ -1197,18 +1336,10 @@
         }
       },
 
-      delegateEventListener: function(type, listener, useCapture) {
-        if (delegatedEvents[type]) { return; }
-
-        Skin.addEventListener(doc, type, listener, useCapture);
-
-        delegatedEvents[type] = true;
-      },
-
       /**
        * @required
        */
-      renderAttrs: function($skin, attrs, dirty) {
+      renderAttrs: function renderAttrs($skin, attrs, dirty) {
         var key, value;
 
         if (!dirty) { return; }
@@ -1220,10 +1351,10 @@
 
           value = attrs[key];
 
-          if (typeof value === 'string') {
-            Skin.setAttr($skin, key, value);
-          } else if (value === undefined && Skin.hasAttr($skin, key)) {
+          if (value == undefined/* && Skin.hasAttr($skin, key)*/) {
             Skin.removeAttr($skin, key);
+          } else {
+            Skin.setAttr($skin, key, value);
           }
         }
       },
@@ -1231,20 +1362,24 @@
       /**
        * @required
        */
-      renderProps: function($skin, props, dirty) {
+      renderProps: function renderProps($skin, props, dirty, sealed) {
         var key, value;
 
         if (!dirty) { return; }
 
         for (key in dirty) {
-          if (dirty.hasOwnProperty(key) && Skin.hasProp($skin, key)) {
-            value = props[key];
+          if (!dirty.hasOwnProperty(key)) {
+            continue;
+          }
 
-            if (value !== undefined) {
-              Skin.setProp($skin, key, value);
-            } else {
-              Skin.removeProp($skin, key);
-            }
+          value = props[key];
+
+          if (key in PROPS_SHOULD_BE_USED) {
+            Skin.setProp($skin, key, value);
+          } else if (value == undefined) { // null or undefined
+            Skin.removeAttr($skin, Skin.toKebabCase(key));
+          } else if (!sealed || (Skin.hasProp($skin, key) /*&& typeof value !== 'object'*/)) {
+            Skin.setAttr($skin, Skin.toKebabCase(key), value);
           }
         }
       },
@@ -1252,7 +1387,7 @@
       /**
        * @required
        */
-      renderStyle: function($skin, style, dirty) {
+      renderStyle: function renderStyle($skin, style, dirty) {
         var key, value;
 
         if (!dirty) { return; }
@@ -1262,9 +1397,9 @@
             value = style[key];
 
             if (value) {
-              Skin.setStyleItem($skin, key, value);
+              Skin.setStyleProp($skin, key, value);
             } else {
-              Skin.removeStyleItem($skin, key);
+              Skin.removeStyleProp($skin, key);
             }
           }
         }
@@ -1274,7 +1409,7 @@
       /**
        * @required
        */
-      renderClasses: function($skin, classes, dirty) {
+      renderClasses: function renderClasses($skin, classes, dirty) {
         var key, names = [];
 
         if (!dirty) { return; }
@@ -1286,12 +1421,13 @@
         }
 
         Skin.setProp($skin, 'className', names.join(' '));
+        //Skin.setAttr($skin, 'class', names.join(' '));
       },
 
       /**
        * @required
        */
-      renderChildren: function($skin, $children) {
+      renderChildren: function renderChildren($skin, $children) {
         var i, n, m, $child, $existed, $removed;
 
         m = Skin.getChildrenNum($skin);
@@ -1334,6 +1470,22 @@
     }
 
   });
+
+  var containers = {
+    'option': 'select',
+    'tbody': 'table', 'thead': 'table', 'tfoot': 'table', 'tr': 'tbody', 'td': 'tr', 'th': 'tr'
+  };
+
+  var parents = {
+    'div': Skin.createElement('div'),
+    'svg': Skin.createElement('svg', namespaceURIs.svg),
+    'math': Skin.createElement('div', namespaceURIs.math),
+
+    'tr': Skin.createElement('tr'),
+    'table': Skin.createElement('table'),
+    'tbody': Skin.createElement('tbody'),
+    'select': Skin.createElement('select')
+  };
 
   Exact.Skin = Skin;
 
@@ -1529,7 +1681,7 @@
         for (i = 0; i < n; ++i) {
           handler = handlers[i];// handlers[ i ]( event.clone() );
 
-          if (event.keyName && event.keyName !== handler.keyName) { continue; }
+          if (handler.keyName && handler.keyName !== event.keyName) { continue; }
 
           if (/*!event.eventPhase ||  */(event.eventPhase === 1) === !!handler.useCapture) {
             exec = handler.exec;
@@ -1574,7 +1726,7 @@
             register(this, type, value);
           }
         }
-      } else {//  .on('click', context.onClick);
+      } else if (type) {//  .on('click', context.onClick);
         register(this, type, exec, useCapture);
       }
 
@@ -1857,19 +2009,25 @@
 
 
       set: function(key, val, old/*, accessor, descriptors*/) {
-        this[key] = val;
-
-        //if (this[key] === undefined) {
-        //  delete this[key];
+        //if (val !== old) {
+        //  this[key] = val;
+        //  return true;
         //}
 
+        this[key] = val;
         return this[key] !== old;
       },
 
       initialize: function initialize(accessor, props) {
-        var constructor = accessor.constructor, descriptors = constructor.descriptors;
+        var constructor = accessor.constructor, descriptors = constructor.descriptors, prototype = constructor.prototype;
 
-        if (!accessor._descriptors_ && Array.isArray(descriptors)) { // like ['title', 'name', {price: {type: 'number'}}]
+        if (accessor._props === undefined) {
+          var _props = {};
+          ObjectUtil_defineProp(accessor, '_props', {value: _props});
+          ObjectUtil_defineProp(_props, 'set', {value: constructor.set});
+        }
+
+        if (!prototype._descriptors_ && Array.isArray(descriptors)) { // like ['title', 'name', {price: {type: 'number'}}]
           var n = descriptors.length,  keys = descriptors.slice(0), key, desc;
 
           if (typeof keys[n-1] === 'object') {
@@ -1881,45 +2039,40 @@
           n = keys.length;
 
           while (--n >= 0) {
-            descriptors[keys[n]] = {};
+            descriptors[keys[n]] = null;
           }
 
-          if (canDefineGetterAndSetter) {
-            var _props = {};
+          for (key in descriptors) {
+            if (!descriptors.hasOwnProperty(key) || !descriptors[key]) { continue; }
 
-            ObjectUtil_defineProp(accessor, '_props', {value: _props});
-            ObjectUtil_defineProp(_props, 'set', {value: constructor.set});
+            desc = descriptors[key];
 
-            for (key in descriptors) {
-              if (!descriptors.hasOwnProperty(key)) { continue; }
+            desc = typeof desc === 'object' ? desc : {type: desc}; //TODO: emptyObject
 
-              desc = descriptors[key];
-
+            if (/*!(key in prototype) && */canDefineGetterAndSetter) {
               var opts = {
                 enumerable: 'enumerable' in desc ? desc.enumerable : true,
                 configurable: 'configurable' in desc ? desc.configurable : true
               };
 
-              if ('set' in desc) {
+              if ('get' in desc) {
                 opts.get = desc.get;
-                opts.set = desc.set;
-              } else if (!('get' in desc)){
+                if ('set' in desc) {
+                  opts.set = desc.set;
+                }
+              } else {
                 opts.get = makeGetter(key);
                 opts.set = makeSetter(key);
-              } else {
-                opts.get = desc.get;
               }
 
-              ObjectUtil_defineProp(accessor, key, opts);
+              ObjectUtil_defineProp(prototype, key, opts);
             }
+
+            descriptors[key] = desc;
           }
 
-          ObjectUtil_defineProp(accessor, '_descriptors_', {value: descriptors});
+          ObjectUtil_defineProp(prototype, '_descriptors_', {value: descriptors});
         }
-
-        //if (accessor._props === undefined) {
-        //  ObjectUtil_defineProp(accessor, '_props', {value: accessor});
-        //}
 
         if (typeof accessor.defaults === 'function') {
           var defaults = accessor.defaults();
@@ -1965,6 +2118,83 @@
     boolean: /\bboolean\b/
   };
 
+  function getType(value) {
+    if (value instanceof Object) {
+      var constructor = value.constructor;
+      return  constructor.fullName || constructor.name;
+    }
+
+    return typeof value;
+  }
+
+  function makeTypeError(constructorName, propertyName, expectedType, actualType) {
+    return new TypeError('`' + propertyName + '` of type `' + (constructorName || '<<anonymous>>') +
+      '` should be `' + expectedType + (actualType ? '`, not `' + actualType : '') + '`');
+  }
+
+  function makeTypesError(constructorName, propertyName, expectedTypes, actualType) {
+    var types = [];
+    for (var i = 0, n = expectedTypes.length; i < n; ++i) {
+      //if (typeof expectedTypes[i] === 'function') {
+      //  str += expectedTypes[i].name;
+      //} else {
+      //  str += expectedTypes[i].name;
+      //}
+      types.push('`' + (expectedTypes[i].name || expectedTypes[i]) + '`');
+    }
+
+    return new TypeError('`' + propertyName + '` of type `' + (constructorName || '<<anonymous>>') +
+      '` should be ' + types.join(' or ') + (actualType ? ', not `' + actualType : '') + '`');
+  }
+
+  /**
+   * Validate the type of the value when the key is set in accessor.
+   *
+   * @param {Accessor} accessor
+   * @param {string} key
+   * @param {*} value
+   * @param {string|Function} type
+   * @returns {TypeError}
+   */
+  function validateType(accessor, key, value, type) {
+    if (value === undefined) { return; } //TODO: required ?
+
+    var t1 = typeof type, t2, error, constructor;
+
+    //t2 = typeof value;
+    if (t1 === 'string' && typeof value !== type) { //TODO: type can be array
+//    if (t1 === 'string' && !TYPE_REGEXPS[t2].test(type)) {
+      t1 = type;
+      error = true;
+    } else if (t1 === 'function' && !(value instanceof type)) {
+      t1 = type.fullName || type.name;
+      error = true;
+    }
+
+    if (error) {
+      constructor = accessor.constructor;
+      return makeTypeError(constructor.fullName || constructor.name, key, t1, getType(value));
+    } else if (Array.isArray(type)) {
+      for (var i = 0, n = type.length; i < n; ++i) {
+        t1 = typeof type[i];
+        if ((t1 === 'string' && typeof value === type[i]) || (t1 === 'function' && value instanceof type[i])) {
+          break;
+        }
+      }
+
+      if (i === n) {
+        constructor = accessor.constructor;
+        return makeTypesError(constructor.fullName || constructor.name, key, type, getType(value));
+      }
+    }
+  }
+
+  function validatePattern(accessor, key, value, pattern) {
+    if (!pattern.test(value)) {
+      return new Error(value, 'does not match the pattern ' + pattern.toString());
+    }
+  }
+
   /**
    * Validator provides the `validate()` method.
    *
@@ -2004,25 +2234,25 @@
 
           if (!desc) { return true; }
 
-          var t = typeof desc;
-
-          if (t === 'string' || t === 'function') { // Like {name: 'string', role: Student} where Student is constructor
-            type = desc;
-          } else if (t === 'object') {
+          //var t = typeof desc;
+          //
+          //if (t === 'string' || t === 'function') { // Like {name: 'string', role: Student} where Student is constructor
+          //  type = desc;
+          //} else if (t === 'object') {
             type = desc.type;
             pattern = desc.pattern;
-          } else {
-            return true;
-          }
+          //} else {
+          //  return true; //TODO: type: ['string', 'number', Date]
+          //}
 //        required = desc.required; //TODO: coerce
           validate = desc.validate;
 
           if (!error && type) {
-            error = Validator.validateType(accessor, key, value, type);
+            error = validateType(accessor, key, value, type);
           }
 
           if (!error && pattern) {
-            error = Validator.validatePattern(accessor, key, value, pattern);
+            error = validatePattern(accessor, key, value, pattern);
           }
 
           if (!error && typeof validate === 'function') {
@@ -2030,9 +2260,9 @@
           }
 
           if (error) {
-            if ('development' === 'development') {
-              console.warn('Invalid:', error.message);
-            }
+            //if ('development' === 'development') {
+            //  console.warn('Invalid:', error.message);
+            //}
 
             if (accessor.on && accessor.send) {
               accessor.send('invalid.' + key, error);
@@ -2043,56 +2273,11 @@
         }
 
         return true;
-      },
-
-      /**
-       * Validate the type of the value when the key is set in accessor.
-       *
-       * @param {Accessor} accessor
-       * @param {string} key
-       * @param {*} value
-       * @param {string|Function} type
-       * @returns {TypeError}
-       */
-      validateType: function validateType(accessor, key, value, type) {
-        if (value === undefined) { return; } //TODO: required ?
-
-        var t1 = typeof type, t2, error, constructor;
-
-        t2 = typeof value;
-//      if (t1 === 'string' && (t2 = typeof value) !== type) {
-        if (t1 === 'string' && !TYPE_REGEXPS[t2].test(type)) {
-          t1 = type;
-
-          error = true;
-        } else if (t1 === 'function' && !(value instanceof type)) {
-          t1 = type.fullName || type.name;
-
-          constructor = value.constructor;
-          t2 = constructor.fullName || constructor.name;
-
-          error = true;
-        }
-
-        if (error) {
-          constructor = accessor.constructor;
-
-          return makeTypeError(constructor.fullName || constructor.name, key, t1, t2);
-        }
-      },
-
-      validatePattern: function validatePattern(accessor, key, value, pattern) {
-        if (!pattern.test(value)) {
-          return new Error(value, 'does not match the pattern ' + pattern.toString());
-        }
       }
     }
   });
 
-  function makeTypeError(constructorName, propertyName, expectedType, actualType) {
-    return new TypeError('`' + propertyName + '` of type `' + (constructorName || '<<anonymous>>') +
-      '` should be `' + expectedType + (actualType ? '`, not `' + actualType : '') + '`');
-  }
+
 
   Exact.Validator = Validator;
 
@@ -2155,12 +2340,12 @@
         } else {
           delete object._dirty[key];
         }
-      },
+      }/*,
 
       hasDirty: function hasDirty(object, key) { // hasDirtyAttr, hasDirty
         var _dirty = object._dirty;
         return _dirty ? (key === undefined || _dirty.hasOwnProperty(key)) : false;
-      }
+      }*/
     },
 
     /**
@@ -2204,7 +2389,7 @@
 
     constructor: Cache,
 
-    mixins: [Accessor.prototype],
+    mixins: [Accessor.prototype, DirtyChecker.prototype],
 
     //onChange: null,
 
@@ -2409,7 +2594,7 @@
 
     set: function(index, item) {
       if (index >= this.length) {
-        for (var i = this.length;  i < index; ++i) {
+        for (var i = this.length; i < index; ++i) {
           base.push.call(this, undefined);
         }
 
@@ -2417,6 +2602,7 @@
       } else {
         if (this[index] === item) { return this; }
         this[index] = item;
+        //base.splice.call(this, index, 1, item);
       }
 
       invalidate(this);
@@ -2425,7 +2611,7 @@
     },
 
     reset: function(items) {
-      var i, n, m, min;
+      var i, n, m, flag;
       n = this.length;
       m = items.length;
 
@@ -2434,25 +2620,32 @@
       if (n > m) {
 //        min = m;
         base.splice.call(this, m);
+        flag = true;
       } /*else {
        min = n;
        base.push.apply(this, items.slice(min));
        }*/
 
       for (i = 0;  i < m; ++i) {
+        if (!flag && this[i] !== items[i]) {
+          flag = true;
+        }
+
         this[i] = items[i];
       }
 
       this.length = m;
 
-      invalidate(this);
+      if (flag) {
+        invalidate(this);
+      }
 
       return this;
 
     },
 
     insert: function(item, before) { //TODO: before can be number index
-      if (!(item instanceof Object) || !(before instanceof Object)) {
+      if (!(item instanceof Object) || (arguments.length > 1 && !(before instanceof Object))) {
         throw new TypeError("Failed to execute `insert` on `Collection`: 2 arguments must be object.");
       }
 
@@ -2464,9 +2657,9 @@
 
       for (i = 0; i < n; ++i) {
         if (this[i] === item) {
-          if (i === n-1) {
-            return this;
-          }
+          //if (i === n-1) {
+          //  return this;
+          //}
 
           base.splice.call(this, i, 1);
           n = this.length;// <=> --n;
@@ -2547,7 +2740,7 @@
 //      invalidate(this);
 
       return this;
-    },
+    }/*,
 
     empty: function() {
       this.splice(0);
@@ -2555,7 +2748,7 @@
 //      invalidate(this);
 
       return this;
-    }
+    }*/
   });
 
   Exact.Collection = Collection;
@@ -2755,21 +2948,21 @@
         this.refresh();
       } //TODO: shouldRefresh()�� last chance to update shadow and its children
 
-      if (this.send) {
-        //shadow.send('refresh');//TODO: beforeRefresh, refreshing
-        this.send('refreshed');//TODO: beforeRefresh, refreshing
-      }
-
       Updater.append(this);
       //Shadow.render(this);
       //Shadow.clean(this);
+
+      //if (this.send) {
+      //  //shadow.send('refresh');//TODO: beforeRefresh, refreshing
+      //  this.send('refreshed');//TODO: beforeRefresh, refreshing
+      //}
     },
 
     render: function render() {
-//        if (!shadow.isInvalid) { return; }
+      if (!this.isInvalid) { return; }
 
       var $skin = this.$skin,
-        props = this,
+        props = this, // <--
         attrs = this._attrs,
         style = this._style,
         classes = this._classes,
@@ -2778,10 +2971,12 @@
 
       if (props && props._dirty) { //TODO: textContent => children
         dirty = props._dirty;
-        Shadow.clean(props);
+        //Shadow.clean(props);
 
-        Skin.renderProps($skin, props, dirty);
+        Skin.renderProps($skin, props, dirty, this._secrets.final);
       }
+
+      Shadow.clean(this);
 
       if (Skin.isElement($skin)) {
         if (attrs && attrs._dirty) {
@@ -2813,8 +3008,8 @@
           if ($removed && $removed.length > 0) {
             for (var i = 0, n = $removed.length; i < n; ++i) {
               var $parent = Skin.getParent($removed[i]);
-              if (!$parent) {
-                var shadow = Shadow.getShadow($removed[i]);
+              var shadow = Shadow.getShadow($removed[i]);
+              if (!$parent && !shadow.hasOwnProperty('excluded')) {
                 Shadow.release(shadow);
               }
             }
@@ -2864,23 +3059,24 @@
 
       /**
        * @param {Shadow} shadow
-       * @param {string} tag
        * @param {Object} props
+       * * @param {string} tag
+       * @param {string} ns
        */
-      initialize: function initialize(shadow, tag, props) {
+      initialize: function initialize(shadow, props, tag, ns) {
 //        throw new Error('initialize() must be implemented by subclass!');
+        shadow.guid = ++uid;
+        shadow._secrets = {}; //TODO:
+        shadow.update = shadow.update.bind(shadow); //TODO: defineProp
+        shadow.render = shadow.render.bind(shadow); //TODO: defineProp
+        shadow.invalidate = shadow.invalidate.bind(shadow);
+        //shadow._update = Shadow.update.bind(null, shadow);
 
-        Shadow.initSkin(shadow, tag);
+        Shadow.initSkin(shadow, tag, ns);
 
         if (Skin.isElement(shadow.$skin)) {
           defineMembersOf(shadow);
         }
-
-        shadow.guid = ++uid;
-        shadow.update = shadow.update.bind(shadow);
-        shadow.render = shadow.render.bind(shadow);
-        shadow.invalidate = shadow.invalidate.bind(shadow);
-        //shadow._update = Shadow.update.bind(null, shadow);
 
         Accessor.initialize(shadow, props);
       },
@@ -2890,9 +3086,10 @@
        *
        * @param {Shadow} shadow
        * @param {string} tag
+       * @param {string} ns ''/'svg'/'math'
        */
-      initSkin: function initSkin(shadow, tag) {
-        ObjectUtil_defineProp(shadow, '$skin', {value: tag/* !== 'TEXT'*/ ? Skin.createElement(tag) : Skin.createText('')}); //TODO: $shin._secrets = {$skin: ...}
+      initSkin: function initSkin(shadow, tag, ns) {
+        ObjectUtil_defineProp(shadow, '$skin', {value: tag/* !== 'TEXT'*/ ? Skin.createElement(tag, ns) : Skin.createText('')}); //TODO: $shin._secrets = {$skin: ...}
 //        shadow.$skin._shadow = shadow; //TODO: strict
         if (Skin.canExtend(shadow.$skin)) {
           ObjectUtil_defineProp(shadow.$skin, '_shadow', {value: shadow});
@@ -2901,6 +3098,7 @@
 
       clean: function clean(shadow) {
         shadow.isInvalid = false;
+        DirtyChecker_clean(shadow); //delete shadow._dirty;
       },
 
       /**
@@ -2971,9 +3169,10 @@
 
 
       addEventListenerFor: function (shadow, type, useCapture) {
-        var action = shadow._actions[type], $skin;
+        var $skin = shadow.$skin;
+        if (!$skin) { return; }
 
-        $skin = shadow.$skin;
+        var action = shadow._actions[type];
 
         if (Skin.mayDispatchEvent($skin, type)) {//TODO: No problem?
           action.listener = function (event) {
@@ -2987,11 +3186,12 @@
       },
 
       removeEventListenerFor: function (shadow, type, useCapture) {
-        var actions = shadow._actions, action = actions[type], $skin;
+        var $skin = shadow.$skin;
+        if (!$skin) { return; }
 
-        $skin = shadow.$skin;
+        var action = shadow._actions[type];
 
-        if (Skin.mayDispatchEvent($skin, type)) {
+        if (action.listener && Skin.mayDispatchEvent($skin, type)) {
           Skin.removeEventListener($skin, type, action.listener, useCapture);
 
           delete action.listener;
@@ -3037,7 +3237,7 @@
       },
 
       initialize: function(text, data) {
-        Shadow.initialize(text, '', {data: data});
+        Shadow.initialize(text, {data: data}, '');
         //Shadow.initialize(text, 'TEXT', {data: data});
       }
     },
@@ -3062,8 +3262,8 @@
   var Watcher = Exact.Watcher;
 
 
-  function Element(tag, props) {
-    Element.initialize(this, tag, props);
+  function Element(props, tag, ns) {
+    Element.initialize(this, props, tag, ns);
   }
 
   Exact.defineClass({
@@ -3089,12 +3289,16 @@
        * Create a element shadow
        *
        * @param {string} tag
+       * @param {string} ns
        * @param {Object} props
        * @returns {Element}
        */
-      create: function create(tag, props) {
+      create: function create(tag, ns, props) {
+        if (ns && typeof ns === 'object') { // create(tag, props)
+          props = ns;
+        } // else create(tag) or create(tag, ns) or create(tag, ns, props)
 
-        return new Element(tag, props);
+        return new Element(props, tag, ns);
       }
     }
   });
@@ -3172,17 +3376,17 @@
         return new ClassRef(props);
       },
 
-      destroy: function destroy(component) {
-        var i, n, child, children = component.children;
-
-        for (i = 0, n = children.length; i < n; ++i) {
-          child = children[i];
-          child.constructor.destroy(child);
-        }
-
-        component.off();
-        Shadow.clean(component);
-      },
+      //destroy: function destroy(component) {
+      //  var i, n, child, children = component.children;
+      //
+      //  for (i = 0, n = children.length; i < n; ++i) {
+      //    child = children[i];
+      //    child.constructor.destroy(child);
+      //  }
+      //
+      //  component.off();
+      //  Shadow.clean(component);
+      //},
 
       release: function release(component) {
         var i, children = component._children;
@@ -3234,11 +3438,12 @@
 
         //props.tag = template.tag;
 
-        Shadow.initialize(component, template.tag, props);
+        Shadow.initialize(component, props, template.tag, template.ns);
 //        Accessor.initialize(component);
 
         HTMXTemplate.compile(template, component);
 
+        component._secrets.final = true;
         component.send('initialized');
       }
 
@@ -3253,6 +3458,15 @@
      * @abstract
      */
     ready: function ready() {},
+
+    update: function update() { //TODO: enumerable = false
+      base.update.call(this);
+
+      if (this.isInvalid) {
+        //shadow.send('refresh');//TODO: beforeRefresh, refreshing
+        this.send('refreshed');//TODO: beforeRefresh, refreshing
+      }
+    },
 
     /**
      * @abstract
@@ -3327,7 +3541,7 @@
   }
 
   function List() {
-    Component.apply(this, arguments);
+    Component.call(this, arguments);
   }
 
   Exact.defineClass({
@@ -3487,7 +3701,6 @@
           //targetEvent: targetEvent
         });
 
-
         binding.exec({dispatcher: source});
 
         if (mode > 0/* && binding.life*/) {
@@ -3506,6 +3719,8 @@
       },
 
       clean: function(binding) {
+        if (binding.mode <= 0) { return; }
+
         if (binding.scopeEvent) {
           binding.scope.off(binding.scopeEvent, binding.exec);
         } else if (binding.scopePaths) {
@@ -3586,23 +3801,50 @@
     }
   }
 
+  //function normalize(paths, scope) {
+  //  //var descriptors = scope._descriptors_;
+  //
+  //  //if (!descriptors) { return; }
+  //
+  //  var i, j, n, prop, source, descriptors;
+  //
+  //  for (i = 0, n = paths.length; i < n; ++i) {
+  //    var path = paths[i];
+  //
+  //    j = path.lastIndexOf('.');
+  //    if (j < 0) {
+  //      prop = path;
+  //      source = scope;
+  //    } else {
+  //      prop = path.slice(j + 1);
+  //      source = RES.search(path.slice(0, j), scope, true);
+  //    }
+  //
+  //    descriptors = source._descriptors_;
+  //
+  //    if (prop in descriptors && descriptors[prop].depends) {
+  //
+  //    }
+  //  }
+  //}
+
   function eye(fn, paths, scope, target, binding) {
-    var i, j, n, path, attr, watcher, exec;
+    var i, j, n, path, prop, watcher, exec;
 
     for (i = 0, n = paths.length; i < n; ++i) {
       path = paths[i];//.name;
       j = path.lastIndexOf('.');
       if (j < 0) {
-        attr = path;
+        prop = path;
         watcher = scope;
       } else {
-        attr = path.slice(j + 1);
+        prop = path.slice(j + 1);
         watcher = RES.search(path.slice(0, j), scope, true);
       }
 
       if (watcher && watcher[fn]) {
-
-        watcher[fn]('changed.' + attr, binding.exec);// TODO: binding.invalidate
+        //TODO: check scope._descriptors_[prop].depends
+        watcher[fn]('changed.' + prop, binding.exec);// TODO: binding.invalidate
 
         if (fn === 'on') {
           record(target, binding);
@@ -3766,23 +4008,26 @@
 // src/core/templates/StyleTemplate.js
 //######################################################################################################################
 (function() {
-  
+
   'use strict';
 
-  function StyleXTemplate(literals, expressions) {
-    this.literals = literals;
-    this.expressions = expressions; //this.expressions = null;
+  var ObjectUtil_assign = Exact.ObjectUtil.assign;
+  var ObjectUtil_defineProp = Exact.ObjectUtil.defineProp;
+
+  function PropsTemplate(literals, expressions) {
+    ObjectUtil_assign(this, literals);
+    ObjectUtil_defineProp(this, 'expressions', {
+      value: expressions, writable: true, enumerable: false, configurable: true
+    });
   }
 
-  StyleXTemplate.compile = function(template, target) {
-
-  };
-
-  Exact.StyleXTemplate = StyleXTemplate;
+  Exact.PropsTemplate = PropsTemplate;
 
 })();
 
-
+//######################################################################################################################
+// src/core/templates/HTMXTemplate.js
+//######################################################################################################################
 (function() {
   'use strict';
 
@@ -3791,99 +4036,144 @@
   var Element = Exact.Element;
   var Component = Exact.Component;
 
-  var ObjectUtil = Exact.ObjectUtil
+  var ObjectUtil = Exact.ObjectUtil;
   var ExpressionUtil = Exact.ExpressionUtil;
 
+  var PropsTemplate = Exact.PropsTemplate;
+
   function HTMXTemplate() {
-    this.id = '';         //string, local id
-    this.as = '';         //string, key in target
+    this.ns = '';         // namespace
+    //this.as = '';         //string, key of target
+    this.uid = '';         //string, local id
+    //this.key = '';         //string, key in list
     this.tag = '';        //string, tag name
     this.type = null;     //Function, constructor
-    this.stay = false;    //boolean
+    //this.stay = false;    //boolean
+    this.props = null;
     this.attrs = null;    //Object like {literals: {title: 'Hi'}, expressions: {'data-msg': {...}}}
     this.style = null;    //Object like {literals: {color: 'red'}, expressions: {fontSize: {...}}}
-    //this.actions = null;  //Object like {literals: {click: 'onClick'}, expressions: {change: {...}}}
     this.classes = null;  //Object like {literals: {highlight: true}, expressions: {active: {...}}}
     this.children = null; //Array like []
-    this.literals = null; //Object like {title: 'Hi'}
-    this.expressions = null; //Object like {title: {type: null, template: null}}
+    //this.literals = null; //Object like {title: 'Hi'}
+    //this.expressions = null; //Object like {title: {type: null, template: null}}
+//TODO: this.props = {expressions: null}
+    //this.actions = null;  // for refactor
+    //this.indices = null;  // for refactor
   }
 
-  HTMXTemplate.parse = null; // Interface,
+  var emptyObject = {}, emptyArray = [];
 
-  function initStyle(target, scope, template) {
+  var specials = {
+    uid: true, attrs: true, style: true, classes: true, actions: true
+  };
+
+  function create(type, params, children) {
+    var template = new HTMXTemplate();
+    
+    if (typeof type === 'string') {
+      template.tag = type;
+    } else {
+      template.type = type;
+    }
+
+    if (params) {
+      template.uid = params.uid;
+      template.attrs = params.attrs;
+      template.style = params.style;
+      template.classes = params.classes;
+      template.actions = params.actions;
+
+      var flag, props = {};
+
+      for (var key in params) {
+        if (params.hasOwnProperty(key) && !specials[key]) {
+          props[key] = params[key];
+          flag = true;
+        }
+      }
+
+      if (flag) {
+        template.props = props;
+      }
+    }
+
+    template.children = children;
+    
+    return template;
+  }
+
+  //HTMXTemplate.parse = null; // Interface,
+
+  function initStyle(target, scope, style) {
     //var styleString = template.literals.style;//TODO: warn in HTMLTemplate
-    if (template.style) {
-      initProps(target.style, scope, template.style);
-    }
-  }
-  
-  function initAttrs(target, scope, template) {
-    if (template.attrs) {
-      initProps(target.attrs, scope, template.attrs);
+    if (style) {
+      initProps(target.style, scope, style);
     }
   }
 
-  function initProps(target, scope, template) {
-    if (!template) { return; }
+  function initAttrs(target, scope, attrs) {
+    if (attrs) {
+      initProps(target.attrs, scope, attrs);
+    }
+  }
 
-    var literals = template.literals;
-    var expressions = template.expressions;
+  function initProps(target, scope, props) {
+    if (!props) { return; }
 
-    if (literals) {
-      target.set(literals);
-      //target.reset(literals);
+    var expressions = props.expressions;
+
+    if (props) {
+      target.set(props);
     }
 
     if (expressions) {
-      scope._expressionsQueue.push({target: target, expressions: expressions});
+      scope._todos.push({target: target, expressions: expressions});
     }
   }
 
-  function initClasses(target, scope, template) {
-    if ((template.expressions && template.expressions.className) && template.classes) {
-      console.warn('ignore'); //TODO: warn in HTMXTemplate, class="`btn &{$.active? 'active':''}`"
-    }
-
-    var i, names, classes, literals = template.literals, className = literals ? literals.className : '';
+  function initClasses(target, scope, classes, template) {
+    //if ((template.expressions && template.expressions.className) && template.classes) {
+    //  console.warn('ignore'); //TODO: warn in HTMXParser, class="`btn &{$.active? 'active':''}`"
+    //}
+//TODO: do this in HTMXParser
+    var i, names, props = template.props, className = props ? props.className : '';
 
     if (className) {
-      if (!template.classes) {
-        template.classes = new Exact.StyleXTemplate();
+      //classes = template.classes;
+
+      if (!classes) {
+        classes = template.classes = new PropsTemplate(); //TODO: defineProp
+        // new Exact.StyleXTemplate();
       }
-
-      classes = template.classes;
-
-      if (!classes.literals) {
-        classes.literals = {};
-      }
-
-      literals = classes.literals;
 
       names = className.split(/\s/);
       for (i = 0; i < names.length; ++i) {
-        literals[names[i]] = true;
+        classes[names[i]] = true;
       }
     }
 
-    if (template.classes) {
-      initProps(target.classes, scope, template.classes);
+    if (classes) {
+      initProps(target.classes, scope, classes);
     }
   }
 
-  function initSelf(target, scope, template) {
-    //TODO:
+  function initActions(target, actions) {
+    if (actions) {
+      target.on(actions);
+    }
+  }
 
-    initProps(target, scope, template);
-    initAttrs(target, scope, template);
-    initStyle(target, scope, template);
-    initClasses(target, scope, template);
-    //initActions(target, scope, template);
+  function initSelf(scope, target, template) {
+    initProps(target, scope, template.props);
+    initAttrs(target, scope, template.attrs);
+    initStyle(target, scope, template.style);
+    initClasses(target, scope, template.classes, template);
+    initActions(target, template.actions);
   }
 
 
-  function initChildren(target, scope, template) {
-    var i, n, id, tag, type, child, content, contents = [], children = template.children;
+  function initChildrenOrContents(scope, target, template) {
+    var i, n, uid, tag, type, child, content, contents = [], children = template.children;
 
     if (!children) { return; }
 
@@ -3894,24 +4184,23 @@
         content = Text.create(child);
       } else if (ExpressionUtil.isExpression(child)) {
         content = Text.create('');
-        scope._expressionsQueue.push({target: content, expressions: {data: child}});
+        scope._todos.push({target: content, expressions: {data: child}});
       } else if (child instanceof Object) {
-        id = child.id;
+        uid = child.uid;
         tag = child.tag;
         type = child.type;
         //literals = child.literals; //TODO:
 
         if (!type) {
-          content = Element.create(tag);
+          content = Element.create(tag, child.ns);
         } else {
           content = Component.create(type);
         }
-        //TODO: collect contents/slots, scope._expressionsQueue.push({target: content, expressions: {placeholder: {}}});
-        initSelf(content, scope, child);
-        initChildren(content, scope, child);
+        //TODO: collect contents/slots, scope._todos.push({target: content, expressions: {placeholder: {}}});
+        initSelfAndChildrenOrContents(scope, content, child);
 
-        if (id) {
-          scope[id] = content; //TODO: addPart
+        if (uid) {
+          scope[uid] = content; //TODO: addPart
         }
       }
 
@@ -3927,7 +4216,7 @@
   }
 
   function initExpressions(component) {
-    var i, n, queue = component._expressionsQueue, item, key, target, expression, expressions;
+    var i, n, queue = component._todos, item, key, target, expression, expressions;
 
     for (i = 0, n = queue.length; i < n; ++i) {
       item = queue[i];
@@ -3942,17 +4231,189 @@
       }
     }
   }
+  
+  function initSelfAndChildrenOrContents(scope, target, template) {
+    initSelf(scope, target, template);
+    initChildrenOrContents(scope, target, template);
+  }
 
-  HTMXTemplate.compile = function compile(template, component) {
-    component._expressionsQueue = []; //TODO: _todos
+  function compile(template, component) {
+    component._todos = []; //TODO: _todos
 
-    initSelf(component, component, template);
-    initChildren(component, component, template);
+    initSelfAndChildrenOrContents(component, component, template);
 
     initExpressions(component);
 
-    delete component._expressionsQueue;
-  };
+    delete component._todos;
+
+    component._template = template;
+  }
+
+  function resetProps(target, props, prev) {
+    if (target.defaults) {
+      var defaults = target.defaults();
+    }
+
+    var all = ObjectUtil.assign({}, defaults, props);
+
+    if (prev) {
+      for (var key in prev) {
+        if (prev.hasOwnProperty(key) && !all.hasOwnProperty(key)) {
+          all[key] = undefined;
+        }
+      }
+    }
+
+    target.set(all);
+  }
+
+  function resetAttrs(target, props, prev) {
+    if (!props && !prev) { return; }
+
+    resetProps(target.attrs, props, prev);
+  }
+
+  function resetStyle(target, props, prev) {
+    if (!props && !prev) { return; }
+
+    resetProps(target.style, props, prev);
+  }
+
+  function resetClasses(target, props, prev) {
+    if (!props && !prev) { return; }
+
+    resetProps(target.classes, props, prev);
+  }
+
+  function resetActions(target, actions) {
+    if (!actions) { return; }
+
+    if (actions.off) {
+      target.off();
+    }
+
+    delete actions.off;
+
+    target.on(actions);
+  }
+
+  function resetSelf(target, template) {
+    var _template = target._template || emptyObject;
+
+    resetProps(target, template.props, _template.props);
+    resetAttrs(target, template.attrs, _template.attrs);
+    resetStyle(target, template.style, _template.style);
+    resetClasses(target, template.classes, _template.classes);
+
+    resetActions(target, template.actions);
+  }
+
+  function resetChildrenOrContents(scope, target, template) {
+    var i, m, n, key, child, 
+      existed, content, olIndices, newIndices,
+      _template = target._template || emptyObject, 
+      existeds = _template.children || emptyArray, 
+      contents = template.children;
+
+    var oldContents, newContents = [];
+    if (!(target instanceof Component) || scope === target) {
+      oldContents = target.children || emptyArray;
+    } else {
+      oldContents = target.contents || emptyArray;
+    }
+
+    olIndices = _template.indices || emptyObject;
+
+    //m = existeds.length;
+    n = contents.length;
+
+    for (i = 0; i < n; ++i) {
+      existed = existeds[i];
+      content = contents[i];
+
+      if (content instanceof Shadow) {
+        newContents.push(content);
+        continue;
+      }
+
+      key = content.key;
+
+      if (key) {
+        newIndices = newIndices || {};
+        newIndices[key] = i;
+
+        if ('development' === 'development' && key in newIndices) {
+          console.warn('key should not be duplicate, but "' + key +'" is duplicate');
+        }
+
+        if (/*olIndices && */key in olIndices) {
+          child = oldContents[olIndices[content.key]];
+
+          resetSelfAndChildrenOrContents(scope, child, content);
+
+          newContents.push(child);
+          continue;
+        }
+      }
+
+      if (content.type) {
+        if (existed && content.type === existed.type) {
+          child = oldContents[i];
+          resetSelfAndChildrenOrContents(scope, child, content);
+        } else {
+          child = Component.create(content.type);
+          initSelfAndChildrenOrContents(scope, child, content);
+        }
+      } else if (content.tag) {
+        if (existed && !existed.type && existed.tag === content.tag) {
+          child = oldContents[i];
+          resetSelfAndChildrenOrContents(scope, child, content);
+        } else {
+          child = Element.create(content.tag, content.ns);
+          initSelfAndChildrenOrContents(scope, child, content);
+        }
+      } else {
+        if (existed && !existed.tag && !existed.type) {//TODO: maybe expression
+          child = oldContents[i]; // text
+          child.set('data', content);
+        } else {
+          child = Text.create(content);
+        }
+      }
+
+      if (content.uid) {
+        scope[uid] = child;
+      }
+
+      newContents.push(child);
+    }
+
+    if (!(target instanceof Component) || scope === target) {
+      target.children.reset(newContents);
+    } else {
+      target.set('contents', newContents);
+    }
+    
+    template.indices = newIndices;
+  }
+  
+  function resetSelfAndChildrenOrContents(scope, target, template) {
+    resetSelf(target, template);
+    resetChildrenOrContents(scope, target, template);
+  }
+
+  function refactor(target, template) {
+    //var _template = target._template; //TODO: _secrets
+    resetSelfAndChildrenOrContents(target, target, template);
+
+    target._template = template;
+
+    return target;
+  }
+
+  HTMXTemplate.create = create;
+  HTMXTemplate.compile = compile;
+  HTMXTemplate.refactor = refactor;
 
   Exact.HTMXTemplate = HTMXTemplate; //HTMXTemplate
 
@@ -4139,6 +4600,42 @@
   var REGEXP_3 = /\$((\[|\]?\.)[\w\$]+)+(?!\()/g; //$.a[0].b.c(), path on scope
   var REGEXP_4 = /^\$((\[|\]?\.)[\w\$]+)+$/; //
 
+  function likeFuncExpr(expr, i) {
+    var n = expr.length, ct, cc, cb, iq;
+
+    if (i >= 0/* && i < n - 1*/) {
+      ct = 1;
+
+      while (++i < n) {
+        cc = expr.charAt(i);
+
+        if (cc === "'" && cb != "\\") {
+          cb = cc;
+          iq = !iq;
+        }
+
+        if (iq) {
+          continue;
+        }
+
+        if (cc === ')') {
+          --ct;
+          if (!ct) {
+            break;
+          }
+        } else if (cc === '(') {
+          ++ct;
+        }
+      }
+
+      if (ct) {
+        throw new Error('expression "'+expr+'" is illegal');
+      }
+    }
+
+    return i === n-1;
+  }
+
   function parseArgs(args, imports) { //TODO: 1, $.b, red, exec(), $.f()
     var arg, res, flag, flags, parsed;
 
@@ -4195,7 +4692,7 @@
 
       k = i + j * 2;
 
-      if (l < 0) { // not function
+      if (l < 0) { // path, not function
         args = [];
         path = expr.slice(k);
 
@@ -4213,7 +4710,7 @@
         args.push(res);
 
         evaluator = i ? makeNotEvaluator(args) : makeGetEvaluator(args);
-      } else { // function
+      } else if (likeFuncExpr(expr, l)) { // function, possible but maybe illegal
         path = expr.slice(k, l);
         args = StringUtil_split(expr.slice(l + 1, expr.length - 1), ',', '()');
 
@@ -4249,11 +4746,13 @@
           evaluator = i ? makeNotEvaluator(args) : makeGetEvaluator(args);
         }
       }
-
-      return evaluator;
     }
 
-    return makeExpressionEvaluator(expr);
+    if (!evaluator) {
+      evaluator = makeExpressionEvaluator(expr);
+    }
+
+    return evaluator;
   }
 
   function extractScopePaths(expr) {
@@ -4377,10 +4876,11 @@
   var StringUtil = Exact.StringUtil;
   var LiteralUtil = Exact.LiteralUtil;
 
+  var PropsTemplate = Exact.PropsTemplate;
+  var StyleXTemplate = Exact.StyleXTemplate;
+
   var TextStringParser = Exact.TextStringParser;
   var ExpressionParser = Exact.ExpressionParser;
-
-  var StyleXTemplate = Exact.StyleXTemplate;
 
   Exact.StyleXParser = {
     /**
@@ -4425,7 +4925,8 @@
         }
       }
 
-      return new StyleXTemplate(literals, expressions);
+      //return new StyleXTemplate(literals, expressions);
+      return new PropsTemplate(literals, expressions);
     }
   };
 
@@ -4453,8 +4954,8 @@
   var BLANK_REGEXP = /[\n\r\t]/g;
 
   var SPECIAL_KEYS  = { //TODO: x-as="title" => set('title', value), x-ask="insert[1]" => insert(value, 1), x:type, x:style
-    'x-id': 'id',
     'x-as': 'as',
+    'x-id': 'uid',
     //'x-on': 'actions', //TODO: remove
     'x-type': 'type',
     //'x-stay': 'stay',
@@ -4477,7 +4978,7 @@
 
       if (Skin.hasAttr($template, x_key)) {
         specials[key] = Skin.getAttr($template, x_key);
-        Skin.removeAttr($template, x_key);
+        //Skin.removeAttr($template, x_key);
       }
     }
 
@@ -4500,14 +5001,14 @@
     var specials = getSpecials($template);
 
     //node.stay = specials.stay;
-
-    if (specials.id) {
-      node.id = specials.id;//Skin.toCamelCase(specials.id);
-    }
-
     if (specials.as) {
       node.as = specials.as;//Skin.toCamelCase(specials.as);
     }
+
+    if (specials.uid) {
+      node.uid = specials.uid;//Skin.toCamelCase(specials.id);
+    }
+
 
     if (specials.type) {
       var type = specials.type;
@@ -4520,7 +5021,7 @@
         }
       }
 
-      ObjectUtil_defineProp(node, 'type', {value: type});
+      ObjectUtil_defineProp(node, 'type', {value: type}); //TODO: node.type = type, freeze node at last.
     }
 
     if (specials.attrs) {
@@ -4543,18 +5044,15 @@
     //}
   }
 
-  function parseAttribute(node, key, expr, type, imports, isNotAttr) {
-    //if (!isNotAttr) {
-    //  var attributes = node.attributes; //TODO:????
-    //  if (!attributes) {
-    //    attributes = node.attributes = {};
-    //  }
-    //
-    //  attributes[key] = expr;
-    //}
+  function parsePropFromAttr(node, key, expr, type, imports) {
+    var props, literal, expression;
 
-    var literal, expression;//, expressions, attributes;
-//    key = Skin.toCamelCase(key);
+    props = node.props;
+    if (!props) {
+      ObjectUtil_defineProp(node, 'props', {value: {}});
+      props = node.props;
+    }
+    
     if (!expr) {
       literal = true;
     } else if (ExpressionParser.isExpression(expr)) { 
@@ -4566,44 +5064,39 @@
     }
 
     if (expression) {
-      var expressions = node.expressions;
-      if (!expressions) {
-        expressions = node.expressions = {};
+      if (!props.expressions) {
+        ObjectUtil_defineProp(props, 'expressions', {value: {}});
       }
+
+      var expressions = props.expressions;
 
       expressions[key] = expression;
     } else {
-      var literals = node.literals;
-      if (!literals) {
-        literals = node.literals = {};
-      }
-
-      literals[key] = (literal !== undefined) ? literal : expr;
+      props[key] = (literal !== undefined) ? literal : expr;
     }
 
   }
 
-  function parseHost(node, $template, imports) {
-    var i, n, $attr, $attrs;
-
+  function parseSelf(node, $template, imports) {
+    node.ns = Skin.getNameSpace($template);
     node.tag = Skin.getProp($template, 'tagName').toLowerCase(); //TODO: toLowerCase
 
     parseSpecials(node, $template, imports);
 
     if (!Skin.hasAttrs($template)) { return; }
 
-    $attrs = Skin.getAttrs($template);
+    var attrs = Skin.getAttrs($template);
 
-    for (i = 0, n = $attrs.length; i < n; ++i) {
-      $attr = $attrs[i];
-
-      parseAttribute(node, Skin.toCamelCase($attr.name), $attr.value, '', imports);
+    for (var key in attrs) {
+      if (attrs.hasOwnProperty(key) && !SPECIAL_KEYS.hasOwnProperty(key)) {
+        parsePropFromAttr(node, Skin.toCamelCase(key), attrs[key], '', imports);
+      }
     }
   }
 
   function parseChildren(node, $template, imports) {
     //Skin.normalize($template);
-    var i, n, key, tag, type, text = '', stay, expression, literals = node.literals,
+    var i, n, key, tag, type, text = '', stay, expression, props = node.props,
       $child, $children = Skin.getChildrenCopy($template), child, children = [];
 
     for (i = 0, n = $children.length; i < n; ++i) {
@@ -4633,7 +5126,7 @@
 
       child = new HTMXTemplate();
 
-      parseHost(child, $child, imports);
+      parseSelf(child, $child, imports);
 
       key = child.as;
       tag = child.tag;
@@ -4641,21 +5134,21 @@
       //stay = child.stay;
 
       if (key) { //TODO:
-        key = Skin.toCamelCase(key);
+        //key = Skin.toCamelCase(key);
 
         if (tag !== 'value' || stay) { //TODO: <value x-as="price" x-type="number">123</value>
-          if (!literals) {
-            literals = node.literals = {};
+          if (!props) {
+            props = node.props = {};
           }
-          literals[key] = child;
+          props[key] = child;
         } else if (type === 'contents') { //TODO: fistChild is not text
-          if (!literals) {
-            literals = node.literals = {};
+          if (!props) {
+            props = node.props = {};
           }
-          literals[key] = getContents($child, imports);
+          props[key] = getContents($child, imports);
         } else if (!type || type in COMMON_TYPES) {
           text = Skin.getProp($child, 'textContent');
-          parseAttribute(node, key, text, type, imports, true);
+          parsePropFromAttr(node, key, text, type, imports);
         }
       }
 
@@ -4690,17 +5183,17 @@
 
     if (!Skin.isElement($template)) { return; }
 
-    parseHost(host, $template, imports);
+    parseSelf(host, $template, imports);
     parseChildren(host, $template, imports);
 
     return host;
   }
 
+  HTMXTemplate.parse = parse;
+
   Exact.HTMXParser = {
     parse: parse
   };
-
-  Exact.HTMXTemplate.parse = parse;
   
 })();
 
@@ -4957,6 +5450,7 @@
   } else {
     global = global || window || {};
     global.Exact = Exact;
+    Exact.global = global;
   }
 
 })(typeof global !== 'undefined' ? global : undefined, typeof module !== 'undefined' ? module : undefined);

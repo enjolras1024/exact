@@ -1,4 +1,6 @@
-
+//######################################################################################################################
+// src/core/templates/HTMXTemplate.js
+//######################################################################################################################
 (function() {
   'use strict';
 
@@ -7,99 +9,144 @@
   var Element = Exact.Element;
   var Component = Exact.Component;
 
-  var ObjectUtil = Exact.ObjectUtil
+  var ObjectUtil = Exact.ObjectUtil;
   var ExpressionUtil = Exact.ExpressionUtil;
 
+  var PropsTemplate = Exact.PropsTemplate;
+
   function HTMXTemplate() {
-    this.id = '';         //string, local id
-    this.as = '';         //string, key in target
+    this.ns = '';         // namespace
+    //this.as = '';         //string, key of target
+    this.uid = '';         //string, local id
+    //this.key = '';         //string, key in list
     this.tag = '';        //string, tag name
     this.type = null;     //Function, constructor
-    this.stay = false;    //boolean
+    //this.stay = false;    //boolean
+    this.props = null;
     this.attrs = null;    //Object like {literals: {title: 'Hi'}, expressions: {'data-msg': {...}}}
     this.style = null;    //Object like {literals: {color: 'red'}, expressions: {fontSize: {...}}}
-    //this.actions = null;  //Object like {literals: {click: 'onClick'}, expressions: {change: {...}}}
     this.classes = null;  //Object like {literals: {highlight: true}, expressions: {active: {...}}}
     this.children = null; //Array like []
-    this.literals = null; //Object like {title: 'Hi'}
-    this.expressions = null; //Object like {title: {type: null, template: null}}
+    //this.literals = null; //Object like {title: 'Hi'}
+    //this.expressions = null; //Object like {title: {type: null, template: null}}
+//TODO: this.props = {expressions: null}
+    //this.actions = null;  // for refactor
+    //this.indices = null;  // for refactor
   }
 
-  HTMXTemplate.parse = null; // Interface,
+  var emptyObject = {}, emptyArray = [];
 
-  function initStyle(target, scope, template) {
+  var specials = {
+    uid: true, attrs: true, style: true, classes: true, actions: true
+  };
+
+  function create(type, params, children) {
+    var template = new HTMXTemplate();
+    
+    if (typeof type === 'string') {
+      template.tag = type;
+    } else {
+      template.type = type;
+    }
+
+    if (params) {
+      template.uid = params.uid;
+      template.attrs = params.attrs;
+      template.style = params.style;
+      template.classes = params.classes;
+      template.actions = params.actions;
+
+      var flag, props = {};
+
+      for (var key in params) {
+        if (params.hasOwnProperty(key) && !specials[key]) {
+          props[key] = params[key];
+          flag = true;
+        }
+      }
+
+      if (flag) {
+        template.props = props;
+      }
+    }
+
+    template.children = children;
+    
+    return template;
+  }
+
+  //HTMXTemplate.parse = null; // Interface,
+
+  function initStyle(target, scope, style) {
     //var styleString = template.literals.style;//TODO: warn in HTMLTemplate
-    if (template.style) {
-      initProps(target.style, scope, template.style);
-    }
-  }
-  
-  function initAttrs(target, scope, template) {
-    if (template.attrs) {
-      initProps(target.attrs, scope, template.attrs);
+    if (style) {
+      initProps(target.style, scope, style);
     }
   }
 
-  function initProps(target, scope, template) {
-    if (!template) { return; }
+  function initAttrs(target, scope, attrs) {
+    if (attrs) {
+      initProps(target.attrs, scope, attrs);
+    }
+  }
 
-    var literals = template.literals;
-    var expressions = template.expressions;
+  function initProps(target, scope, props) {
+    if (!props) { return; }
 
-    if (literals) {
-      target.set(literals);
-      //target.reset(literals);
+    var expressions = props.expressions;
+
+    if (props) {
+      target.set(props);
     }
 
     if (expressions) {
-      scope._expressionsQueue.push({target: target, expressions: expressions});
+      scope._todos.push({target: target, expressions: expressions});
     }
   }
 
-  function initClasses(target, scope, template) {
-    if ((template.expressions && template.expressions.className) && template.classes) {
-      console.warn('ignore'); //TODO: warn in HTMXTemplate, class="`btn &{$.active? 'active':''}`"
-    }
-
-    var i, names, classes, literals = template.literals, className = literals ? literals.className : '';
+  function initClasses(target, scope, classes, template) {
+    //if ((template.expressions && template.expressions.className) && template.classes) {
+    //  console.warn('ignore'); //TODO: warn in HTMXParser, class="`btn &{$.active? 'active':''}`"
+    //}
+//TODO: do this in HTMXParser
+    var i, names, props = template.props, className = props ? props.className : '';
 
     if (className) {
-      if (!template.classes) {
-        template.classes = new Exact.StyleXTemplate();
+      //classes = template.classes;
+
+      if (!classes) {
+        classes = template.classes = new PropsTemplate(); //TODO: defineProp
+        // new Exact.StyleXTemplate();
       }
-
-      classes = template.classes;
-
-      if (!classes.literals) {
-        classes.literals = {};
-      }
-
-      literals = classes.literals;
 
       names = className.split(/\s/);
       for (i = 0; i < names.length; ++i) {
-        literals[names[i]] = true;
+        classes[names[i]] = true;
       }
     }
 
-    if (template.classes) {
-      initProps(target.classes, scope, template.classes);
+    if (classes) {
+      initProps(target.classes, scope, classes);
     }
   }
 
-  function initSelf(target, scope, template) {
-    //TODO:
+  function initActions(target, actions) {
+    if (actions) {
+      target.on(actions);
+    }
+  }
 
-    initProps(target, scope, template);
-    initAttrs(target, scope, template);
-    initStyle(target, scope, template);
-    initClasses(target, scope, template);
-    //initActions(target, scope, template);
+  function initSelf(scope, target, template) {
+    initProps(target, scope, template.props);
+    initAttrs(target, scope, template.attrs);
+    initStyle(target, scope, template.style);
+    initClasses(target, scope, template.classes, template);
+    initActions(target, template.actions);
   }
 
 
-  function initChildren(target, scope, template) {
-    var i, n, id, tag, type, child, content, contents = [], children = template.children;
+  function initChildrenOrContents(scope, target, template) {
+    var i, n, uid, tag, type, child, content, contents = [], children = template.children;
 
     if (!children) { return; }
 
@@ -110,24 +157,23 @@
         content = Text.create(child);
       } else if (ExpressionUtil.isExpression(child)) {
         content = Text.create('');
-        scope._expressionsQueue.push({target: content, expressions: {data: child}});
+        scope._todos.push({target: content, expressions: {data: child}});
       } else if (child instanceof Object) {
-        id = child.id;
+        uid = child.uid;
         tag = child.tag;
         type = child.type;
         //literals = child.literals; //TODO:
 
         if (!type) {
-          content = Element.create(tag);
+          content = Element.create(tag, child.ns);
         } else {
           content = Component.create(type);
         }
-        //TODO: collect contents/slots, scope._expressionsQueue.push({target: content, expressions: {placeholder: {}}});
-        initSelf(content, scope, child);
-        initChildren(content, scope, child);
+        //TODO: collect contents/slots, scope._todos.push({target: content, expressions: {placeholder: {}}});
+        initSelfAndChildrenOrContents(scope, content, child);
 
-        if (id) {
-          scope[id] = content; //TODO: addPart
+        if (uid) {
+          scope[uid] = content; //TODO: addPart
         }
       }
 
@@ -143,7 +189,7 @@
   }
 
   function initExpressions(component) {
-    var i, n, queue = component._expressionsQueue, item, key, target, expression, expressions;
+    var i, n, queue = component._todos, item, key, target, expression, expressions;
 
     for (i = 0, n = queue.length; i < n; ++i) {
       item = queue[i];
@@ -158,17 +204,189 @@
       }
     }
   }
+  
+  function initSelfAndChildrenOrContents(scope, target, template) {
+    initSelf(scope, target, template);
+    initChildrenOrContents(scope, target, template);
+  }
 
-  HTMXTemplate.compile = function compile(template, component) {
-    component._expressionsQueue = []; //TODO: _todos
+  function compile(template, component) {
+    component._todos = []; //TODO: _todos
 
-    initSelf(component, component, template);
-    initChildren(component, component, template);
+    initSelfAndChildrenOrContents(component, component, template);
 
     initExpressions(component);
 
-    delete component._expressionsQueue;
-  };
+    delete component._todos;
+
+    component._template = template;
+  }
+
+  function resetProps(target, props, prev) {
+    if (target.defaults) {
+      var defaults = target.defaults();
+    }
+
+    var all = ObjectUtil.assign({}, defaults, props);
+
+    if (prev) {
+      for (var key in prev) {
+        if (prev.hasOwnProperty(key) && !all.hasOwnProperty(key)) {
+          all[key] = undefined;
+        }
+      }
+    }
+
+    target.set(all);
+  }
+
+  function resetAttrs(target, props, prev) {
+    if (!props && !prev) { return; }
+
+    resetProps(target.attrs, props, prev);
+  }
+
+  function resetStyle(target, props, prev) {
+    if (!props && !prev) { return; }
+
+    resetProps(target.style, props, prev);
+  }
+
+  function resetClasses(target, props, prev) {
+    if (!props && !prev) { return; }
+
+    resetProps(target.classes, props, prev);
+  }
+
+  function resetActions(target, actions) {
+    if (!actions) { return; }
+
+    if (actions.off) {
+      target.off();
+    }
+
+    delete actions.off;
+
+    target.on(actions);
+  }
+
+  function resetSelf(target, template) {
+    var _template = target._template || emptyObject;
+
+    resetProps(target, template.props, _template.props);
+    resetAttrs(target, template.attrs, _template.attrs);
+    resetStyle(target, template.style, _template.style);
+    resetClasses(target, template.classes, _template.classes);
+
+    resetActions(target, template.actions);
+  }
+
+  function resetChildrenOrContents(scope, target, template) {
+    var i, m, n, key, child, 
+      existed, content, olIndices, newIndices,
+      _template = target._template || emptyObject, 
+      existeds = _template.children || emptyArray, 
+      contents = template.children;
+
+    var oldContents, newContents = [];
+    if (!(target instanceof Component) || scope === target) {
+      oldContents = target.children || emptyArray;
+    } else {
+      oldContents = target.contents || emptyArray;
+    }
+
+    olIndices = _template.indices || emptyObject;
+
+    //m = existeds.length;
+    n = contents.length;
+
+    for (i = 0; i < n; ++i) {
+      existed = existeds[i];
+      content = contents[i];
+
+      if (content instanceof Shadow) {
+        newContents.push(content);
+        continue;
+      }
+
+      key = content.key;
+
+      if (key) {
+        newIndices = newIndices || {};
+        newIndices[key] = i;
+
+        if (__DEV__ === 'development' && key in newIndices) {
+          console.warn('key should not be duplicate, but "' + key +'" is duplicate');
+        }
+
+        if (/*olIndices && */key in olIndices) {
+          child = oldContents[olIndices[content.key]];
+
+          resetSelfAndChildrenOrContents(scope, child, content);
+
+          newContents.push(child);
+          continue;
+        }
+      }
+
+      if (content.type) {
+        if (existed && content.type === existed.type) {
+          child = oldContents[i];
+          resetSelfAndChildrenOrContents(scope, child, content);
+        } else {
+          child = Component.create(content.type);
+          initSelfAndChildrenOrContents(scope, child, content);
+        }
+      } else if (content.tag) {
+        if (existed && !existed.type && existed.tag === content.tag) {
+          child = oldContents[i];
+          resetSelfAndChildrenOrContents(scope, child, content);
+        } else {
+          child = Element.create(content.tag, content.ns);
+          initSelfAndChildrenOrContents(scope, child, content);
+        }
+      } else {
+        if (existed && !existed.tag && !existed.type) {//TODO: maybe expression
+          child = oldContents[i]; // text
+          child.set('data', content);
+        } else {
+          child = Text.create(content);
+        }
+      }
+
+      if (content.uid) {
+        scope[uid] = child;
+      }
+
+      newContents.push(child);
+    }
+
+    if (!(target instanceof Component) || scope === target) {
+      target.children.reset(newContents);
+    } else {
+      target.set('contents', newContents);
+    }
+    
+    template.indices = newIndices;
+  }
+  
+  function resetSelfAndChildrenOrContents(scope, target, template) {
+    resetSelf(target, template);
+    resetChildrenOrContents(scope, target, template);
+  }
+
+  function refactor(target, template) {
+    //var _template = target._template; //TODO: _secrets
+    resetSelfAndChildrenOrContents(target, target, template);
+
+    target._template = template;
+
+    return target;
+  }
+
+  HTMXTemplate.create = create;
+  HTMXTemplate.compile = compile;
+  HTMXTemplate.refactor = refactor;
 
   Exact.HTMXTemplate = HTMXTemplate; //HTMXTemplate
 

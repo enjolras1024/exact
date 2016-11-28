@@ -20,8 +20,8 @@
   var BLANK_REGEXP = /[\n\r\t]/g;
 
   var SPECIAL_KEYS  = { //TODO: x-as="title" => set('title', value), x-ask="insert[1]" => insert(value, 1), x:type, x:style
-    'x-id': 'id',
     'x-as': 'as',
+    'x-id': 'uid',
     //'x-on': 'actions', //TODO: remove
     'x-type': 'type',
     //'x-stay': 'stay',
@@ -44,7 +44,7 @@
 
       if (Skin.hasAttr($template, x_key)) {
         specials[key] = Skin.getAttr($template, x_key);
-        Skin.removeAttr($template, x_key);
+        //Skin.removeAttr($template, x_key);
       }
     }
 
@@ -67,14 +67,14 @@
     var specials = getSpecials($template);
 
     //node.stay = specials.stay;
-
-    if (specials.id) {
-      node.id = specials.id;//Skin.toCamelCase(specials.id);
-    }
-
     if (specials.as) {
       node.as = specials.as;//Skin.toCamelCase(specials.as);
     }
+
+    if (specials.uid) {
+      node.uid = specials.uid;//Skin.toCamelCase(specials.id);
+    }
+
 
     if (specials.type) {
       var type = specials.type;
@@ -87,7 +87,7 @@
         }
       }
 
-      ObjectUtil_defineProp(node, 'type', {value: type});
+      ObjectUtil_defineProp(node, 'type', {value: type}); //TODO: node.type = type, freeze node at last.
     }
 
     if (specials.attrs) {
@@ -110,18 +110,15 @@
     //}
   }
 
-  function parseAttribute(node, key, expr, type, imports, isNotAttr) {
-    //if (!isNotAttr) {
-    //  var attributes = node.attributes; //TODO:????
-    //  if (!attributes) {
-    //    attributes = node.attributes = {};
-    //  }
-    //
-    //  attributes[key] = expr;
-    //}
+  function parsePropFromAttr(node, key, expr, type, imports) {
+    var props, literal, expression;
 
-    var literal, expression;//, expressions, attributes;
-//    key = Skin.toCamelCase(key);
+    props = node.props;
+    if (!props) {
+      ObjectUtil_defineProp(node, 'props', {value: {}});
+      props = node.props;
+    }
+    
     if (!expr) {
       literal = true;
     } else if (ExpressionParser.isExpression(expr)) { 
@@ -133,44 +130,39 @@
     }
 
     if (expression) {
-      var expressions = node.expressions;
-      if (!expressions) {
-        expressions = node.expressions = {};
+      if (!props.expressions) {
+        ObjectUtil_defineProp(props, 'expressions', {value: {}});
       }
+
+      var expressions = props.expressions;
 
       expressions[key] = expression;
     } else {
-      var literals = node.literals;
-      if (!literals) {
-        literals = node.literals = {};
-      }
-
-      literals[key] = (literal !== undefined) ? literal : expr;
+      props[key] = (literal !== undefined) ? literal : expr;
     }
 
   }
 
-  function parseHost(node, $template, imports) {
-    var i, n, $attr, $attrs;
-
+  function parseSelf(node, $template, imports) {
+    node.ns = Skin.getNameSpace($template);
     node.tag = Skin.getProp($template, 'tagName').toLowerCase(); //TODO: toLowerCase
 
     parseSpecials(node, $template, imports);
 
     if (!Skin.hasAttrs($template)) { return; }
 
-    $attrs = Skin.getAttrs($template);
+    var attrs = Skin.getAttrs($template);
 
-    for (i = 0, n = $attrs.length; i < n; ++i) {
-      $attr = $attrs[i];
-
-      parseAttribute(node, Skin.toCamelCase($attr.name), $attr.value, '', imports);
+    for (var key in attrs) {
+      if (attrs.hasOwnProperty(key) && !SPECIAL_KEYS.hasOwnProperty(key)) {
+        parsePropFromAttr(node, Skin.toCamelCase(key), attrs[key], '', imports);
+      }
     }
   }
 
   function parseChildren(node, $template, imports) {
     //Skin.normalize($template);
-    var i, n, key, tag, type, text = '', stay, expression, literals = node.literals,
+    var i, n, key, tag, type, text = '', stay, expression, props = node.props,
       $child, $children = Skin.getChildrenCopy($template), child, children = [];
 
     for (i = 0, n = $children.length; i < n; ++i) {
@@ -200,7 +192,7 @@
 
       child = new HTMXTemplate();
 
-      parseHost(child, $child, imports);
+      parseSelf(child, $child, imports);
 
       key = child.as;
       tag = child.tag;
@@ -208,21 +200,21 @@
       //stay = child.stay;
 
       if (key) { //TODO:
-        key = Skin.toCamelCase(key);
+        //key = Skin.toCamelCase(key);
 
         if (tag !== 'value' || stay) { //TODO: <value x-as="price" x-type="number">123</value>
-          if (!literals) {
-            literals = node.literals = {};
+          if (!props) {
+            props = node.props = {};
           }
-          literals[key] = child;
+          props[key] = child;
         } else if (type === 'contents') { //TODO: fistChild is not text
-          if (!literals) {
-            literals = node.literals = {};
+          if (!props) {
+            props = node.props = {};
           }
-          literals[key] = getContents($child, imports);
+          props[key] = getContents($child, imports);
         } else if (!type || type in COMMON_TYPES) {
           text = Skin.getProp($child, 'textContent');
-          parseAttribute(node, key, text, type, imports, true);
+          parsePropFromAttr(node, key, text, type, imports);
         }
       }
 
@@ -257,16 +249,16 @@
 
     if (!Skin.isElement($template)) { return; }
 
-    parseHost(host, $template, imports);
+    parseSelf(host, $template, imports);
     parseChildren(host, $template, imports);
 
     return host;
   }
 
+  HTMXTemplate.parse = parse;
+
   Exact.HTMXParser = {
     parse: parse
   };
-
-  Exact.HTMXTemplate.parse = parse;
   
 })();

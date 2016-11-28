@@ -104,7 +104,7 @@
   var Array$unshift = Array.prototype.unshift;
 
   var UPDATE_COMMANDS = { //TODO: as outer const
-    '$set': true, '$push': true, '$unshift': true, '$splice': true, '$apply': true
+    '$set': true, '$push': true, '$unshift': true, '$splice': true, '$apply': true, '$assign': true
   };
 
   /**
@@ -133,9 +133,9 @@
     } else if (specs.hasOwnProperty('$push')) {
       Array$push.apply(target, specs['$push']); //TODO: push as outer func
     } else if (specs.hasOwnProperty('$unshift')) {
-      Array$unshift.unshift.apply(target, specs['$unshift']); //TODO: unshift as outer func
+      Array$unshift.apply(target, specs['$unshift']); //TODO: unshift as outer func
     } else if (specs.hasOwnProperty('$splice')) {
-      Array$splice.splice.apply(target, specs['$splice']); //TODO: unshift as outer func
+      Array$splice.apply(target, specs['$splice']); //TODO: unshift as outer func
     } else if (specs.hasOwnProperty('$apply')) {
       target = specs['$apply'](target);
     }

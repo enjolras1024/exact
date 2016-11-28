@@ -102,19 +102,25 @@
 
 
       set: function(key, val, old/*, accessor, descriptors*/) {
-        this[key] = val;
-
-        //if (this[key] === undefined) {
-        //  delete this[key];
+        //if (val !== old) {
+        //  this[key] = val;
+        //  return true;
         //}
 
+        this[key] = val;
         return this[key] !== old;
       },
 
       initialize: function initialize(accessor, props) {
-        var constructor = accessor.constructor, descriptors = constructor.descriptors;
+        var constructor = accessor.constructor, descriptors = constructor.descriptors, prototype = constructor.prototype;
 
-        if (!accessor._descriptors_ && Array.isArray(descriptors)) { // like ['title', 'name', {price: {type: 'number'}}]
+        if (accessor._props === undefined) {
+          var _props = {};
+          ObjectUtil_defineProp(accessor, '_props', {value: _props});
+          ObjectUtil_defineProp(_props, 'set', {value: constructor.set});
+        }
+
+        if (!prototype._descriptors_ && Array.isArray(descriptors)) { // like ['title', 'name', {price: {type: 'number'}}]
           var n = descriptors.length,  keys = descriptors.slice(0), key, desc;
 
           if (typeof keys[n-1] === 'object') {
@@ -126,45 +132,40 @@
           n = keys.length;
 
           while (--n >= 0) {
-            descriptors[keys[n]] = {};
+            descriptors[keys[n]] = null;
           }
 
-          if (canDefineGetterAndSetter) {
-            var _props = {};
+          for (key in descriptors) {
+            if (!descriptors.hasOwnProperty(key) || !descriptors[key]) { continue; }
 
-            ObjectUtil_defineProp(accessor, '_props', {value: _props});
-            ObjectUtil_defineProp(_props, 'set', {value: constructor.set});
+            desc = descriptors[key];
 
-            for (key in descriptors) {
-              if (!descriptors.hasOwnProperty(key)) { continue; }
+            desc = typeof desc === 'object' ? desc : {type: desc}; //TODO: emptyObject
 
-              desc = descriptors[key];
-
+            if (/*!(key in prototype) && */canDefineGetterAndSetter) {
               var opts = {
                 enumerable: 'enumerable' in desc ? desc.enumerable : true,
                 configurable: 'configurable' in desc ? desc.configurable : true
               };
 
-              if ('set' in desc) {
+              if ('get' in desc) {
                 opts.get = desc.get;
-                opts.set = desc.set;
-              } else if (!('get' in desc)){
+                if ('set' in desc) {
+                  opts.set = desc.set;
+                }
+              } else {
                 opts.get = makeGetter(key);
                 opts.set = makeSetter(key);
-              } else {
-                opts.get = desc.get;
               }
 
-              ObjectUtil_defineProp(accessor, key, opts);
+              ObjectUtil_defineProp(prototype, key, opts);
             }
+
+            descriptors[key] = desc;
           }
 
-          ObjectUtil_defineProp(accessor, '_descriptors_', {value: descriptors});
+          ObjectUtil_defineProp(prototype, '_descriptors_', {value: descriptors});
         }
-
-        //if (accessor._props === undefined) {
-        //  ObjectUtil_defineProp(accessor, '_props', {value: accessor});
-        //}
 
         if (typeof accessor.defaults === 'function') {
           var defaults = accessor.defaults();

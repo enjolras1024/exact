@@ -7,10 +7,11 @@
   var StringUtil = Exact.StringUtil;
   var LiteralUtil = Exact.LiteralUtil;
 
+  var PropsTemplate = Exact.PropsTemplate;
+  var StyleXTemplate = Exact.StyleXTemplate;
+
   var TextStringParser = Exact.TextStringParser;
   var ExpressionParser = Exact.ExpressionParser;
-
-  var StyleXTemplate = Exact.StyleXTemplate;
 
   Exact.StyleXParser = {
     /**
@@ -55,7 +56,8 @@
         }
       }
 
-      return new StyleXTemplate(literals, expressions);
+      //return new StyleXTemplate(literals, expressions);
+      return new PropsTemplate(literals, expressions);
     }
   };
 

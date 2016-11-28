@@ -27,6 +27,42 @@
   var REGEXP_3 = /\$((\[|\]?\.)[\w\$]+)+(?!\()/g; //$.a[0].b.c(), path on scope
   var REGEXP_4 = /^\$((\[|\]?\.)[\w\$]+)+$/; //
 
+  function likeFuncExpr(expr, i) {
+    var n = expr.length, ct, cc, cb, iq;
+
+    if (i >= 0/* && i < n - 1*/) {
+      ct = 1;
+
+      while (++i < n) {
+        cc = expr.charAt(i);
+
+        if (cc === "'" && cb != "\\") {
+          cb = cc;
+          iq = !iq;
+        }
+
+        if (iq) {
+          continue;
+        }
+
+        if (cc === ')') {
+          --ct;
+          if (!ct) {
+            break;
+          }
+        } else if (cc === '(') {
+          ++ct;
+        }
+      }
+
+      if (ct) {
+        throw new Error('expression "'+expr+'" is illegal');
+      }
+    }
+
+    return i === n-1;
+  }
+
   function parseArgs(args, imports) { //TODO: 1, $.b, red, exec(), $.f()
     var arg, res, flag, flags, parsed;
 
@@ -83,7 +119,7 @@
 
       k = i + j * 2;
 
-      if (l < 0) { // not function
+      if (l < 0) { // path, not function
         args = [];
         path = expr.slice(k);
 
@@ -101,7 +137,7 @@
         args.push(res);
 
         evaluator = i ? makeNotEvaluator(args) : makeGetEvaluator(args);
-      } else { // function
+      } else if (likeFuncExpr(expr, l)) { // function, possible but maybe illegal
         path = expr.slice(k, l);
         args = StringUtil_split(expr.slice(l + 1, expr.length - 1), ',', '()');
 
@@ -137,11 +173,13 @@
           evaluator = i ? makeNotEvaluator(args) : makeGetEvaluator(args);
         }
       }
-
-      return evaluator;
     }
 
-    return makeExpressionEvaluator(expr);
+    if (!evaluator) {
+      evaluator = makeExpressionEvaluator(expr);
+    }
+
+    return evaluator;
   }
 
   function extractScopePaths(expr) {

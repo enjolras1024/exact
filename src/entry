@@ -11,6 +11,7 @@
 //  } else {
 //    global = global || window || {};
 //    global.Exact = Exact;
+//    Exact.global = global;
 //  }
 //
 //})(typeof global !== 'undefined' ? global : undefined, typeof module !== 'undefined' ? module : undefined);

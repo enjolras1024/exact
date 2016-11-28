@@ -8,8 +8,8 @@
   var Watcher = Exact.Watcher;
 
 
-  function Element(tag, props) {
-    Element.initialize(this, tag, props);
+  function Element(props, tag, ns) {
+    Element.initialize(this, props, tag, ns);
   }
 
   Exact.defineClass({
@@ -35,12 +35,16 @@
        * Create a element shadow
        *
        * @param {string} tag
+       * @param {string} ns
        * @param {Object} props
        * @returns {Element}
        */
-      create: function create(tag, props) {
+      create: function create(tag, ns, props) {
+        if (ns && typeof ns === 'object') { // create(tag, props)
+          props = ns;
+        } // else create(tag) or create(tag, ns) or create(tag, ns, props)
 
-        return new Element(tag, props);
+        return new Element(props, tag, ns);
       }
     }
   });

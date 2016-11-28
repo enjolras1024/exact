@@ -1,5 +1,5 @@
 //######################################################################################################################
-// src/apis/constants.js
+// src/share/constants.js
 //######################################################################################################################
 (function() {
 
@@ -51,6 +51,12 @@
       if (!res && !notInGlobal) {
         res = find(path, this);
       }
+
+      if (!res && !notInGlobal && Exact.global) {
+        res = find(path, Exact.global);
+      }
+
+      //TODO: continue to find(path, window);
 
       return res;
     },

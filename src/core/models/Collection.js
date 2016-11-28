@@ -124,7 +124,7 @@
 
     set: function(index, item) {
       if (index >= this.length) {
-        for (var i = this.length;  i < index; ++i) {
+        for (var i = this.length; i < index; ++i) {
           base.push.call(this, undefined);
         }
 
@@ -132,6 +132,7 @@
       } else {
         if (this[index] === item) { return this; }
         this[index] = item;
+        //base.splice.call(this, index, 1, item);
       }
 
       invalidate(this);
@@ -140,7 +141,7 @@
     },
 
     reset: function(items) {
-      var i, n, m, min;
+      var i, n, m, flag;
       n = this.length;
       m = items.length;
 
@@ -149,25 +150,32 @@
       if (n > m) {
 //        min = m;
         base.splice.call(this, m);
+        flag = true;
       } /*else {
        min = n;
        base.push.apply(this, items.slice(min));
        }*/
 
       for (i = 0;  i < m; ++i) {
+        if (!flag && this[i] !== items[i]) {
+          flag = true;
+        }
+
         this[i] = items[i];
       }
 
       this.length = m;
 
-      invalidate(this);
+      if (flag) {
+        invalidate(this);
+      }
 
       return this;
 
     },
 
     insert: function(item, before) { //TODO: before can be number index
-      if (!(item instanceof Object) || !(before instanceof Object)) {
+      if (!(item instanceof Object) || (arguments.length > 1 && !(before instanceof Object))) {
         throw new TypeError("Failed to execute `insert` on `Collection`: 2 arguments must be object.");
       }
 
@@ -179,9 +187,9 @@
 
       for (i = 0; i < n; ++i) {
         if (this[i] === item) {
-          if (i === n-1) {
-            return this;
-          }
+          //if (i === n-1) {
+          //  return this;
+          //}
 
           base.splice.call(this, i, 1);
           n = this.length;// <=> --n;
@@ -262,7 +270,7 @@
 //      invalidate(this);
 
       return this;
-    },
+    }/*,
 
     empty: function() {
       this.splice(0);
@@ -270,7 +278,7 @@
 //      invalidate(this);
 
       return this;
-    }
+    }*/
   });
 
   Exact.Collection = Collection;

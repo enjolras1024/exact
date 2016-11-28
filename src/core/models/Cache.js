@@ -23,7 +23,7 @@
 
     constructor: Cache,
 
-    mixins: [Accessor.prototype],
+    mixins: [Accessor.prototype, DirtyChecker.prototype],
 
     //onChange: null,
 
