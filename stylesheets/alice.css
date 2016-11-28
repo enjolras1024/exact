@@ -57,3 +57,7 @@
 /*.cm-s-alice .cm-attribute {
   color: #0b0;
 }*/
+
+@media screen and (max-width: 900px)  {
+
+}
