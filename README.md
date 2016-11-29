@@ -1,1 +1,1 @@
-A JavaScript Library for Building Web UIs
+An Event-driven Framework for Building User Interfaces with Simple APIs in a Flexible Way
