@@ -18,10 +18,10 @@
     <h3 class="brand"><a href="../" class="logo">Exact</a></h3>
     <a class="menu-btn"></a>
     <ul class="menu-bar">
-      <li><a href="../examples/todomvc.html" class="menu-item"> Examples </a></li>
+      <li><a href="../examples/color-palette.html" class="menu-item"> Examples </a></li>
+      <li><a href="../downloads/index.html" class="menu-item"> Downloads </a></li>
       <li><a href="#" class="menu-item  active"> Documents </a></li>
-      <li><a href="#" class="menu-item"> Downloads </a></li>
-      <li><a href="#" class="menu-item"> Blogs </a></li>
+      <li><a href="../apis/index.html" class="menu-item"> APIs </a></li>
       <li><a href="#" class="menu-item"> GitHub </a></li>
     </ul>
   </nav>
@@ -38,19 +38,20 @@
     <div class="card">
       <h4>Events</h4>
       <ul class="list">
-        <li><a href="./events.html#on-off" class="link">On / Off</a></li>
+        <li><a href="./events.html#on-off-once" class="link">On / Off / Once</a></li>
         <li><a href="./events.html#send-emit" class="link">Send / Emit</a></li>
-        <li><a href="./events.html#keys-of-event" class="link">Keys of Event</a></li>
+        <li><a href="./events.html#key-name-of-event" class="link">Key Name of Event</a></li>
       </ul>
     </div>
     <div class="card">
       <h4>Properties</h4>
       <ul class="list">
         <li><a href="./properties.html#setting-property" class="link">Setting Property</a></li>
-        <li><a href="./properties.html#using-descriptors" class="link">Using Descriptors</a></li>
-        <li><a href="./properties.html#adding-validation" class="link">Adding Validation</a></li>
         <li><a href="./properties.html#dirty-marking" class="link">Dirty Marking</a></li>
         <li><a href="./properties.html#property-changed-event" class="link">Property-Changed Event</a></li>
+        <li><a href="./properties.html#using-descriptors" class="link">Using Descriptors</a></li>
+        <li><a href="./properties.html#adding-validation" class="link">Adding Validation</a></li>
+        <li><a href="./properties.html#custom-getter-setter" class="link">Custom Getter / Setter</a></li>
       </ul>
     </div>
     <div class="card">
@@ -108,129 +109,24 @@
     <h4 >Cache / Store for Object</h4>
     <p>Cache只有一个必需的`set`方法和一个可选的钩子函数`onChange`，具有脏标记的功能。而Store没有脏标记的功能，但具有更新通知和属性验证的功能。用例如下：</p>
     <a id="collection-for-array"></a>
-    <div class="code-box">
-      <pre class="code-behind js-mode">
-  var cache = new Exact.Cache({x: 1});
-  cache.onChange = function() {
-    console.log(cache.hasDirty('x'), cache.x);
-  }
-  cache.set('x', 2); // 输出：true 2
+    <div class="code-box scroll">
+      <!--<pre class="code-behind js-mode">
+var cache = new Exact.Cache({x: 1});
+cache.onChange = function() {
+  console.log(cache.hasDirty('x'), cache.x);
+}
+cache.set('x', 2); // 输出：true 2
 
-  var store = new Exact.Store({y: 1});
-  store.on('changed', function(event) {
-    console.log(event.keyName, store.y);
-  });
-  store.set('y', 2); // 输出："y" 2
-      </pre>
+var store = new Exact.Store({y: 1});
+store.on('changed', function(event) {
+  console.log(event.keyName, store.y);
+});
+store.set('y', 2); // 输出："y" 2
+      </pre>-->
       <div class="CodeMirror cm-s-alice">
         <div class="CodeMirror-lines">
           <div style="position: relative; outline: none;">
-            <!--<div class="CodeMirror-measure">
-              <pre>x</pre>
-            </div>
-            <div class="CodeMirror-measure"></div>
-            <div style="position: relative; z-index: 1;"></div>
-            <div class="CodeMirror-cursors">
-              <div class="CodeMirror-cursor" style="left: 204.5px; top: 17px; height: 17px;">&nbsp;</div>
-            </div>-->
-            <div class="CodeMirror-code">
-              <div style="position: relative;">
-                <div class="CodeMirror-gutter-wrapper" style="left: -31px;">
-                  <div class="CodeMirror-linenumber CodeMirror-gutter-elt" style="left: 0px; width: 21px;">1</div>
-                </div>
-                      <pre class=" CodeMirror-line "><span style="padding-right: 0.1px;">  <span
-                          class="cm-keyword">var</span> <span class="cm-def">cache</span> <span
-                          class="cm-operator">=</span> <span class="cm-keyword">new</span> <span class="cm-variable">Exact</span>.<span
-                          class="cm-property">Cache</span>({<span class="cm-property">x</span>: <span class="cm-number">1</span>});</span></pre>
-              </div>
-              <div style="position: relative;">
-                <div class="CodeMirror-gutter-wrapper" style="left: -31px;">
-                  <div class="CodeMirror-linenumber CodeMirror-gutter-elt" style="left: 0px; width: 21px;">2</div>
-                </div>
-                      <pre class=" CodeMirror-line "><span style="padding-right: 0.1px;">  <span class="cm-variable">cache</span>.<span
-                          class="cm-property">onChange</span> <span class="cm-operator">=</span> <span
-                          class="cm-keyword">function</span>() {</span></pre>
-              </div>
-              <div style="position: relative;">
-                <div class="CodeMirror-gutter-wrapper" style="left: -31px;">
-                  <div class="CodeMirror-linenumber CodeMirror-gutter-elt" style="left: 0px; width: 21px;">3</div>
-                </div>
-                      <pre class=" CodeMirror-line "><span style="padding-right: 0.1px;">    <span class="cm-variable">console</span>.<span
-                          class="cm-property">log</span>(<span class="cm-variable">cache</span>.<span
-                          class="cm-property">hasDirty</span>(<span class="cm-string">'x'</span>), <span
-                          class="cm-variable">cache</span>.<span class="cm-property">x</span>);</span></pre>
-              </div>
-              <div style="position: relative;">
-                <div class="CodeMirror-gutter-wrapper" style="left: -31px;">
-                  <div class="CodeMirror-linenumber CodeMirror-gutter-elt" style="left: 0px; width: 21px;">4</div>
-                </div>
-                <pre class=" CodeMirror-line "><span style="padding-right: 0.1px;">  }</span></pre>
-              </div>
-              <div style="position: relative;">
-                <div class="CodeMirror-gutter-wrapper" style="left: -31px;">
-                  <div class="CodeMirror-linenumber CodeMirror-gutter-elt" style="left: 0px; width: 21px;">5</div>
-                </div>
-                      <pre class=" CodeMirror-line "><span style="padding-right: 0.1px;">  <span class="cm-variable">cache</span>.<span
-                          class="cm-property">set</span>(<span class="cm-string">'x'</span>, <span
-                          class="cm-number">2</span>); <span class="cm-comment">// 输出：true 2</span></span></pre>
-              </div>
-              <div style="position: relative;">
-                <div class="CodeMirror-gutter-wrapper" style="left: -31px;">
-                  <div class="CodeMirror-linenumber CodeMirror-gutter-elt" style="left: 0px; width: 21px;">6</div>
-                </div>
-                      <pre class=" CodeMirror-line "><span style="padding-right: 0.1px;"><span
-                          cm-text="">​</span></span></pre>
-              </div>
-              <div style="position: relative;">
-                <div class="CodeMirror-gutter-wrapper" style="left: -31px;">
-                  <div class="CodeMirror-linenumber CodeMirror-gutter-elt" style="left: 0px; width: 21px;">7</div>
-                </div>
-                      <pre class=" CodeMirror-line "><span style="padding-right: 0.1px;">  <span
-                          class="cm-keyword">var</span> <span class="cm-def">store</span> <span
-                          class="cm-operator">=</span> <span class="cm-keyword">new</span> <span class="cm-variable">Exact</span>.<span
-                          class="cm-property">Store</span>({<span class="cm-property">y</span>: <span class="cm-number">1</span>});</span></pre>
-              </div>
-              <div style="position: relative;">
-                <div class="CodeMirror-gutter-wrapper" style="left: -31px;">
-                  <div class="CodeMirror-linenumber CodeMirror-gutter-elt" style="left: 0px; width: 21px;">8</div>
-                </div>
-                      <pre class=" CodeMirror-line "><span style="padding-right: 0.1px;">  <span class="cm-variable">store</span>.<span
-                          class="cm-property">on</span>(<span class="cm-string">'changed'</span>, <span
-                          class="cm-keyword">function</span>(<span class="cm-def">event</span>) {</span></pre>
-              </div>
-              <div style="position: relative;">
-                <div class="CodeMirror-gutter-wrapper" style="left: -31px;">
-                  <div class="CodeMirror-linenumber CodeMirror-gutter-elt" style="left: 0px; width: 21px;">9</div>
-                </div>
-                      <pre class=" CodeMirror-line "><span style="padding-right: 0.1px;">    <span class="cm-variable">console</span>.<span
-                          class="cm-property">log</span>(<span class="cm-variable-2">event</span>.<span
-                          class="cm-property">keyName</span>, <span class="cm-variable">store</span>.<span
-                          class="cm-property">y</span>);</span></pre>
-              </div>
-              <div style="position: relative;">
-                <div class="CodeMirror-gutter-wrapper" style="left: -31px;">
-                  <div class="CodeMirror-linenumber CodeMirror-gutter-elt" style="left: 0px; width: 21px;">10
-                  </div>
-                </div>
-                <pre class=" CodeMirror-line "><span style="padding-right: 0.1px;">  });</span></pre>
-              </div>
-              <div style="position: relative;">
-                <div class="CodeMirror-gutter-wrapper" style="left: -31px;">
-                  <div class="CodeMirror-linenumber CodeMirror-gutter-elt" style="left: 0px; width: 21px;">11
-                  </div>
-                </div>
-                      <pre class=" CodeMirror-line "><span style="padding-right: 0.1px;">  <span class="cm-variable">store</span>.<span
-                          class="cm-property">set</span>(<span class="cm-string">'y'</span>, <span
-                          class="cm-number">2</span>); <span class="cm-comment">// 输出："y" 2</span></span></pre>
-              </div>
-              <!--<div style="position: relative;">
-                <div class="CodeMirror-gutter-wrapper" style="left: -31px;">
-                  <div class="CodeMirror-linenumber CodeMirror-gutter-elt" style="left: 0px; width: 21px;">12
-                  </div>
-                </div>
-                <pre class=" CodeMirror-line "><span style="padding-right: 0.1px;">      </span></pre>
-              </div>-->
-            </div>
+            <div class="CodeMirror-code"><pre class=" CodeMirror-line "><span style="padding-right: 0.1px;"><span class="cm-keyword">var</span> <span class="cm-def">cache</span> <span class="cm-operator">=</span> <span class="cm-keyword">new</span> <span class="cm-variable">Exact</span>.<span class="cm-property">Cache</span>({<span class="cm-property">x</span>: <span class="cm-number">1</span>});</span></pre><pre class=" CodeMirror-line "><span style="padding-right: 0.1px;"><span class="cm-variable">cache</span>.<span class="cm-property">onChange</span> <span class="cm-operator">=</span> <span class="cm-keyword">function</span>() {</span></pre><pre class=" CodeMirror-line "><span style="padding-right: 0.1px;">  <span class="cm-variable">console</span>.<span class="cm-property">log</span>(<span class="cm-variable">cache</span>.<span class="cm-property">hasDirty</span>(<span class="cm-string">'x'</span>), <span class="cm-variable">cache</span>.<span class="cm-property">x</span>);</span></pre><pre class=" CodeMirror-line "><span style="padding-right: 0.1px;">}</span></pre><pre class=" CodeMirror-line "><span style="padding-right: 0.1px;"><span class="cm-variable">cache</span>.<span class="cm-property">set</span>(<span class="cm-string">'x'</span>, <span class="cm-number">2</span>); <span class="cm-comment">// 输出：true 2</span></span></pre><pre class=" CodeMirror-line "><span style="padding-right: 0.1px;"><span cm-text="">​</span></span></pre><pre class=" CodeMirror-line "><span style="padding-right: 0.1px;"><span class="cm-keyword">var</span> <span class="cm-def">store</span> <span class="cm-operator">=</span> <span class="cm-keyword">new</span> <span class="cm-variable">Exact</span>.<span class="cm-property">Store</span>({<span class="cm-property">y</span>: <span class="cm-number">1</span>});</span></pre><pre class=" CodeMirror-line "><span style="padding-right: 0.1px;"><span class="cm-variable">store</span>.<span class="cm-property">on</span>(<span class="cm-string">'changed'</span>, <span class="cm-keyword">function</span>(<span class="cm-def">event</span>) {</span></pre><pre class=" CodeMirror-line "><span style="padding-right: 0.1px;">  <span class="cm-variable">console</span>.<span class="cm-property">log</span>(<span class="cm-variable-2">event</span>.<span class="cm-property">keyName</span>, <span class="cm-variable">store</span>.<span class="cm-property">y</span>);</span></pre><pre class=" CodeMirror-line "><span style="padding-right: 0.1px;">});</span></pre><pre class=" CodeMirror-line "><span style="padding-right: 0.1px;"><span class="cm-variable">store</span>.<span class="cm-property">set</span>(<span class="cm-string">'y'</span>, <span class="cm-number">2</span>); <span class="cm-comment">// 输出："y" 2</span></span></pre></div>
           </div>
         </div>
       </div>
@@ -240,311 +136,55 @@
     <p>Collection继承自Array，重写了`push`等改变自身结构的方法。在这些方法里，都添加了钩子函数`onChange`。
       所以当一个Collection对象发生增删或替换时，就会触发钩子函数`onChange`。
       用例如下：</p>
-    <div class="code-box">
-      <pre class="code-behind js-mode">
-  var collection = new Exact.Collection(1,2,3);
-  console.log(collection)       // 输出：[1,2,3]
+    <div class="code-box scroll">
+     <!-- <pre class="code-behind js-mode">
+var collection = new Exact.Collection(1,2,3);
+console.log(collection)       // 输出：[1,2,3]
 
-  collection = Exact.Collection.from([0,1,2]);
-  console.log(collection)       // 输出：[0,1,2]
+collection = Exact.Collection.from([0,1,2]);
+console.log(collection)       // 输出：[0,1,2]
 
-  collection.onChange = function() {
-    console.log(collection);
-  }
+collection.onChange = function() {
+  console.log(collection);
+}
 
-  collection.push(3, 4);        // 输出：[0,1,2,3,4]
-  collection.unshift(-1);       // 输出：[-1,0,1,2,3,4]
-  collection.pop();             // 输出：[-1,0,1,2,3]
-  collection.shift();           // 输出：[0,1,2,3]
-  collection.splice(2, 0, 1.5); // 输出：[0,1,1.5,2,3]
-  </pre>
+collection.push(3, 4);        // 输出：[0,1,2,3,4]
+collection.unshift(-1);       // 输出：[-1,0,1,2,3,4]
+collection.pop();             // 输出：[-1,0,1,2,3]
+collection.shift();           // 输出：[0,1,2,3]
+collection.splice(2, 0, 1.5); // 输出：[0,1,1.5,2,3]
+  </pre>-->
       <div class="CodeMirror cm-s-alice">
         <div class="CodeMirror-lines">
           <div style="position: relative; outline: none;">
-            <!--<div class="CodeMirror-measure">
-              <div class="CodeMirror-linenumber CodeMirror-gutter-elt">
-                <div>16</div>
-              </div>
-            </div>
-            <div class="CodeMirror-measure"></div>
-            <div style="position: relative; z-index: 1;"></div>
-            <div class="CodeMirror-cursors">
-              <div class="CodeMirror-cursor" style="left: 152px; top: 0px; height: 17px;">&nbsp;</div>
-            </div>-->
-            <div class="CodeMirror-code">
-              <div style="position: relative;">
-                <div class="CodeMirror-gutter-wrapper" style="left: -31px;">
-                  <div class="CodeMirror-linenumber CodeMirror-gutter-elt" style="left: 0px; width: 21px;">1</div>
-                </div>
-                      <pre class=" CodeMirror-line "><span style="padding-right: 0.1px;">  <span
-                          class="cm-keyword">var</span> <span class="cm-def">collection</span> <span
-                          class="cm-operator">=</span> <span class="cm-keyword">new</span> <span class="cm-variable">Exact</span>.<span
-                          class="cm-property">Collection</span>(<span class="cm-number">1</span>,<span
-                          class="cm-number">2</span>,<span class="cm-number">3</span>);</span></pre>
-              </div>
-              <div style="position: relative;">
-                <div class="CodeMirror-gutter-wrapper" style="left: -31px;">
-                  <div class="CodeMirror-linenumber CodeMirror-gutter-elt" style="left: 0px; width: 21px;">2</div>
-                </div>
-                      <pre class=" CodeMirror-line "><span style="padding-right: 0.1px;">  <span class="cm-variable">console</span>.<span
-                          class="cm-property">log</span>(<span class="cm-variable">collection</span>)       <span
-                          class="cm-comment">// 输出：[1,2,3]</span></span></pre>
-              </div>
-              <div style="position: relative;">
-                <div class="CodeMirror-gutter-wrapper" style="left: -31px;">
-                  <div class="CodeMirror-linenumber CodeMirror-gutter-elt" style="left: 0px; width: 21px;">3</div>
-                </div>
-                      <pre class=" CodeMirror-line "><span style="padding-right: 0.1px;"><span
-                          cm-text="">​</span></span></pre>
-              </div>
-              <div style="position: relative;">
-                <div class="CodeMirror-gutter-wrapper" style="left: -31px;">
-                  <div class="CodeMirror-linenumber CodeMirror-gutter-elt" style="left: 0px; width: 21px;">4</div>
-                </div>
-                      <pre class=" CodeMirror-line "><span style="padding-right: 0.1px;">  <span class="cm-variable">collection</span> <span
-                          class="cm-operator">=</span> <span class="cm-variable">Exact</span>.<span class="cm-property">Collection</span>.<span
-                          class="cm-property">from</span>([<span class="cm-number">0</span>,<span
-                          class="cm-number">1</span>,<span class="cm-number">2</span>]);</span></pre>
-              </div>
-              <div style="position: relative;">
-                <div class="CodeMirror-gutter-wrapper" style="left: -31px;">
-                  <div class="CodeMirror-linenumber CodeMirror-gutter-elt" style="left: 0px; width: 21px;">5</div>
-                </div>
-                      <pre class=" CodeMirror-line "><span style="padding-right: 0.1px;">  <span class="cm-variable">console</span>.<span
-                          class="cm-property">log</span>(<span class="cm-variable">collection</span>)       <span
-                          class="cm-comment">// 输出：[0,1,2]</span></span></pre>
-              </div>
-              <div style="position: relative;">
-                <div class="CodeMirror-gutter-wrapper" style="left: -31px;">
-                  <div class="CodeMirror-linenumber CodeMirror-gutter-elt" style="left: 0px; width: 21px;">6</div>
-                </div>
-                      <pre class=" CodeMirror-line "><span style="padding-right: 0.1px;"><span
-                          cm-text="">​</span></span></pre>
-              </div>
-              <div style="position: relative;">
-                <div class="CodeMirror-gutter-wrapper" style="left: -31px;">
-                  <div class="CodeMirror-linenumber CodeMirror-gutter-elt" style="left: 0px; width: 21px;">7</div>
-                </div>
-                      <pre class=" CodeMirror-line "><span style="padding-right: 0.1px;">  <span class="cm-variable">collection</span>.<span
-                          class="cm-property">onChange</span> <span class="cm-operator">=</span> <span
-                          class="cm-keyword">function</span>() {</span></pre>
-              </div>
-              <div style="position: relative;">
-                <div class="CodeMirror-gutter-wrapper" style="left: -31px;">
-                  <div class="CodeMirror-linenumber CodeMirror-gutter-elt" style="left: 0px; width: 21px;">8</div>
-                </div>
-                      <pre class=" CodeMirror-line "><span style="padding-right: 0.1px;">    <span class="cm-variable">console</span>.<span
-                          class="cm-property">log</span>(<span class="cm-variable">collection</span>);</span></pre>
-              </div>
-              <div style="position: relative;">
-                <div class="CodeMirror-gutter-wrapper" style="left: -31px;">
-                  <div class="CodeMirror-linenumber CodeMirror-gutter-elt" style="left: 0px; width: 21px;">9</div>
-                </div>
-                <pre class=" CodeMirror-line "><span style="padding-right: 0.1px;">  }</span></pre>
-              </div>
-              <div style="position: relative;">
-                <div class="CodeMirror-gutter-wrapper" style="left: -31px;">
-                  <div class="CodeMirror-linenumber CodeMirror-gutter-elt" style="left: 0px; width: 21px;">10
-                  </div>
-                </div>
-                      <pre class=" CodeMirror-line "><span style="padding-right: 0.1px;"><span
-                          cm-text="">​</span></span></pre>
-              </div>
-              <div style="position: relative;">
-                <div class="CodeMirror-gutter-wrapper" style="left: -31px;">
-                  <div class="CodeMirror-linenumber CodeMirror-gutter-elt" style="left: 0px; width: 21px;">11
-                  </div>
-                </div>
-                      <pre class=" CodeMirror-line "><span style="padding-right: 0.1px;">  <span class="cm-variable">collection</span>.<span
-                          class="cm-property">push</span>(<span class="cm-number">3</span>, <span
-                          class="cm-number">4</span>);        <span
-                          class="cm-comment">// 输出：[0,1,2,3,4]</span></span></pre>
-              </div>
-              <div style="position: relative;">
-                <div class="CodeMirror-gutter-wrapper" style="left: -31px;">
-                  <div class="CodeMirror-linenumber CodeMirror-gutter-elt" style="left: 0px; width: 21px;">12
-                  </div>
-                </div>
-                      <pre class=" CodeMirror-line "><span style="padding-right: 0.1px;">  <span class="cm-variable">collection</span>.<span
-                          class="cm-property">unshift</span>(<span class="cm-operator">-</span><span
-                          class="cm-number">1</span>);       <span class="cm-comment">// 输出：[-1,0,1,2,3,4]</span></span></pre>
-              </div>
-              <div style="position: relative;">
-                <div class="CodeMirror-gutter-wrapper" style="left: -31px;">
-                  <div class="CodeMirror-linenumber CodeMirror-gutter-elt" style="left: 0px; width: 21px;">13
-                  </div>
-                </div>
-                      <pre class=" CodeMirror-line "><span style="padding-right: 0.1px;">  <span class="cm-variable">collection</span>.<span
-                          class="cm-property">pop</span>();             <span
-                          class="cm-comment">// 输出：[-1,0,1,2,3]</span></span></pre>
-              </div>
-              <div style="position: relative;">
-                <div class="CodeMirror-gutter-wrapper" style="left: -31px;">
-                  <div class="CodeMirror-linenumber CodeMirror-gutter-elt" style="left: 0px; width: 21px;">14
-                  </div>
-                </div>
-                      <pre class=" CodeMirror-line "><span style="padding-right: 0.1px;">  <span class="cm-variable">collection</span>.<span
-                          class="cm-property">shift</span>();           <span class="cm-comment">// 输出：[0,1,2,3]</span></span></pre>
-              </div>
-              <div style="position: relative;">
-                <div class="CodeMirror-gutter-wrapper" style="left: -31px;">
-                  <div class="CodeMirror-linenumber CodeMirror-gutter-elt" style="left: 0px; width: 21px;">15
-                  </div>
-                </div>
-                      <pre class=" CodeMirror-line "><span style="padding-right: 0.1px;">  <span class="cm-variable">collection</span>.<span
-                          class="cm-property">splice</span>(<span class="cm-number">2</span>, <span
-                          class="cm-number">0</span>, <span class="cm-number">1.5</span>); <span class="cm-comment">// 输出：[0,1,1.5,2,3]</span></span></pre>
-              </div>
-            </div>
+            <div class="CodeMirror-code"><pre class=" CodeMirror-line "><span style="padding-right: 0.1px;"><span class="cm-keyword">var</span> <span class="cm-def">collection</span> <span class="cm-operator">=</span> <span class="cm-keyword">new</span> <span class="cm-variable">Exact</span>.<span class="cm-property">Collection</span>(<span class="cm-number">1</span>,<span class="cm-number">2</span>,<span class="cm-number">3</span>);</span></pre><pre class=" CodeMirror-line "><span style="padding-right: 0.1px;"><span class="cm-variable">console</span>.<span class="cm-property">log</span>(<span class="cm-variable">collection</span>)       <span class="cm-comment">// 输出：[1,2,3]</span></span></pre><pre class=" CodeMirror-line "><span style="padding-right: 0.1px;"><span cm-text="">​</span></span></pre><pre class=" CodeMirror-line "><span style="padding-right: 0.1px;"><span class="cm-variable">collection</span> <span class="cm-operator">=</span> <span class="cm-variable">Exact</span>.<span class="cm-property">Collection</span>.<span class="cm-property">from</span>([<span class="cm-number">0</span>,<span class="cm-number">1</span>,<span class="cm-number">2</span>]);</span></pre><pre class=" CodeMirror-line "><span style="padding-right: 0.1px;"><span class="cm-variable">console</span>.<span class="cm-property">log</span>(<span class="cm-variable">collection</span>)       <span class="cm-comment">// 输出：[0,1,2]</span></span></pre><pre class=" CodeMirror-line "><span style="padding-right: 0.1px;"><span cm-text="">​</span></span></pre><pre class=" CodeMirror-line "><span style="padding-right: 0.1px;"><span class="cm-variable">collection</span>.<span class="cm-property">onChange</span> <span class="cm-operator">=</span> <span class="cm-keyword">function</span>() {</span></pre><pre class=" CodeMirror-line "><span style="padding-right: 0.1px;">  <span class="cm-variable">console</span>.<span class="cm-property">log</span>(<span class="cm-variable">collection</span>);</span></pre><pre class=" CodeMirror-line "><span style="padding-right: 0.1px;">}</span></pre><pre class=" CodeMirror-line "><span style="padding-right: 0.1px;"><span cm-text="">​</span></span></pre><pre class=" CodeMirror-line "><span style="padding-right: 0.1px;"><span class="cm-variable">collection</span>.<span class="cm-property">push</span>(<span class="cm-number">3</span>, <span class="cm-number">4</span>);        <span class="cm-comment">// 输出：[0,1,2,3,4]</span></span></pre><pre class=" CodeMirror-line "><span style="padding-right: 0.1px;"><span class="cm-variable">collection</span>.<span class="cm-property">unshift</span>(<span class="cm-operator">-</span><span class="cm-number">1</span>);       <span class="cm-comment">// 输出：[-1,0,1,2,3,4]</span></span></pre><pre class=" CodeMirror-line "><span style="padding-right: 0.1px;"><span class="cm-variable">collection</span>.<span class="cm-property">pop</span>();             <span class="cm-comment">// 输出：[-1,0,1,2,3]</span></span></pre><pre class=" CodeMirror-line "><span style="padding-right: 0.1px;"><span class="cm-variable">collection</span>.<span class="cm-property">shift</span>();           <span class="cm-comment">// 输出：[0,1,2,3]</span></span></pre><pre class=" CodeMirror-line "><span style="padding-right: 0.1px;"><span class="cm-variable">collection</span>.<span class="cm-property">splice</span>(<span class="cm-number">2</span>, <span class="cm-number">0</span>, <span class="cm-number">1.5</span>); <span class="cm-comment">// 输出：[0,1,1.5,2,3]</span></span></pre></div>
           </div>
         </div>
       </div>
     </div>
   <p>Collection没有重写`slice`等不改变自身结构的方法，这些方法依然返回新的数组而非新的Collection对象。
   针对对象元素，Collection额外提供了`insert`、`remove`和`replace`三个方法。这三个方法只接受对象元素作参数，否则抛出错误。用法如下：</p>
-    <div class="code-box">
-      <pre class="code-behind js-mode">
-  var collection = new Exact.Collection();
+    <div class="code-box scroll">
+      <!--<pre class="code-behind js-mode">
+var collection = new Exact.Collection();
 
-  // 末尾插入
-  collection.insert({x: 1});
-  collection.insert({x: 2});                // [{x: 1}, {x: 2}]
+// 末尾插入
+collection.insert({x: 1});
+collection.insert({x: 2});                // [{x: 1}, {x: 2}]
 
-  // 在某个已有元素之前插入
-  collection.insert({x: 0), collection[0]); // [{x: 0}, {x: 1}, {x: 2}]
+// 在某个已有元素之前插入
+collection.insert({x: 0), collection[0]); // [{x: 0}, {x: 1}, {x: 2}]
 
-  // 移除已有元素
-  collection.remove(collection[1]);         // [{x: 0}, {x: 2}]
+// 移除已有元素
+collection.remove(collection[1]);         // [{x: 0}, {x: 2}]
 
-  // 替换已有元素
-  collection.replace(collection[1], {x: 1});// [{x: 0}, {x: 1}]
-  </pre>
+// 替换已有元素
+collection.replace(collection[1], {x: 1});// [{x: 0}, {x: 1}]
+  </pre>-->
       <div class="CodeMirror cm-s-alice">
         <div class="CodeMirror-lines">
           <div style="position: relative; outline: none;">
-            <!--<div class="CodeMirror-measure">
-              <div class="CodeMirror-linenumber CodeMirror-gutter-elt">
-                <div>15</div>
-              </div>
-            </div>
-            <div class="CodeMirror-measure"></div>
-            <div style="position: relative; z-index: 1;"></div>
-            <div class="CodeMirror-cursors">
-              <div class="CodeMirror-cursor" style="left: 0px; top: 85px; height: 17px;">&nbsp;</div>
-            </div>-->
-            <div class="CodeMirror-code">
-              <div style="position: relative;">
-                <div class="CodeMirror-gutter-wrapper" style="left: -31px;">
-                  <div class="CodeMirror-linenumber CodeMirror-gutter-elt" style="left: 0px; width: 21px;">1</div>
-                </div>
-                      <pre class=" CodeMirror-line "><span style="padding-right: 0.1px;">  <span
-                          class="cm-keyword">var</span> <span class="cm-def">collection</span> <span
-                          class="cm-operator">=</span> <span class="cm-keyword">new</span> <span class="cm-variable">Exact</span>.<span
-                          class="cm-property">Collection</span>();</span></pre>
-              </div>
-              <div style="position: relative;">
-                <div class="CodeMirror-gutter-wrapper" style="left: -31px;">
-                  <div class="CodeMirror-linenumber CodeMirror-gutter-elt" style="left: 0px; width: 21px;">2</div>
-                </div>
-                      <pre class=" CodeMirror-line "><span style="padding-right: 0.1px;"><span
-                          cm-text="">​</span></span></pre>
-              </div>
-              <div style="position: relative;">
-                <div class="CodeMirror-gutter-wrapper" style="left: -31px;">
-                  <div class="CodeMirror-linenumber CodeMirror-gutter-elt" style="left: 0px; width: 21px;">3</div>
-                </div>
-                <pre class=" CodeMirror-line "><span style="padding-right: 0.1px;">  <span class="cm-comment">// 末尾插入</span></span></pre>
-              </div>
-              <div style="position: relative;">
-                <div class="CodeMirror-gutter-wrapper" style="left: -31px;">
-                  <div class="CodeMirror-linenumber CodeMirror-gutter-elt" style="left: 0px; width: 21px;">4</div>
-                </div>
-                      <pre class=" CodeMirror-line "><span style="padding-right: 0.1px;">  <span class="cm-variable">collection</span>.<span
-                          class="cm-property">insert</span>({<span class="cm-property">x</span>: <span
-                          class="cm-number">1</span>});</span></pre>
-              </div>
-              <div style="position: relative;">
-                <div class="CodeMirror-gutter-wrapper" style="left: -31px;">
-                  <div class="CodeMirror-linenumber CodeMirror-gutter-elt" style="left: 0px; width: 21px;">5</div>
-                </div>
-                      <pre class=" CodeMirror-line "><span style="padding-right: 0.1px;">  <span class="cm-variable">collection</span>.<span
-                          class="cm-property">insert</span>({<span class="cm-property">x</span>: <span
-                          class="cm-number">2</span>});                <span
-                          class="cm-comment">// [{x: 1}, {x: 2}]</span></span></pre>
-              </div>
-              <div style="position: relative;">
-                <div class="CodeMirror-gutter-wrapper" style="left: -31px;">
-                  <div class="CodeMirror-linenumber CodeMirror-gutter-elt" style="left: 0px; width: 21px;">6</div>
-                </div>
-                      <pre class=" CodeMirror-line "><span style="padding-right: 0.1px;"><span
-                          cm-text="">​</span></span></pre>
-              </div>
-              <div style="position: relative;">
-                <div class="CodeMirror-gutter-wrapper" style="left: -31px;">
-                  <div class="CodeMirror-linenumber CodeMirror-gutter-elt" style="left: 0px; width: 21px;">7</div>
-                </div>
-                <pre class=" CodeMirror-line "><span style="padding-right: 0.1px;">  <span class="cm-comment">// 在某个已有元素之前插入</span></span></pre>
-              </div>
-              <div style="position: relative;">
-                <div class="CodeMirror-gutter-wrapper" style="left: -31px;">
-                  <div class="CodeMirror-linenumber CodeMirror-gutter-elt" style="left: 0px; width: 21px;">8</div>
-                </div>
-                      <pre class=" CodeMirror-line "><span style="padding-right: 0.1px;">  <span class="cm-variable">collection</span>.<span
-                          class="cm-property">insert</span>({<span class="cm-property">x</span>: <span
-                          class="cm-number">0</span>), <span class="cm-variable">collection</span>[<span
-                          class="cm-number">0</span>]); <span
-                          class="cm-comment">// [{x: 0}, {x: 1}, {x: 2}]</span></span></pre>
-              </div>
-              <div style="position: relative;">
-                <div class="CodeMirror-gutter-wrapper" style="left: -31px;">
-                  <div class="CodeMirror-linenumber CodeMirror-gutter-elt" style="left: 0px; width: 21px;">9</div>
-                </div>
-                      <pre class=" CodeMirror-line "><span style="padding-right: 0.1px;"><span
-                          cm-text="">​</span></span></pre>
-              </div>
-              <div style="position: relative;">
-                <div class="CodeMirror-gutter-wrapper" style="left: -31px;">
-                  <div class="CodeMirror-linenumber CodeMirror-gutter-elt" style="left: 0px; width: 21px;">10
-                  </div>
-                </div>
-                <pre class=" CodeMirror-line "><span style="padding-right: 0.1px;">  <span class="cm-comment">// 移除已有元素</span></span></pre>
-              </div>
-              <div style="position: relative;">
-                <div class="CodeMirror-gutter-wrapper" style="left: -31px;">
-                  <div class="CodeMirror-linenumber CodeMirror-gutter-elt" style="left: 0px; width: 21px;">11
-                  </div>
-                </div>
-                      <pre class=" CodeMirror-line "><span style="padding-right: 0.1px;">  <span class="cm-variable">collection</span>.<span
-                          class="cm-variable">remove</span>(<span class="cm-variable">collection</span>[<span
-                          class="cm-number">1</span>]);         <span
-                          class="cm-comment">// [{x: 0}, {x: 2}]</span></span></pre>
-              </div>
-              <div style="position: relative;">
-                <div class="CodeMirror-gutter-wrapper" style="left: -31px;">
-                  <div class="CodeMirror-linenumber CodeMirror-gutter-elt" style="left: 0px; width: 21px;">12
-                  </div>
-                </div>
-                      <pre class=" CodeMirror-line "><span style="padding-right: 0.1px;"><span
-                          cm-text="">​</span></span></pre>
-              </div>
-              <div style="position: relative;">
-                <div class="CodeMirror-gutter-wrapper" style="left: -31px;">
-                  <div class="CodeMirror-linenumber CodeMirror-gutter-elt" style="left: 0px; width: 21px;">13
-                  </div>
-                </div>
-                <pre class=" CodeMirror-line "><span style="padding-right: 0.1px;">  <span class="cm-comment">// 替换已有元素</span></span></pre>
-              </div>
-              <div style="position: relative;">
-                <div class="CodeMirror-gutter-wrapper" style="left: -31px;">
-                  <div class="CodeMirror-linenumber CodeMirror-gutter-elt" style="left: 0px; width: 21px;">14
-                  </div>
-                </div>
-                      <pre class=" CodeMirror-line "><span style="padding-right: 0.1px;">  <span class="cm-variable">collection</span>.<span
-                          class="cm-variable">replace</span>(<span class="cm-variable">collection</span>[<span
-                          class="cm-number">1</span>], {<span class="cm-variable">x</span>: <span
-                          class="cm-number">1</span>});<span class="cm-comment">// [{x: 0}, {x: 1}]</span></span></pre>
-              </div>
-            </div>
+            <div class="CodeMirror-code"><pre class=" CodeMirror-line "><span style="padding-right: 0.1px;"><span class="cm-keyword">var</span> <span class="cm-def">collection</span> <span class="cm-operator">=</span> <span class="cm-keyword">new</span> <span class="cm-variable">Exact</span>.<span class="cm-property">Collection</span>();</span></pre><pre class=" CodeMirror-line "><span style="padding-right: 0.1px;"><span cm-text="">​</span></span></pre><pre class=" CodeMirror-line "><span style="padding-right: 0.1px;"><span class="cm-comment">// 末尾插入</span></span></pre><pre class=" CodeMirror-line "><span style="padding-right: 0.1px;"><span class="cm-variable">collection</span>.<span class="cm-property">insert</span>({<span class="cm-property">x</span>: <span class="cm-number">1</span>});</span></pre><pre class=" CodeMirror-line "><span style="padding-right: 0.1px;"><span class="cm-variable">collection</span>.<span class="cm-property">insert</span>({<span class="cm-property">x</span>: <span class="cm-number">2</span>});                <span class="cm-comment">// [{x: 1}, {x: 2}]</span></span></pre><pre class=" CodeMirror-line "><span style="padding-right: 0.1px;"><span cm-text="">​</span></span></pre><pre class=" CodeMirror-line "><span style="padding-right: 0.1px;"><span class="cm-comment">// 在某个已有元素之前插入</span></span></pre><pre class=" CodeMirror-line "><span style="padding-right: 0.1px;"><span class="cm-variable">collection</span>.<span class="cm-property">insert</span>({<span class="cm-property">x</span>: <span class="cm-number">0</span>), <span class="cm-variable">collection</span>[<span class="cm-number">0</span>]); <span class="cm-comment">// [{x: 0}, {x: 1}, {x: 2}]</span></span></pre><pre class=" CodeMirror-line "><span style="padding-right: 0.1px;"><span cm-text="">​</span></span></pre><pre class=" CodeMirror-line "><span style="padding-right: 0.1px;"><span class="cm-comment">// 移除已有元素</span></span></pre><pre class=" CodeMirror-line "><span style="padding-right: 0.1px;"><span class="cm-variable">collection</span>.<span class="cm-variable">remove</span>(<span class="cm-variable">collection</span>[<span class="cm-number">1</span>]);         <span class="cm-comment">// [{x: 0}, {x: 2}]</span></span></pre><pre class=" CodeMirror-line "><span style="padding-right: 0.1px;"><span cm-text="">​</span></span></pre><pre class=" CodeMirror-line "><span style="padding-right: 0.1px;"><span class="cm-comment">// 替换已有元素</span></span></pre><pre class=" CodeMirror-line "><span style="padding-right: 0.1px;"><span class="cm-variable">collection</span>.<span class="cm-variable">replace</span>(<span class="cm-variable">collection</span>[<span class="cm-number">1</span>], {<span class="cm-variable">x</span>: <span class="cm-number">1</span>});<span class="cm-comment">// [{x: 0}, {x: 1}]</span></span></pre></div>
           </div>
         </div>
       </div>

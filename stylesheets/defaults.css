@@ -12,6 +12,10 @@ h1, h2, h3, h4 {
   font-size: 1em;
 }
 
+article h1 {
+  font-size: 3.5em;
+}
+
 article h2 {
   font-size: 2.5em;
 }
@@ -44,7 +48,7 @@ ul > li {
 }
 
 .logo {
-  line-height: 1.33em;
+  line-height: 1.35em;
   /*font-style: italic;*/
   font-size: 3.6em;
   color: #06d;
@@ -148,6 +152,7 @@ ul > li {
 
 .link {
   color: #444;
+  line-height: 1.5em;
 }
 
 .link:hover/*, .link.active*/ {
@@ -246,8 +251,8 @@ color: #06d;
 
 .code-box {
   position: relative;
-  /*overflow-x: auto;*/
-  background-color: #ccc;
+  padding: 10px;
+  background-color: #f8f8f8;
 }
 
 .code-behind {
@@ -272,7 +277,54 @@ color: #06d;
   height: 400px;
 }
 
+.tab-header {
+  height: 30px;
+  width: 100%;
+  border-bottom: solid 1px #0af;
 
+}
+
+.tab-bar {
+  margin: 0;
+  float: right;
+}
+
+.tab-bar > li {
+  float: left;
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.tab-item {
+  padding: 5px 10px;
+  line-height: 30px;
+  font-size: 1.5em;
+  color: #888;
+}
+
+.tab-item:hover, .tab-item:active {
+  color: #222;
+  /*border-bottom: solid 2px #666;*/
+}
+
+.tab-item.active{
+  color: #222;
+}
+
+.tab-content {
+  height: 500px;
+}
+
+.scroll {
+  overflow: auto;
+}
+
+.frame {
+  border: none;
+  height: 100%;
+  width: 100%;
+}
 
 @media screen and (max-width: 900px)  {
   body {
@@ -341,7 +393,7 @@ color: #06d;
     width: 100%;
   }
 
-  .menu-item.active{
+  .menu-item:hover, .menu-item:active, .menu-item.active{
     background-color: #111;
     border-bottom: solid 1px #0af;
   }

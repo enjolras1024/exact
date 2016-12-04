@@ -18,10 +18,10 @@
     <h3 class="brand"><a href="../" class="logo">Exact</a></h3>
     <a class="menu-btn"></a>
     <ul class="menu-bar">
-      <li><a href="../examples/todomvc.html" class="menu-item"> Examples </a></li>
+      <li><a href="../examples/color-palette.html" class="menu-item"> Examples </a></li>
+      <li><a href="../downloads/index.html" class="menu-item"> Downloads </a></li>
       <li><a href="#" class="menu-item  active"> Documents </a></li>
-      <li><a href="#" class="menu-item"> Downloads </a></li>
-      <li><a href="#" class="menu-item"> Blogs </a></li>
+      <li><a href="../apis/index.html" class="menu-item"> APIs </a></li>
       <li><a href="#" class="menu-item"> GitHub </a></li>
     </ul>
   </nav>
@@ -38,19 +38,20 @@
     <div class="card">
       <h4>Events</h4>
       <ul class="list">
-        <li><a href="./events.html#on-off" class="link">On / Off</a></li>
+        <li><a href="./events.html#on-off-once" class="link">On / Off / Once</a></li>
         <li><a href="./events.html#send-emit" class="link">Send / Emit</a></li>
-        <li><a href="./events.html#keys-of-event" class="link">Keys of Event</a></li>
+        <li><a href="./events.html#key-name-of-event" class="link">Key Name of Event</a></li>
       </ul>
     </div>
     <div class="card">
       <h4>Properties</h4>
       <ul class="list">
         <li><a href="./properties.html#setting-property" class="link">Setting Property</a></li>
-        <li><a href="./properties.html#using-descriptors" class="link">Using Descriptors</a></li>
-        <li><a href="./properties.html#adding-validation" class="link">Adding Validation</a></li>
         <li><a href="./properties.html#dirty-marking" class="link">Dirty Marking</a></li>
         <li><a href="./properties.html#property-changed-event" class="link">Property-Changed Event</a></li>
+        <li><a href="./properties.html#using-descriptors" class="link">Using Descriptors</a></li>
+        <li><a href="./properties.html#adding-validation" class="link">Adding Validation</a></li>
+        <li><a href="./properties.html#custom-getter-setter" class="link">Custom Getter / Setter</a></li>
       </ul>
     </div>
     <div class="card">
@@ -96,13 +97,13 @@
   </aside>
   <a class="side-btn">&gt;</a>
   <article class="article">
-    <a id="on-off"></a>
+    <a id="on-off-once"></a>
     <h2>Events</h2>
     <p>事件系统是Exact的基础，Watcher对象提供的实例方法，实现了监听、移除和派发任意类型事件的功能。Store、Element和Component等都继承或混入了这些方法。</p>
-    <h4 >On / Off</h4>
+    <h4 >On / Off / Once</h4>
     <p>用`on`方法来监听指定类型的事件，用`off`方法来移除相应类型的事件处理函数。用例如下：</p>
     <a id="send-emit"></a>
-<!--<div class="code-box">
+<!--<div class="code-box scroll">
       <pre class="code-behind">
   var onChange = function() {};
 
@@ -113,114 +114,64 @@
     invalid: function() {},
   } );
 
-  watcher.off('change', onChange);  //移除了change事件处理函数onChange
-  watcher.off('click');             //移除了所有click事件处理函数
-  watcher.off();                    //移除了所有类型事件处理函数</pre>
+  watcher.off('change', onChange);  // 移除了change事件处理函数onChange
+  watcher.off('click');             // 移除了所有click事件处理函数
+  watcher.off();                    // 移除了所有类型事件处理函数</pre>
     </div>-->
-    <div class="CodeMirror cm-s-alice">
-      <div class="CodeMirror-lines">
-        <div style="position: relative; outline: none;">
-          <div class="CodeMirror-measure"><span><span>​</span>x</span></div>
-          <div class="CodeMirror-measure"></div>
-          <div style="position: relative; z-index: 1;"></div>
-          <div class="CodeMirror-cursors">
-            <div class="CodeMirror-cursor" style="left: 244px; top: 34px; height: 17px;">&nbsp;</div>
-          </div>
-          <div class="CodeMirror-code">
-            <div style="position: relative;">
-              <div class="CodeMirror-gutter-wrapper" style="left: -31px;">
-                <div class="CodeMirror-linenumber CodeMirror-gutter-elt" style="left: 0px; width: 21px;">1</div>
-              </div>
-                    <pre class=" CodeMirror-line "><span style="padding-right: 0.1px;">  <span
-                        class="cm-keyword">var</span> <span class="cm-def">onChange</span> <span
-                        class="cm-operator">=</span> <span class="cm-keyword">function</span>() {};</span></pre>
-            </div>
-            <div style="position: relative;">
-              <div class="CodeMirror-gutter-wrapper" style="left: -31px;">
-                <div class="CodeMirror-linenumber CodeMirror-gutter-elt" style="left: 0px; width: 21px;">2</div>
-              </div>
+    <div class="code-box scroll">
+      <div class="CodeMirror cm-s-alice">
+        <div class="CodeMirror-lines">
+          <div style="position: relative; outline: none;">
+            <div class="CodeMirror-code">
+              <pre class=" CodeMirror-line "><span style="padding-right: 0.1px;"><span
+                  class="cm-keyword">var</span> <span class="cm-def">onChange</span> <span class="cm-operator">=</span> <span
+                  class="cm-keyword">function</span>() {};</span></pre>
               <pre class=" CodeMirror-line "><span style="padding-right: 0.1px;"><span cm-text="">​</span></span></pre>
-            </div>
-            <div style="position: relative;">
-              <div class="CodeMirror-gutter-wrapper" style="left: -31px;">
-                <div class="CodeMirror-linenumber CodeMirror-gutter-elt" style="left: 0px; width: 21px;">3</div>
-              </div>
-                    <pre class=" CodeMirror-line "><span style="padding-right: 0.1px;">  <span class="cm-variable">watcher</span>.<span
-                        class="cm-property">on</span>(<span class="cm-string">'click'</span>, <span class="cm-keyword">function</span>() {});</span></pre>
-            </div>
-            <div style="position: relative;">
-              <div class="CodeMirror-gutter-wrapper" style="left: -31px;">
-                <div class="CodeMirror-linenumber CodeMirror-gutter-elt" style="left: 0px; width: 21px;">4</div>
-              </div>
-                    <pre class=" CodeMirror-line "><span style="padding-right: 0.1px;">  <span class="cm-variable">watcher</span>.<span
-                        class="cm-property">on</span>({</span></pre>
-            </div>
-            <div style="position: relative;">
-              <div class="CodeMirror-gutter-wrapper" style="left: -31px;">
-                <div class="CodeMirror-linenumber CodeMirror-gutter-elt" style="left: 0px; width: 21px;">5</div>
-              </div>
-                    <pre class=" CodeMirror-line "><span style="padding-right: 0.1px;">    <span class="cm-property">click</span>: <span
-                        class="cm-keyword">function</span>() {},</span></pre>
-            </div>
-            <div style="position: relative;">
-              <div class="CodeMirror-gutter-wrapper" style="left: -31px;">
-                <div class="CodeMirror-linenumber CodeMirror-gutter-elt" style="left: 0px; width: 21px;">6</div>
-              </div>
-                    <pre class=" CodeMirror-line "><span style="padding-right: 0.1px;">    <span class="cm-property">change</span>: <span
-                        class="cm-variable">onChange</span>,</span></pre>
-            </div>
-            <div style="position: relative;">
-              <div class="CodeMirror-gutter-wrapper" style="left: -31px;">
-                <div class="CodeMirror-linenumber CodeMirror-gutter-elt" style="left: 0px; width: 21px;">7</div>
-              </div>
-                    <pre class=" CodeMirror-line "><span style="padding-right: 0.1px;">    <span class="cm-property">invalid</span>: <span
-                        class="cm-keyword">function</span>() {},</span></pre>
-            </div>
-            <div style="position: relative;">
-              <div class="CodeMirror-gutter-wrapper" style="left: -31px;">
-                <div class="CodeMirror-linenumber CodeMirror-gutter-elt" style="left: 0px; width: 21px;">8</div>
-              </div>
-              <pre class=" CodeMirror-line "><span style="padding-right: 0.1px;">  } );</span></pre>
-            </div>
-            <div style="position: relative;">
-              <div class="CodeMirror-gutter-wrapper" style="left: -31px;">
-                <div class="CodeMirror-linenumber CodeMirror-gutter-elt" style="left: 0px; width: 21px;">9</div>
-              </div>
+              <pre class=" CodeMirror-line "><span style="padding-right: 0.1px;"><span
+                  class="cm-variable">watcher</span>.<span class="cm-property">on</span>(<span
+                  class="cm-string">'click'</span>, <span class="cm-keyword">function</span>() {});</span></pre>
+              <pre class=" CodeMirror-line "><span style="padding-right: 0.1px;"><span
+                  class="cm-variable">watcher</span>.<span class="cm-property">on</span>({</span></pre>
+              <pre class=" CodeMirror-line "><span style="padding-right: 0.1px;">  <span
+                  class="cm-property">click</span>: <span class="cm-keyword">function</span>() {},</span></pre>
+              <pre class=" CodeMirror-line "><span style="padding-right: 0.1px;">  <span
+                  class="cm-property">change</span>: <span class="cm-variable">onChange</span>,</span></pre>
+              <pre class=" CodeMirror-line "><span style="padding-right: 0.1px;">  <span
+                  class="cm-property">invalid</span>: <span class="cm-keyword">function</span>() {},</span></pre>
+              <pre class=" CodeMirror-line "><span style="padding-right: 0.1px;">} );</span></pre>
               <pre class=" CodeMirror-line "><span style="padding-right: 0.1px;"><span cm-text="">​</span></span></pre>
-            </div>
-            <div style="position: relative;">
-              <div class="CodeMirror-gutter-wrapper" style="left: -31px;">
-                <div class="CodeMirror-linenumber CodeMirror-gutter-elt" style="left: 0px; width: 21px;">10</div>
-              </div>
-                    <pre class=" CodeMirror-line "><span style="padding-right: 0.1px;">  <span class="cm-variable">watcher</span>.<span
-                        class="cm-property">off</span>(<span class="cm-string">'change'</span>, <span
-                        class="cm-variable">onChange</span>);  <span class="cm-comment">//移除了change事件处理函数onChange</span></span></pre>
-            </div>
-            <div style="position: relative;">
-              <div class="CodeMirror-gutter-wrapper" style="left: -31px;">
-                <div class="CodeMirror-linenumber CodeMirror-gutter-elt" style="left: 0px; width: 21px;">11</div>
-              </div>
-                    <pre class=" CodeMirror-line "><span style="padding-right: 0.1px;">  <span class="cm-variable">watcher</span>.<span
-                        class="cm-property">off</span>(<span class="cm-string">'click'</span>);             <span
-                        class="cm-comment">//移除了所有click事件处理函数</span></span></pre>
-            </div>
-            <div style="position: relative;">
-              <div class="CodeMirror-gutter-wrapper" style="left: -31px;">
-                <div class="CodeMirror-linenumber CodeMirror-gutter-elt" style="left: 0px; width: 21px;">12</div>
-              </div>
-                    <pre class=" CodeMirror-line "><span style="padding-right: 0.1px;">  <span class="cm-variable">watcher</span>.<span
-                        class="cm-property">off</span>();                    <span
-                        class="cm-comment">//移除了所有类型事件处理函数</span></span></pre>
+              <pre class=" CodeMirror-line "><span style="padding-right: 0.1px;"><span
+                  class="cm-variable">watcher</span>.<span class="cm-property">off</span>(<span class="cm-string">'change'</span>, <span
+                  class="cm-variable">onChange</span>);  <span
+                  class="cm-comment">// 移除了change事件处理函数onChange</span></span></pre>
+              <pre class=" CodeMirror-line "><span style="padding-right: 0.1px;"><span
+                  class="cm-variable">watcher</span>.<span class="cm-property">off</span>(<span class="cm-string">'click'</span>);             <span
+                  class="cm-comment">// 移除了所有click事件处理函数</span></span></pre>
+              <pre class=" CodeMirror-line "><span style="padding-right: 0.1px;"><span
+                  class="cm-variable">watcher</span>.<span class="cm-property">off</span>();                    <span
+                  class="cm-comment">// 移除了所有类型事件处理函数</span></span></pre>
             </div>
           </div>
         </div>
       </div>
     </div>
+
+    <p>特别地，用`once`监听事件，处理函数在第一次触发之后被自动移除。</p>
+    <div class="code-box scroll">
+      <div class="CodeMirror cm-s-alice">
+        <div class="CodeMirror-lines">
+          <div style="position: relative; outline: none;">
+            <div class="CodeMirror-code"><pre class=" CodeMirror-line "><span style="padding-right: 0.1px;"><span class="cm-variable">watcher</span>.<span class="cm-property">once</span>(<span class="cm-string">'initialized'</span>, <span class="cm-keyword">function</span>(<span class="cm-def">event</span>) {</span></pre><pre class=" CodeMirror-line "><span style="padding-right: 0.1px;">  <span class="cm-variable">console</span>.<span class="cm-property">log</span>(<span class="cm-variable-2">event</span>.<span class="cm-property">type</span>);</span></pre><pre class=" CodeMirror-line "><span style="padding-right: 0.1px;">});</span></pre><pre class=" CodeMirror-line "><span style="padding-right: 0.1px;"><span cm-text="">​</span></span></pre><pre class=" CodeMirror-line "><span style="padding-right: 0.1px;"><span class="cm-variable">watcher</span>.<span class="cm-property">send</span>(<span class="cm-string">'initialized'</span>);<span class="cm-tab" role="presentation" cm-text="	">    </span><span class="cm-comment">// 输出："initialized"</span></span></pre><pre class=" CodeMirror-line "><span style="padding-right: 0.1px;"><span class="cm-variable">watcher</span>.<span class="cm-property">send</span>(<span class="cm-string">'initialized'</span>);<span class="cm-tab" role="presentation" cm-text="	">    </span><span class="cm-comment">// 没有新的输出</span></span></pre></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
     <h4 >Send / Emit</h4>
     <p>用`send`或`emit`方法来派发事件，以及传递附带参数。
       对于`send`方法派发的事件，处理函数接受到的第一个参数为Event对象，而`emit`会忽略事件本身，只向处理函数传递附带参数。
       用例如下：</p>
- <!--   <div class="code-box">
+ <!--   <div class="code-box scroll">
       <pre class="code-behind">
   function onClick(event, value) {
     console.log(event.type, value);
@@ -230,135 +181,65 @@
   }
 
   watcher.on('click' onClick);
-  watcher.send('click');                      //控制台输出："click", undefined
-  watcher.send('click', 'ok');                //控制台输出："click", "ok"
-  watcher.emit('click', {type: 'not click'}); //控制台输出："not click", undefined
+  watcher.send('click');                      // 输出："click", undefined
+  watcher.send('click', 'ok');                // 输出："click", "ok"
+  watcher.emit('click', {type: 'not click'}); // 输出："not click", undefined
 
   watcher.on('message', onMessage);
-  watcher.emit('message', 'ok');              //控制台输出："ok"</pre>
+  watcher.emit('message', 'ok');              // 输出："ok"</pre>
     </div>-->
-    <div class="CodeMirror cm-s-alice">
-      <div class="CodeMirror-lines">
-        <div style="position: relative; outline: none;">
-          <div class="CodeMirror-measure"><span><span>​</span>x</span></div>
-          <div class="CodeMirror-measure"></div>
-          <div style="position: relative; z-index: 1;"></div>
-          <div class="CodeMirror-cursors">
-            <div class="CodeMirror-cursor" style="left: 145px; top: 204px; height: 17px;">&nbsp;</div>
-          </div>
-          <div class="CodeMirror-code">
-            <div style="position: relative;">
-              <div class="CodeMirror-gutter-wrapper" style="left: -31px;">
-                <div class="CodeMirror-linenumber CodeMirror-gutter-elt" style="left: 0px; width: 21px;">1</div>
-              </div>
-                    <pre class=" CodeMirror-line "><span style="padding-right: 0.1px;">  <span class="cm-keyword">function</span> <span
-                        class="cm-def">onClick</span>(<span class="cm-def">event</span>, <span
-                        class="cm-def">value</span>) {</span></pre>
-            </div>
-            <div style="position: relative;">
-              <div class="CodeMirror-gutter-wrapper" style="left: -31px;">
-                <div class="CodeMirror-linenumber CodeMirror-gutter-elt" style="left: 0px; width: 21px;">2</div>
-              </div>
-                    <pre class=" CodeMirror-line "><span style="padding-right: 0.1px;">    <span class="cm-variable">console</span>.<span
-                        class="cm-property">log</span>(<span class="cm-variable-2">event</span>.<span
-                        class="cm-property">type</span>, <span class="cm-variable-2">value</span>);</span></pre>
-            </div>
-            <div style="position: relative;">
-              <div class="CodeMirror-gutter-wrapper" style="left: -31px;">
-                <div class="CodeMirror-linenumber CodeMirror-gutter-elt" style="left: 0px; width: 21px;">3</div>
-              </div>
-              <pre class=" CodeMirror-line "><span style="padding-right: 0.1px;">  }</span></pre>
-            </div>
-            <div style="position: relative;">
-              <div class="CodeMirror-gutter-wrapper" style="left: -31px;">
-                <div class="CodeMirror-linenumber CodeMirror-gutter-elt" style="left: 0px; width: 21px;">4</div>
-              </div>
-                    <pre class=" CodeMirror-line "><span style="padding-right: 0.1px;">  <span class="cm-keyword">function</span> <span
-                        class="cm-def">onMessage</span>(<span class="cm-def">value</span>) {</span></pre>
-            </div>
-            <div style="position: relative;">
-              <div class="CodeMirror-gutter-wrapper" style="left: -31px;">
-                <div class="CodeMirror-linenumber CodeMirror-gutter-elt" style="left: 0px; width: 21px;">5</div>
-              </div>
-                    <pre class=" CodeMirror-line "><span style="padding-right: 0.1px;">    <span class="cm-variable">console</span>.<span
-                        class="cm-property">log</span>(<span class="cm-variable-2">value</span>);</span></pre>
-            </div>
-            <div style="position: relative;">
-              <div class="CodeMirror-gutter-wrapper" style="left: -31px;">
-                <div class="CodeMirror-linenumber CodeMirror-gutter-elt" style="left: 0px; width: 21px;">6</div>
-              </div>
-              <pre class=" CodeMirror-line "><span style="padding-right: 0.1px;">  }</span></pre>
-            </div>
-            <div style="position: relative;">
-              <div class="CodeMirror-gutter-wrapper" style="left: -31px;">
-                <div class="CodeMirror-linenumber CodeMirror-gutter-elt" style="left: 0px; width: 21px;">7</div>
-              </div>
+    <div class="code-box scroll">
+      <div class="CodeMirror cm-s-alice">
+        <div class="CodeMirror-lines">
+          <div style="position: relative; outline: none;">
+            <div class="CodeMirror-code">
+              <pre class=" CodeMirror-line "><span style="padding-right: 0.1px;"><span
+                  class="cm-keyword">function</span> <span class="cm-def">onClick</span>(<span
+                  class="cm-def">event</span>, <span class="cm-def">value</span>) {</span></pre>
+              <pre class=" CodeMirror-line "><span style="padding-right: 0.1px;">  <span
+                  class="cm-variable">console</span>.<span class="cm-property">log</span>(<span class="cm-variable-2">event</span>.<span
+                  class="cm-property">type</span>, <span class="cm-variable-2">value</span>);</span></pre>
+              <pre class=" CodeMirror-line "><span style="padding-right: 0.1px;">}</span></pre>
+              <pre class=" CodeMirror-line "><span style="padding-right: 0.1px;"><span
+                  class="cm-keyword">function</span> <span class="cm-def">onMessage</span>(<span
+                  class="cm-def">value</span>) {</span></pre>
+              <pre class=" CodeMirror-line "><span style="padding-right: 0.1px;">  <span
+                  class="cm-variable">console</span>.<span class="cm-property">log</span>(<span class="cm-variable-2">value</span>);</span></pre>
+              <pre class=" CodeMirror-line "><span style="padding-right: 0.1px;">}</span></pre>
               <pre class=" CodeMirror-line "><span style="padding-right: 0.1px;"><span cm-text="">​</span></span></pre>
-            </div>
-            <div style="position: relative;">
-              <div class="CodeMirror-gutter-wrapper" style="left: -31px;">
-                <div class="CodeMirror-linenumber CodeMirror-gutter-elt" style="left: 0px; width: 21px;">8</div>
-              </div>
-                    <pre class=" CodeMirror-line "><span style="padding-right: 0.1px;">  <span class="cm-variable">watcher</span>.<span
-                        class="cm-property">on</span>(<span class="cm-string">'click'</span> <span class="cm-variable">onClick</span>);</span></pre>
-            </div>
-            <div style="position: relative;">
-              <div class="CodeMirror-gutter-wrapper" style="left: -31px;">
-                <div class="CodeMirror-linenumber CodeMirror-gutter-elt" style="left: 0px; width: 21px;">9</div>
-              </div>
-                    <pre class=" CodeMirror-line "><span style="padding-right: 0.1px;">  <span class="cm-variable">watcher</span>.<span
-                        class="cm-property">send</span>(<span
-                        class="cm-string">'click'</span>);                      <span class="cm-comment">//控制台输出："click", undefined</span></span></pre>
-            </div>
-            <div style="position: relative;">
-              <div class="CodeMirror-gutter-wrapper" style="left: -31px;">
-                <div class="CodeMirror-linenumber CodeMirror-gutter-elt" style="left: 0px; width: 21px;">10</div>
-              </div>
-                    <pre class=" CodeMirror-line "><span style="padding-right: 0.1px;">  <span class="cm-variable">watcher</span>.<span
-                        class="cm-property">send</span>(<span class="cm-string">'click'</span>, <span class="cm-string">'ok'</span>);                <span
-                        class="cm-comment">//控制台输出："click", "ok"</span></span></pre>
-            </div>
-            <div style="position: relative;">
-              <div class="CodeMirror-gutter-wrapper" style="left: -31px;">
-                <div class="CodeMirror-linenumber CodeMirror-gutter-elt" style="left: 0px; width: 21px;">11</div>
-              </div>
-                    <pre class=" CodeMirror-line "><span style="padding-right: 0.1px;">  <span class="cm-variable">watcher</span>.<span
-                        class="cm-property">emit</span>(<span class="cm-string">'click'</span>, {<span
-                        class="cm-property">type</span>: <span class="cm-string">'not click'</span>}); <span
-                        class="cm-comment">//控制台输出："not click", undefined</span></span></pre>
-            </div>
-            <div style="position: relative;">
-              <div class="CodeMirror-gutter-wrapper" style="left: -31px;">
-                <div class="CodeMirror-linenumber CodeMirror-gutter-elt" style="left: 0px; width: 21px;">12</div>
-              </div>
+              <pre class=" CodeMirror-line "><span style="padding-right: 0.1px;"><span
+                  class="cm-variable">watcher</span>.<span class="cm-property">on</span>(<span
+                  class="cm-string">'click'</span> <span class="cm-variable">onClick</span>);</span></pre>
+              <pre class=" CodeMirror-line "><span style="padding-right: 0.1px;"><span
+                  class="cm-variable">watcher</span>.<span class="cm-property">send</span>(<span class="cm-string">'click'</span>);                      <span
+                  class="cm-comment">// 输出："click", undefined</span></span></pre>
+              <pre class=" CodeMirror-line "><span style="padding-right: 0.1px;"><span
+                  class="cm-variable">watcher</span>.<span class="cm-property">send</span>(<span class="cm-string">'click'</span>, <span
+                  class="cm-string">'ok'</span>);                <span
+                  class="cm-comment">// 输出："click", "ok"</span></span></pre>
+              <pre class=" CodeMirror-line "><span style="padding-right: 0.1px;"><span
+                  class="cm-variable">watcher</span>.<span class="cm-property">emit</span>(<span class="cm-string">'click'</span>, {<span
+                  class="cm-property">type</span>: <span class="cm-string">'not click'</span>}); <span
+                  class="cm-comment">// 输出："not click", undefined</span></span></pre>
               <pre class=" CodeMirror-line "><span style="padding-right: 0.1px;"><span cm-text="">​</span></span></pre>
-            </div>
-            <div style="position: relative;">
-              <div class="CodeMirror-gutter-wrapper" style="left: -31px;">
-                <div class="CodeMirror-linenumber CodeMirror-gutter-elt" style="left: 0px; width: 21px;">13</div>
-              </div>
-                    <pre class=" CodeMirror-line "><span style="padding-right: 0.1px;">  <span class="cm-variable">watcher</span>.<span
-                        class="cm-property">on</span>(<span class="cm-string">'message'</span>, <span
-                        class="cm-variable">onMessage</span>);</span></pre>
-            </div>
-            <div style="position: relative;">
-              <div class="CodeMirror-gutter-wrapper" style="left: -31px;">
-                <div class="CodeMirror-linenumber CodeMirror-gutter-elt" style="left: 0px; width: 21px;">14</div>
-              </div>
-                    <pre class=" CodeMirror-line "><span style="padding-right: 0.1px;">  <span class="cm-variable">watcher</span>.<span
-                        class="cm-property">emit</span>(<span class="cm-string">'message'</span>, <span
-                        class="cm-string">'ok'</span>);              <span class="cm-comment">//控制台输出："ok"</span></span></pre>
+              <pre class=" CodeMirror-line "><span style="padding-right: 0.1px;"><span
+                  class="cm-variable">watcher</span>.<span class="cm-property">on</span>(<span class="cm-string">'message'</span>, <span
+                  class="cm-variable">onMessage</span>);</span></pre>
+              <pre class=" CodeMirror-line "><span style="padding-right: 0.1px;"><span
+                  class="cm-variable">watcher</span>.<span class="cm-property">emit</span>(<span class="cm-string">'message'</span>, <span
+                  class="cm-string">'ok'</span>);              <span class="cm-comment">// 输出："ok"</span></span></pre>
             </div>
           </div>
         </div>
       </div>
     </div>
+    <a id="key-name-of-event"></a>
     <p>在Exact内部，默认使用send方法派发自定义事件和转发DOM事件，相应处理函数接受到的第一个参数始终是Event对象。</p>
-    <a id="keys-of-event"></a>
-    <h4 >KeyName of Event</h4>
+
+    <h4 >Key Name of Event</h4>
     <p>通常在监听键盘事件时，我们会关心用户按下的键名。同样，当某个属性的值发生改变或验证失败时，我们会关心这个属性的名字。为此，Exact的事件系统特别照顾到了这种情况，使得事件的监听和移除方法更为灵活。</p>
-    <div class="code-box">
-      <pre class="code-behind js-mode">
+    <div class="code-box scroll">
+      <!--<pre class="code-behind js-mode">
   function onEnter(event) {
     console.log('key `' + event.keyName + '` is pressed');
   }
@@ -378,179 +259,73 @@
   element.send('changed.other');         // 输出：prop `other` is changed
 
   element.off('keypress.enter');         // 只移除了keyName为`enter`的keypress事件的处理函数
-  element.off('changed');                // 移除了所有changed事件的处理函数，无论keyName是什么</pre>
+  element.off('changed');                // 移除了所有changed事件的处理函数，无论keyName是什么</pre>-->
       <div class="CodeMirror cm-s-alice">
         <div class="CodeMirror-lines">
           <div style="position: relative; outline: none;">
-            <div class="CodeMirror-measure">
-              <pre>x</pre>
-            </div>
-            <div class="CodeMirror-measure"></div>
-            <div style="position: relative; z-index: 1;"></div>
-            <div class="CodeMirror-cursors">
-              <div class="CodeMirror-cursor" style="left: 257.234px; top: 17px; height: 17px;">&nbsp;</div>
-            </div>
             <div class="CodeMirror-code">
-              <div style="position: relative;">
-                <div class="CodeMirror-gutter-wrapper" style="left: -31px;">
-                  <div class="CodeMirror-linenumber CodeMirror-gutter-elt" style="left: 0px; width: 21px;">1</div>
-                </div>
-                      <pre class=" CodeMirror-line "><span style="padding-right: 0.1px;">  <span class="cm-keyword">function</span> <span
-                          class="cm-def">onEnter</span>(<span class="cm-def">event</span>) {</span></pre>
-              </div>
-              <div style="position: relative;">
-                <div class="CodeMirror-gutter-wrapper" style="left: -31px;">
-                  <div class="CodeMirror-linenumber CodeMirror-gutter-elt" style="left: 0px; width: 21px;">2</div>
-                </div>
-                      <pre class=" CodeMirror-line "><span style="padding-right: 0.1px;">    <span class="cm-variable">console</span>.<span
-                          class="cm-property">log</span>(<span class="cm-string">'key `'</span> <span
-                          class="cm-operator">+</span> <span class="cm-variable-2">event</span>.<span
-                          class="cm-property">keyName</span> <span class="cm-operator">+</span> <span class="cm-string">'` is pressed'</span>);</span></pre>
-              </div>
-              <div style="position: relative;">
-                <div class="CodeMirror-gutter-wrapper" style="left: -31px;">
-                  <div class="CodeMirror-linenumber CodeMirror-gutter-elt" style="left: 0px; width: 21px;">3</div>
-                </div>
-                <pre class=" CodeMirror-line "><span style="padding-right: 0.1px;">  }</span></pre>
-              </div>
-              <div style="position: relative;">
-                <div class="CodeMirror-gutter-wrapper" style="left: -31px;">
-                  <div class="CodeMirror-linenumber CodeMirror-gutter-elt" style="left: 0px; width: 21px;">4</div>
-                </div>
-                      <pre class=" CodeMirror-line "><span style="padding-right: 0.1px;">  <span class="cm-keyword">function</span> <span
-                          class="cm-def">onChanged</span>(<span class="cm-def">event</span>) {</span></pre>
-              </div>
-              <div style="position: relative;">
-                <div class="CodeMirror-gutter-wrapper" style="left: -31px;">
-                  <div class="CodeMirror-linenumber CodeMirror-gutter-elt" style="left: 0px; width: 21px;">5</div>
-                </div>
-                      <pre class=" CodeMirror-line "><span style="padding-right: 0.1px;">    <span class="cm-variable">console</span>.<span
-                          class="cm-property">log</span>(<span class="cm-string">'prop `'</span> <span
-                          class="cm-operator">+</span> <span class="cm-variable-2">event</span>.<span
-                          class="cm-property">keyName</span> <span class="cm-operator">+</span> <span class="cm-string">'` is changed'</span>);</span></pre>
-              </div>
-              <div style="position: relative;">
-                <div class="CodeMirror-gutter-wrapper" style="left: -31px;">
-                  <div class="CodeMirror-linenumber CodeMirror-gutter-elt" style="left: 0px; width: 21px;">6</div>
-                </div>
-                <pre class=" CodeMirror-line "><span style="padding-right: 0.1px;">  }</span></pre>
-              </div>
-              <div style="position: relative;">
-                <div class="CodeMirror-gutter-wrapper" style="left: -31px;">
-                  <div class="CodeMirror-linenumber CodeMirror-gutter-elt" style="left: 0px; width: 21px;">7</div>
-                </div>
-                      <pre class=" CodeMirror-line "><span style="padding-right: 0.1px;">  <span class="cm-keyword">function</span> <span
-                          class="cm-def">onTitleChanged</span>(<span class="cm-def">event</span>) {</span></pre>
-              </div>
-              <div style="position: relative;">
-                <div class="CodeMirror-gutter-wrapper" style="left: -31px;">
-                  <div class="CodeMirror-linenumber CodeMirror-gutter-elt" style="left: 0px; width: 21px;">8</div>
-                </div>
-                      <pre class=" CodeMirror-line "><span style="padding-right: 0.1px;">    <span class="cm-variable">console</span>.<span
-                          class="cm-property">log</span>(<span
-                          class="cm-string">'prop `title` is changed, really'</span>);</span></pre>
-              </div>
-              <div style="position: relative;">
-                <div class="CodeMirror-gutter-wrapper" style="left: -31px;">
-                  <div class="CodeMirror-linenumber CodeMirror-gutter-elt" style="left: 0px; width: 21px;">9</div>
-                </div>
-                <pre class=" CodeMirror-line "><span style="padding-right: 0.1px;">  }</span></pre>
-              </div>
-              <div style="position: relative;">
-                <div class="CodeMirror-gutter-wrapper" style="left: -31px;">
-                  <div class="CodeMirror-linenumber CodeMirror-gutter-elt" style="left: 0px; width: 21px;">10
-                  </div>
-                </div>
-                      <pre class=" CodeMirror-line "><span style="padding-right: 0.1px;"><span
-                          cm-text="">​</span></span></pre>
-              </div>
-              <div style="position: relative;">
-                <div class="CodeMirror-gutter-wrapper" style="left: -31px;">
-                  <div class="CodeMirror-linenumber CodeMirror-gutter-elt" style="left: 0px; width: 21px;">11
-                  </div>
-                </div>
-                      <pre class=" CodeMirror-line "><span style="padding-right: 0.1px;">  <span class="cm-variable">element</span>.<span
-                          class="cm-property">on</span>(<span class="cm-string">'keypress.enter'</span>, <span
-                          class="cm-variable">onEnter</span>); <span class="cm-comment">// 按下Enter键时，才会输出：key `enter` is pressed</span></span></pre>
-              </div>
-              <div style="position: relative;">
-                <div class="CodeMirror-gutter-wrapper" style="left: -31px;">
-                  <div class="CodeMirror-linenumber CodeMirror-gutter-elt" style="left: 0px; width: 21px;">12
-                  </div>
-                </div>
-                      <pre class=" CodeMirror-line "><span style="padding-right: 0.1px;">  <span class="cm-variable">element</span>.<span
-                          class="cm-property">on</span>(<span class="cm-string">'changed'</span>, <span
-                          class="cm-variable">onChanged</span>);</span></pre>
-              </div>
-              <div style="position: relative;">
-                <div class="CodeMirror-gutter-wrapper" style="left: -31px;">
-                  <div class="CodeMirror-linenumber CodeMirror-gutter-elt" style="left: 0px; width: 21px;">13
-                  </div>
-                </div>
-                      <pre class=" CodeMirror-line "><span style="padding-right: 0.1px;">  <span class="cm-variable">element</span>.<span
-                          class="cm-property">on</span>(<span class="cm-string">'changed.title'</span>, <span
-                          class="cm-variable">onTitleChanged</span>);</span></pre>
-              </div>
-              <div style="position: relative;">
-                <div class="CodeMirror-gutter-wrapper" style="left: -31px;">
-                  <div class="CodeMirror-linenumber CodeMirror-gutter-elt" style="left: 0px; width: 21px;">14
-                  </div>
-                </div>
-                      <pre class=" CodeMirror-line "><span style="padding-right: 0.1px;"><span
-                          cm-text="">​</span></span></pre>
-              </div>
-              <div style="position: relative;">
-                <div class="CodeMirror-gutter-wrapper" style="left: -31px;">
-                  <div class="CodeMirror-linenumber CodeMirror-gutter-elt" style="left: 0px; width: 21px;">15
-                  </div>
-                </div>
-                      <pre class=" CodeMirror-line "><span style="padding-right: 0.1px;">  <span class="cm-variable">element</span>.<span
-                          class="cm-property">send</span>(<span class="cm-string">'changed.title'</span>);         <span
-                          class="cm-comment">// 输出：prop `title` is changed</span></span></pre>
-              </div>
-              <div style="position: relative;">
-                <div class="CodeMirror-gutter-wrapper" style="left: -31px;">
-                  <div class="CodeMirror-linenumber CodeMirror-gutter-elt" style="left: 0px; width: 21px;">16
-                  </div>
-                </div>
-                      <pre class=" CodeMirror-line "><span style="padding-right: 0.1px;">                                         <span
-                          class="cm-comment">// 输出：prop `title` is changed, really</span></span></pre>
-              </div>
-              <div style="position: relative;">
-                <div class="CodeMirror-gutter-wrapper" style="left: -31px;">
-                  <div class="CodeMirror-linenumber CodeMirror-gutter-elt" style="left: 0px; width: 21px;">17
-                  </div>
-                </div>
-                      <pre class=" CodeMirror-line "><span style="padding-right: 0.1px;">  <span class="cm-variable">element</span>.<span
-                          class="cm-property">send</span>(<span class="cm-string">'changed.other'</span>);         <span
-                          class="cm-comment">// 输出：prop `other` is changed</span></span></pre>
-              </div>
-              <div style="position: relative;">
-                <div class="CodeMirror-gutter-wrapper" style="left: -31px;">
-                  <div class="CodeMirror-linenumber CodeMirror-gutter-elt" style="left: 0px; width: 21px;">18
-                  </div>
-                </div>
-                      <pre class=" CodeMirror-line "><span style="padding-right: 0.1px;"><span
-                          cm-text="">​</span></span></pre>
-              </div>
-              <div style="position: relative;">
-                <div class="CodeMirror-gutter-wrapper" style="left: -31px;">
-                  <div class="CodeMirror-linenumber CodeMirror-gutter-elt" style="left: 0px; width: 21px;">19
-                  </div>
-                </div>
-                      <pre class=" CodeMirror-line "><span style="padding-right: 0.1px;">  <span class="cm-variable">element</span>.<span
-                          class="cm-property">off</span>(<span class="cm-string">'keypress.enter'</span>);         <span
-                          class="cm-comment">// 只移除了keyName为`enter`的keypress事件的处理函数</span></span></pre>
-              </div>
-              <div style="position: relative;">
-                <div class="CodeMirror-gutter-wrapper" style="left: -31px;">
-                  <div class="CodeMirror-linenumber CodeMirror-gutter-elt" style="left: 0px; width: 21px;">20
-                  </div>
-                </div>
-                      <pre class=" CodeMirror-line "><span style="padding-right: 0.1px;">  <span class="cm-variable">element</span>.<span
-                          class="cm-property">off</span>(<span class="cm-string">'changed'</span>);                <span
-                          class="cm-comment">// 移除了所有changed事件的处理函数，无论keyName是什么</span></span></pre>
-              </div>
+              <pre class=" CodeMirror-line "><span style="padding-right: 0.1px;"><span
+                  class="cm-keyword">function</span> <span class="cm-def">onEnter</span>(<span
+                  class="cm-def">event</span>) {</span></pre>
+              <pre class=" CodeMirror-line "><span style="padding-right: 0.1px;">  <span
+                  class="cm-variable">console</span>.<span class="cm-property">log</span>(<span class="cm-string">'key `'</span> <span
+                  class="cm-operator">+</span> <span class="cm-variable-2">event</span>.<span class="cm-property">keyName</span> <span
+                  class="cm-operator">+</span> <span class="cm-string">'` is pressed'</span>);</span></pre>
+              <pre class=" CodeMirror-line "><span style="padding-right: 0.1px;">}</span></pre>
+              <pre class=" CodeMirror-line "><span style="padding-right: 0.1px;"><span
+                  class="cm-keyword">function</span> <span class="cm-def">onChanged</span>(<span
+                  class="cm-def">event</span>) {</span></pre>
+              <pre class=" CodeMirror-line "><span style="padding-right: 0.1px;">  <span
+                  class="cm-variable">console</span>.<span class="cm-property">log</span>(<span class="cm-string">'prop `'</span> <span
+                  class="cm-operator">+</span> <span class="cm-variable-2">event</span>.<span class="cm-property">keyName</span> <span
+                  class="cm-operator">+</span> <span class="cm-string">'` is changed'</span>);</span></pre>
+              <pre class=" CodeMirror-line "><span style="padding-right: 0.1px;">}</span></pre>
+              <pre class=" CodeMirror-line "><span style="padding-right: 0.1px;"><span
+                  class="cm-keyword">function</span> <span class="cm-def">onTitleChanged</span>(<span class="cm-def">event</span>) {</span></pre>
+              <pre class=" CodeMirror-line "><span style="padding-right: 0.1px;">  <span
+                  class="cm-variable">console</span>.<span class="cm-property">log</span>(<span class="cm-string">'prop `title` is changed, really'</span>);</span></pre>
+              <pre class=" CodeMirror-line "><span style="padding-right: 0.1px;">}</span></pre>
+              <pre class=" CodeMirror-line "><span style="padding-right: 0.1px;"><span cm-text="">​</span></span></pre>
+              <pre class=" CodeMirror-line "><span style="padding-right: 0.1px;"><span
+                  class="cm-variable">element</span>.<span class="cm-property">on</span>(<span class="cm-string">'keypress.enter'</span>, <span
+                  class="cm-variable">onEnter</span>); <span
+                  class="cm-comment">// 按下Enter键时，才会输出：key `enter` is pressed</span></span></pre>
+              <pre class=" CodeMirror-line "><span style="padding-right: 0.1px;"><span
+                  class="cm-variable">element</span>.<span class="cm-property">on</span>(<span class="cm-string">'changed'</span>, <span
+                  class="cm-variable">onChanged</span>);</span></pre>
+              <pre class=" CodeMirror-line "><span style="padding-right: 0.1px;"><span
+                  class="cm-variable">element</span>.<span class="cm-property">on</span>(<span class="cm-string">'changed.title'</span>, <span
+                  class="cm-variable">onTitleChanged</span>);</span></pre>
+              <pre class=" CodeMirror-line "><span style="padding-right: 0.1px;"><span cm-text="">​</span></span></pre>
+              <pre class=" CodeMirror-line "><span style="padding-right: 0.1px;"><span
+                  class="cm-variable">element</span>.<span class="cm-property">send</span>(<span class="cm-string">'changed.title'</span>);         <span
+                  class="cm-comment">// 输出：prop `title` is changed</span></span></pre>
+              <pre class=" CodeMirror-line "><span style="padding-right: 0.1px;"><span class="cm-tab"
+                                                                                       role="presentation"
+                                                                                       cm-text="	">    </span><span
+                  class="cm-tab" role="presentation" cm-text="	">    </span><span class="cm-tab" role="presentation"
+                                                                                   cm-text="	">    </span><span
+                  class="cm-tab" role="presentation" cm-text="	">    </span><span class="cm-tab" role="presentation"
+                                                                                   cm-text="	">    </span><span
+                  class="cm-tab" role="presentation" cm-text="	">    </span><span class="cm-tab" role="presentation"
+                                                                                   cm-text="	">    </span><span
+                  class="cm-tab" role="presentation" cm-text="	">    </span><span class="cm-tab" role="presentation"
+                                                                                   cm-text="	">    </span>   <span
+                  class="cm-comment">// 输出：prop `title` is changed, really</span></span></pre>
+              <pre class=" CodeMirror-line "><span style="padding-right: 0.1px;"><span
+                  class="cm-variable">element</span>.<span class="cm-property">send</span>(<span class="cm-string">'changed.other'</span>);         <span
+                  class="cm-comment">// 输出：prop `other` is changed</span></span></pre>
+              <pre class=" CodeMirror-line "><span style="padding-right: 0.1px;"><span cm-text="">​</span></span></pre>
+              <pre class=" CodeMirror-line "><span style="padding-right: 0.1px;"><span
+                  class="cm-variable">element</span>.<span class="cm-property">off</span>(<span class="cm-string">'keypress.enter'</span>);         <span
+                  class="cm-comment">// 只移除了keyName为`enter`的keypress事件的处理函数</span></span></pre>
+              <pre class=" CodeMirror-line "><span style="padding-right: 0.1px;"><span
+                  class="cm-variable">element</span>.<span class="cm-property">off</span>(<span class="cm-string">'changed'</span>);                <span
+                  class="cm-comment">// 移除了未指定keyName的changed事件的处理函数</span></span></pre>
+              <pre class=" CodeMirror-line "><span style="padding-right: 0.1px;"><span cm-text="">​</span></span></pre>
+              <pre class=" CodeMirror-line "><span style="padding-right: 0.1px;"><span
+                  class="cm-variable">element</span>.<span class="cm-property">send</span>(<span class="cm-string">'changed.title'</span>);         <span
+                  class="cm-comment">// 输出：prop `title` is changed, really</span></span></pre>
             </div>
           </div>
         </div>

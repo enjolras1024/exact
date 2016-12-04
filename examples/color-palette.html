@@ -1,0 +1,455 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+  <title>Exact | Color Palette</title>
+
+  <link href="../stylesheets/codemirror.css" rel="stylesheet">
+  <link href="../stylesheets/alice.css" rel="stylesheet">
+  <link href="../stylesheets/defaults.css" rel="stylesheet">
+</head>
+<body>
+<header class="header">
+  <nav class="nav-bar">
+    <h3 class="brand"><a href="../" class="logo">Exact</a></h3>
+    <a class="menu-btn"></a>
+    <ul class="menu-bar">
+      <li><a href="#" class="menu-item active"> Examples </a></li>
+      <li><a href="../downloads/index.html" class="menu-item"> Downloads </a></li>
+      <li><a href="../documents/index.html" class="menu-item"> Documents </a></li>
+      <li><a href="../apis/index.html" class="menu-item"> APIs </a></li>
+      <li><a href="#" class="menu-item"> GitHub </a></li>
+    </ul>
+  </nav>
+</header>
+<div class="main">
+  <aside class="side-bar">
+    <div class="card">
+      <h4>Examples</h4>
+      <ul class="list">
+        <li><a href="" class="link">Color Palette</a></li>
+        <li><a href="./svg-component.html" class="link">SVG Component</a></li>
+        <li><a href="./todomvc.html" class="link">TodoMVC</a></li>
+      </ul>
+    </div>
+
+  </aside>
+  <a class="side-btn">&gt;</a>
+  <article class="article">
+    <h2>Color Palette</h2>
+    <header class="tab-header">
+      <ul class="tab-bar">
+        <li><a href="#" class="tab-item active"> Result </a></li>
+        <li><a href="#" class="tab-item"> HTML </a></li>
+        <li><a href="#" class="tab-item"> JavaScript </a></li>
+        <!--<li><a href="#" class="tab-item"> CSS </a></li>-->
+      </ul>
+    </header>
+    <section class="tab-content code-box scroll">
+      <iframe src="./color-palette/" class="frame"></iframe>
+    </section>
+    <section class="tab-content code-box scroll">
+      <div class="CodeMirror cm-s-alice">
+        <div class="CodeMirror-lines"><div style="position: relative; outline: none;"><div class="CodeMirror-measure"><span><span>​</span>x</span></div><div class="CodeMirror-measure"></div><div style="position: relative; z-index: 1;"></div><div class="CodeMirror-cursors"><div class="CodeMirror-cursor" style="left: 52.75px; top: 136px; height: 17px;">&nbsp;</div></div><div class="CodeMirror-code"><pre class=" CodeMirror-line "><span style="padding-right: 0.1px;"><span cm-text="">​</span></span></pre><pre class=" CodeMirror-line "><span style="padding-right: 0.1px;"><span class="cm-tag cm-bracket">&lt;</span><span class="cm-tag">div</span> <span class="cm-attribute">id</span>=<span class="cm-string">"app-shell"</span><span class="cm-tag cm-bracket">&gt;&lt;/</span><span class="cm-tag">div</span><span class="cm-tag cm-bracket">&gt;</span></span></pre><pre class=" CodeMirror-line "><span style="padding-right: 0.1px;"><span cm-text="">​</span></span></pre><pre class=" CodeMirror-line "><span style="padding-right: 0.1px;"><span class="cm-tag cm-bracket">&lt;</span><span class="cm-tag">div</span> <span class="cm-attribute">class</span>=<span class="cm-string">"template"</span><span class="cm-tag cm-bracket">&gt;</span></span></pre><pre class=" CodeMirror-line "><span style="padding-right: 0.1px;">  <span class="cm-tag cm-bracket">&lt;</span><span class="cm-tag">div</span> <span class="cm-attribute">class</span>=<span class="cm-string">"channel-editor"</span><span class="cm-tag cm-bracket">&gt;</span></span></pre><pre class=" CodeMirror-line "><span style="padding-right: 0.1px;">    <span class="cm-tag cm-bracket">&lt;</span><span class="cm-tag">span</span><span class="cm-tag cm-bracket">&gt;</span><span class="cm-error">&amp;</span>{ $.name }:<span class="cm-tag cm-bracket">&lt;/</span><span class="cm-tag">span</span><span class="cm-tag cm-bracket">&gt;</span></span></pre><pre class=" CodeMirror-line "><span style="padding-right: 0.1px;">    <span class="cm-tag cm-bracket">&lt;</span><span class="cm-tag">input</span> <span class="cm-attribute">type</span>=<span class="cm-string">"text"</span> <span class="cm-attribute">x-id</span>=<span class="cm-string">"editor"</span> <span class="cm-attribute">value</span>=<span class="cm-string">"@{$.value}"</span> <span class="cm-attribute">change+</span>=<span class="cm-string">"onChange"</span><span class="cm-tag cm-bracket">&gt;</span></span></pre><pre class=" CodeMirror-line "><span style="padding-right: 0.1px;">    <span class="cm-tag cm-bracket">&lt;</span><span class="cm-tag">input</span> <span class="cm-attribute">type</span>=<span class="cm-string">"range"</span> <span class="cm-attribute">x-id</span>=<span class="cm-string">"slider"</span> <span class="cm-attribute">min</span>=<span class="cm-string">"0"</span> <span class="cm-attribute">max</span>=<span class="cm-string">"255"</span> <span class="cm-attribute">value</span>=<span class="cm-string">"@{$.value}"</span> <span class="cm-attribute">mousemove+</span>=<span class="cm-string">"onSlide"</span><span class="cm-tag cm-bracket">&gt;</span></span></pre><pre class=" CodeMirror-line "><span style="padding-right: 0.1px;">  <span class="cm-tag cm-bracket">&lt;/</span><span class="cm-tag">div</span><span class="cm-tag cm-bracket">&gt;</span></span></pre><pre class=" CodeMirror-line "><span style="padding-right: 0.1px;"><span class="cm-tag cm-bracket">&lt;/</span><span class="cm-tag">div</span><span class="cm-tag cm-bracket">&gt;</span></span></pre><pre class=" CodeMirror-line "><span style="padding-right: 0.1px;"><span cm-text="">​</span></span></pre><pre class=" CodeMirror-line "><span style="padding-right: 0.1px;"><span class="cm-tag cm-bracket">&lt;</span><span class="cm-tag">div</span> <span class="cm-attribute">class</span>=<span class="cm-string">"template"</span><span class="cm-tag cm-bracket">&gt;</span></span></pre><pre class=" CodeMirror-line "><span style="padding-right: 0.1px;">  <span class="cm-tag cm-bracket">&lt;</span><span class="cm-tag">div</span> <span class="cm-attribute">class</span>=<span class="cm-string">"palette"</span><span class="cm-tag cm-bracket">&gt;</span></span></pre><pre class=" CodeMirror-line "><span style="padding-right: 0.1px;">    <span class="cm-tag cm-bracket">&lt;</span><span class="cm-tag">input</span> <span class="cm-attribute">type</span>=<span class="cm-string">"text"</span> <span class="cm-attribute">value</span>=<span class="cm-string">"@{$.color}"</span> <span class="cm-attribute">change+</span>=<span class="cm-string">"onChange"</span> <span class="cm-attribute">x-id</span>=<span class="cm-string">"input"</span> <span class="cm-attribute">x-class</span>=<span class="cm-string">"invalid: @{$.isInvalid}"</span><span class="cm-tag cm-bracket">&gt;</span></span></pre><pre class=" CodeMirror-line "><span style="padding-right: 0.1px;">    <span class="cm-tag cm-bracket">&lt;</span><span class="cm-tag">span</span> <span class="cm-attribute">x-id</span>=<span class="cm-string">"lump"</span> <span class="cm-attribute">x-style</span>=<span class="cm-string">"background-color: @{$.color}"</span><span class="cm-tag cm-bracket">&gt;&lt;/</span><span class="cm-tag">span</span><span class="cm-tag cm-bracket">&gt;</span></span></pre><pre class=" CodeMirror-line "><span style="padding-right: 0.1px;">    <span class="cm-tag cm-bracket">&lt;</span><span class="cm-tag">div</span> <span class="cm-attribute">x-type</span>=<span class="cm-string">"ChannelEditor"</span> <span class="cm-attribute">name</span>=<span class="cm-string">"R"</span> <span class="cm-attribute">value</span>=<span class="cm-string">"#{$.red}"</span><span class="cm-tag cm-bracket">&gt;&lt;/</span><span class="cm-tag">div</span><span class="cm-tag cm-bracket">&gt;</span></span></pre><pre class=" CodeMirror-line "><span style="padding-right: 0.1px;">    <span class="cm-tag cm-bracket">&lt;</span><span class="cm-tag">div</span> <span class="cm-attribute">x-type</span>=<span class="cm-string">"ChannelEditor"</span> <span class="cm-attribute">name</span>=<span class="cm-string">"G"</span> <span class="cm-attribute">value</span>=<span class="cm-string">"#{$.green}"</span><span class="cm-tag cm-bracket">&gt;&lt;/</span><span class="cm-tag">div</span><span class="cm-tag cm-bracket">&gt;</span></span></pre><pre class=" CodeMirror-line "><span style="padding-right: 0.1px;">    <span class="cm-tag cm-bracket">&lt;</span><span class="cm-tag">div</span> <span class="cm-attribute">x-type</span>=<span class="cm-string">"ChannelEditor"</span> <span class="cm-attribute">name</span>=<span class="cm-string">"B"</span> <span class="cm-attribute">value</span>=<span class="cm-string">"#{$.blue}"</span><span class="cm-tag cm-bracket">&gt;&lt;/</span><span class="cm-tag">div</span><span class="cm-tag cm-bracket">&gt;</span></span></pre><pre class=" CodeMirror-line "><span style="padding-right: 0.1px;">  <span class="cm-tag cm-bracket">&lt;/</span><span class="cm-tag">div</span><span class="cm-tag cm-bracket">&gt;</span></span></pre><pre class=" CodeMirror-line "><span style="padding-right: 0.1px;"><span class="cm-tag cm-bracket">&lt;/</span><span class="cm-tag">div</span><span class="cm-tag cm-bracket">&gt;</span></span></pre><pre class=" CodeMirror-line "><span style="padding-right: 0.1px;"><span cm-text="">​</span></span></pre></div></div></div>
+      </div>
+      <!--<script type="text/html" class="code-behind xml-mode">
+<div id="app-shell"></div>
+
+<div class="template">
+  <div class="channel-editor">
+    <span>&{ $.name }:</span>
+    <input type="text" x-id="editor" value="@{$.value}" change+="onChange">
+    <input type="range" x-id="slider" min="0" max="255" value="@{$.value}" mousemove+="onSlide">
+  </div>
+</div>
+
+<div class="template">
+  <div class="palette">
+    <input type="text" value="@{$.color}" change+="onChange" x-id="input" x-class="invalid: @{$.isInvalid}">
+    <span x-id="lump" x-style="background-color: @{$.color}"></span>
+    <div x-type="ChannelEditor" name="R" value="#{$.red}"></div>
+    <div x-type="ChannelEditor" name="G" value="#{$.green}"></div>
+    <div x-type="ChannelEditor" name="B" value="#{$.blue}"></div>
+  </div>
+</div>
+</script>-->
+    </section>
+    <section class="tab-content code-box scroll">
+      <!--<pre class="code-behind js-mode">
+var Skin = Exact.Skin;
+var Component = Exact.Component;
+
+function ChannelEditor() {
+  Component.apply(this, arguments);
+}
+
+Exact.defineClass({
+  constructor: ChannelEditor, extend: Component,
+  statics: {
+    $template: Skin.query(document, '.template .channel-editor')
+  },
+  onSlide: function() {
+    this.set('value', Skin.getProp(this.slider.$skin, 'value'));
+  },
+  onChange: function() {
+    var value = Number(Skin.getProp(this.slider.$skin, 'value'));
+    if (!isNaN(value)) {
+      this.set('value', value);
+    }
+  },
+  register: function() {
+    Exact.help(this).bind('onChange', 'onSlide');
+  }
+});
+
+function cut(key) {
+  return function (value, props) {
+    value = Number(value);
+
+    value = value >= 0 ? value : 0;
+    value = value <= 255 ? value : 255;
+
+    props[key] = value;
+  }
+}
+
+function hex2dec(n) {
+  var s = Number(n).toString(16);
+  return  s.length > 1 ? s : '0' + s;
+}
+
+function dec2hex(s) {
+  return Number('0x' + s);
+}
+
+function Palette() {
+  Component.apply(this, arguments);
+}
+
+Exact.defineClass({
+  constructor: Palette, extend: Component,
+  statics: {
+    $template: Skin.query(document, '.template .palette'),
+    resources: {
+      ChannelEditor: ChannelEditor
+    },
+    descriptors: [{
+      red: {
+        set: cut('red')
+      },
+      blue: {
+        set: cut('blue')
+      },
+      green: {
+        set: cut('green')
+      },
+      color: {
+        validator: /^\s*#[0-9a-fA-F]{6}\s*$/,
+        depends: ['red', 'green', 'blue'],
+        get: function(props) {
+          return '#' + hex2dec(this.red) + hex2dec(this.green) + hex2dec(this.blue);
+        },
+        set: function(value, props) {
+          value = value.slice(1); // delete '#'
+          this.set('red', dec2hex(value.slice(0, 2)));
+          this.set('green', dec2hex(value.slice(2, 4)));
+          this.set('blue', dec2hex(value.slice(4, 6)));
+        }
+      }
+    }]
+  },
+  defaults: function() {
+    return {
+      red: 0,
+      blue: 0,
+      green: 0
+    }
+  },
+  register: function() {
+    Exact.help(this).bind('onChange');
+  },
+  ready: function() {
+    var self = this;
+    this.on('validated.color', function(event, error) {
+      self.set('isInvalid', !!error);
+    });
+  },
+  onChange: function() {
+    this.set('color', Skin.getProp(this.input.$skin, 'value'));
+  }
+});
+
+document.getElementById('app-shell').appendChild(Component.create(Palette).$skin);
+</pre>-->
+      <div class="CodeMirror cm-s-alice">
+        <div class="CodeMirror-lines">
+          <div style="position: relative; outline: none;">
+            <div class="CodeMirror-measure"><span><span>​</span>x</span></div>
+            <div class="CodeMirror-measure"></div>
+            <div style="position: relative; z-index: 1;"></div>
+            <div class="CodeMirror-cursors">
+              <div class="CodeMirror-cursor" style="left: 79px; top: 1411px; height: 17px;">&nbsp;</div>
+            </div>
+            <div class="CodeMirror-code">
+                      <pre class=" CodeMirror-line "><span style="padding-right: 0.1px;"><span
+                          class="cm-keyword">var</span> <span class="cm-def">Skin</span> <span
+                          class="cm-operator">=</span> <span class="cm-variable">Exact</span>.<span class="cm-property">Skin</span>;</span></pre>
+                      <pre class=" CodeMirror-line "><span style="padding-right: 0.1px;"><span
+                          class="cm-keyword">var</span> <span class="cm-def">Component</span> <span class="cm-operator">=</span> <span
+                          class="cm-variable">Exact</span>.<span class="cm-property">Component</span>;</span></pre>
+                      <pre class=" CodeMirror-line "><span style="padding-right: 0.1px;"><span
+                          cm-text="">​</span></span></pre>
+                      <pre class=" CodeMirror-line "><span style="padding-right: 0.1px;"><span class="cm-keyword">function</span> <span
+                          class="cm-def">ChannelEditor</span>() {</span></pre>
+                      <pre class=" CodeMirror-line "><span style="padding-right: 0.1px;">  <span class="cm-variable">Component</span>.<span
+                          class="cm-property">apply</span>(<span class="cm-keyword">this</span>, <span
+                          class="cm-variable-2">arguments</span>);</span></pre>
+              <pre class=" CodeMirror-line "><span style="padding-right: 0.1px;">}</span></pre>
+                      <pre class=" CodeMirror-line "><span style="padding-right: 0.1px;"><span
+                          cm-text="">​</span></span></pre>
+                      <pre class=" CodeMirror-line "><span style="padding-right: 0.1px;"><span
+                          class="cm-variable">Exact</span>.<span class="cm-property">defineClass</span>({</span></pre>
+                      <pre class=" CodeMirror-line "><span style="padding-right: 0.1px;">  <span class="cm-property">constructor</span>: <span
+                          class="cm-variable">ChannelEditor</span>, <span class="cm-property">extend</span>: <span
+                          class="cm-variable">Component</span>,</span></pre>
+              <pre class=" CodeMirror-line "><span style="padding-right: 0.1px;">  <span class="cm-property">statics</span>: {</span></pre>
+                      <pre class=" CodeMirror-line "><span style="padding-right: 0.1px;">    <span class="cm-property">$template</span>: <span
+                          class="cm-variable">Skin</span>.<span class="cm-property">query</span>(<span
+                          class="cm-variable">document</span>, <span
+                          class="cm-string">'.template .channel-editor'</span>)</span></pre>
+              <pre class=" CodeMirror-line "><span style="padding-right: 0.1px;">  },</span></pre>
+                      <pre class=" CodeMirror-line "><span style="padding-right: 0.1px;">  <span class="cm-property">onSlide</span>: <span
+                          class="cm-keyword">function</span>() {</span></pre>
+                      <pre class=" CodeMirror-line "><span style="padding-right: 0.1px;">    <span class="cm-keyword">this</span>.<span
+                          class="cm-property">set</span>(<span class="cm-string">'value'</span>, <span
+                          class="cm-variable">Skin</span>.<span class="cm-property">getProp</span>(<span
+                          class="cm-keyword">this</span>.<span class="cm-property">slider</span>.<span
+                          class="cm-property">$skin</span>, <span class="cm-string">'value'</span>));</span></pre>
+              <pre class=" CodeMirror-line "><span style="padding-right: 0.1px;">  },</span></pre>
+                      <pre class=" CodeMirror-line "><span style="padding-right: 0.1px;">  <span class="cm-property">onChange</span>: <span
+                          class="cm-keyword">function</span>() {</span></pre>
+                      <pre class=" CodeMirror-line "><span style="padding-right: 0.1px;">    <span class="cm-keyword">var</span> <span
+                          class="cm-def">value</span> <span class="cm-operator">=</span> <span class="cm-variable">Number</span>(<span
+                          class="cm-variable">Skin</span>.<span class="cm-property">getProp</span>(<span
+                          class="cm-keyword">this</span>.<span class="cm-property">slider</span>.<span
+                          class="cm-property">$skin</span>, <span class="cm-string">'value'</span>));</span></pre>
+                      <pre class=" CodeMirror-line "><span style="padding-right: 0.1px;">    <span
+                          class="cm-keyword">if</span> (<span class="cm-operator">!</span><span class="cm-variable">isNaN</span>(<span
+                          class="cm-variable-2">value</span>)) {</span></pre>
+                      <pre class=" CodeMirror-line "><span style="padding-right: 0.1px;">      <span class="cm-keyword">this</span>.<span
+                          class="cm-property">set</span>(<span class="cm-string">'value'</span>, <span
+                          class="cm-variable-2">value</span>);</span></pre>
+              <pre class=" CodeMirror-line "><span style="padding-right: 0.1px;">    }</span></pre>
+              <pre class=" CodeMirror-line "><span style="padding-right: 0.1px;">  },</span></pre>
+                      <pre class=" CodeMirror-line "><span style="padding-right: 0.1px;">  <span class="cm-property">register</span>: <span
+                          class="cm-keyword">function</span>() {</span></pre>
+                      <pre class=" CodeMirror-line "><span style="padding-right: 0.1px;">    <span class="cm-variable">Exact</span>.<span
+                          class="cm-property">help</span>(<span class="cm-keyword">this</span>).<span
+                          class="cm-property">bind</span>(<span class="cm-string">'onChange'</span>, <span
+                          class="cm-string">'onSlide'</span>);</span></pre>
+              <pre class=" CodeMirror-line "><span style="padding-right: 0.1px;">  }</span></pre>
+              <pre class=" CodeMirror-line "><span style="padding-right: 0.1px;">});</span></pre>
+                      <pre class=" CodeMirror-line "><span style="padding-right: 0.1px;"><span
+                          cm-text="">​</span></span></pre>
+                      <pre class=" CodeMirror-line "><span style="padding-right: 0.1px;"><span class="cm-keyword">function</span> <span
+                          class="cm-def">cut</span>(<span class="cm-def">key</span>) {</span></pre>
+                      <pre class=" CodeMirror-line "><span style="padding-right: 0.1px;">  <span class="cm-keyword">return</span> <span
+                          class="cm-keyword">function</span> (<span class="cm-def">value</span>, <span class="cm-def">props</span>) {</span></pre>
+                      <pre class=" CodeMirror-line "><span style="padding-right: 0.1px;">    <span
+                          class="cm-variable-2">value</span> <span class="cm-operator">=</span> <span
+                          class="cm-variable">Number</span>(<span class="cm-variable-2">value</span>);</span></pre>
+                      <pre class=" CodeMirror-line "><span style="padding-right: 0.1px;"><span
+                          cm-text="">​</span></span></pre>
+                      <pre class=" CodeMirror-line "><span style="padding-right: 0.1px;">    <span
+                          class="cm-variable-2">value</span> <span class="cm-operator">=</span> <span
+                          class="cm-variable-2">value</span> <span class="cm-operator">&gt;=</span> <span
+                          class="cm-number">0</span> <span class="cm-operator">?</span> <span class="cm-variable-2">value</span> : <span
+                          class="cm-number">0</span>;</span></pre>
+                      <pre class=" CodeMirror-line "><span style="padding-right: 0.1px;">    <span
+                          class="cm-variable-2">value</span> <span class="cm-operator">=</span> <span
+                          class="cm-variable-2">value</span> <span class="cm-operator">&lt;=</span> <span
+                          class="cm-number">255</span> <span class="cm-operator">?</span> <span class="cm-variable-2">value</span> : <span
+                          class="cm-number">255</span>;</span></pre>
+                      <pre class=" CodeMirror-line "><span style="padding-right: 0.1px;"><span
+                          cm-text="">​</span></span></pre>
+                      <pre class=" CodeMirror-line "><span style="padding-right: 0.1px;">    <span
+                          class="cm-variable-2">props</span>[<span class="cm-variable-2">key</span>] <span
+                          class="cm-operator">=</span> <span class="cm-variable-2">value</span>;</span></pre>
+              <pre class=" CodeMirror-line "><span style="padding-right: 0.1px;">  }</span></pre>
+              <pre class=" CodeMirror-line "><span style="padding-right: 0.1px;">}</span></pre>
+                      <pre class=" CodeMirror-line "><span style="padding-right: 0.1px;"><span
+                          cm-text="">​</span></span></pre>
+                      <pre class=" CodeMirror-line "><span style="padding-right: 0.1px;"><span class="cm-keyword">function</span> <span
+                          class="cm-def">hex2dec</span>(<span class="cm-def">n</span>) {</span></pre>
+                      <pre class=" CodeMirror-line "><span style="padding-right: 0.1px;">  <span
+                          class="cm-keyword">var</span> <span class="cm-def">s</span> <span class="cm-operator">=</span> <span
+                          class="cm-variable">Number</span>(<span class="cm-variable-2">n</span>).<span
+                          class="cm-property">toString</span>(<span class="cm-number">16</span>);</span></pre>
+                      <pre class=" CodeMirror-line "><span style="padding-right: 0.1px;">  <span class="cm-keyword">return</span>  <span
+                          class="cm-variable-2">s</span>.<span class="cm-property">length</span> <span
+                          class="cm-operator">&gt;</span> <span class="cm-number">1</span> <span
+                          class="cm-operator">?</span> <span class="cm-variable-2">s</span> : <span class="cm-string">'0'</span> <span
+                          class="cm-operator">+</span> <span class="cm-variable-2">s</span>;</span></pre>
+              <pre class=" CodeMirror-line "><span style="padding-right: 0.1px;">}</span></pre>
+                      <pre class=" CodeMirror-line "><span style="padding-right: 0.1px;"><span
+                          cm-text="">​</span></span></pre>
+                      <pre class=" CodeMirror-line "><span style="padding-right: 0.1px;"><span class="cm-keyword">function</span> <span
+                          class="cm-def">dec2hex</span>(<span class="cm-def">s</span>) {</span></pre>
+                      <pre class=" CodeMirror-line "><span style="padding-right: 0.1px;">  <span class="cm-keyword">return</span> <span
+                          class="cm-variable">Number</span>(<span class="cm-string">'0x'</span> <span
+                          class="cm-operator">+</span> <span class="cm-variable-2">s</span>);</span></pre>
+              <pre class=" CodeMirror-line "><span style="padding-right: 0.1px;">}</span></pre>
+                      <pre class=" CodeMirror-line "><span style="padding-right: 0.1px;"><span
+                          cm-text="">​</span></span></pre>
+                      <pre class=" CodeMirror-line "><span style="padding-right: 0.1px;"><span class="cm-keyword">function</span> <span
+                          class="cm-def">Palette</span>() {</span></pre>
+                      <pre class=" CodeMirror-line "><span style="padding-right: 0.1px;">  <span class="cm-variable">Component</span>.<span
+                          class="cm-property">apply</span>(<span class="cm-keyword">this</span>, <span
+                          class="cm-variable-2">arguments</span>);</span></pre>
+              <pre class=" CodeMirror-line "><span style="padding-right: 0.1px;">}</span></pre>
+                      <pre class=" CodeMirror-line "><span style="padding-right: 0.1px;"><span
+                          cm-text="">​</span></span></pre>
+                      <pre class=" CodeMirror-line "><span style="padding-right: 0.1px;"><span
+                          class="cm-variable">Exact</span>.<span class="cm-property">defineClass</span>({</span></pre>
+                      <pre class=" CodeMirror-line "><span style="padding-right: 0.1px;">  <span class="cm-property">constructor</span>: <span
+                          class="cm-variable">Palette</span>, <span class="cm-property">extend</span>: <span
+                          class="cm-variable">Component</span>,</span></pre>
+              <pre class=" CodeMirror-line "><span style="padding-right: 0.1px;">  <span class="cm-property">statics</span>: {</span></pre>
+                      <pre class=" CodeMirror-line "><span style="padding-right: 0.1px;">    <span class="cm-property">$template</span>: <span
+                          class="cm-variable">Skin</span>.<span class="cm-property">query</span>(<span
+                          class="cm-variable">document</span>, <span
+                          class="cm-string">'.template .palette'</span>),</span></pre>
+              <pre class=" CodeMirror-line "><span style="padding-right: 0.1px;">    <span class="cm-property">resources</span>: {</span></pre>
+                      <pre class=" CodeMirror-line "><span style="padding-right: 0.1px;">      <span
+                          class="cm-property">ChannelEditor</span>: <span
+                          class="cm-variable">ChannelEditor</span></span></pre>
+              <pre class=" CodeMirror-line "><span style="padding-right: 0.1px;">    },</span></pre>
+              <pre class=" CodeMirror-line "><span style="padding-right: 0.1px;">    <span class="cm-property">descriptors</span>: [{</span></pre>
+                      <pre class=" CodeMirror-line "><span style="padding-right: 0.1px;">      <span
+                          class="cm-property">red</span>: {</span></pre>
+                      <pre class=" CodeMirror-line "><span style="padding-right: 0.1px;">        <span
+                          class="cm-property">set</span>: <span class="cm-variable">cut</span>(<span class="cm-string">'red'</span>)</span></pre>
+              <pre class=" CodeMirror-line "><span style="padding-right: 0.1px;">      },</span></pre>
+                      <pre class=" CodeMirror-line "><span style="padding-right: 0.1px;">      <span
+                          class="cm-property">blue</span>: {</span></pre>
+                      <pre class=" CodeMirror-line "><span style="padding-right: 0.1px;">        <span
+                          class="cm-property">set</span>: <span class="cm-variable">cut</span>(<span class="cm-string">'blue'</span>)</span></pre>
+              <pre class=" CodeMirror-line "><span style="padding-right: 0.1px;">      },</span></pre>
+                      <pre class=" CodeMirror-line "><span style="padding-right: 0.1px;">      <span
+                          class="cm-property">green</span>: {</span></pre>
+                      <pre class=" CodeMirror-line "><span style="padding-right: 0.1px;">        <span
+                          class="cm-property">set</span>: <span class="cm-variable">cut</span>(<span class="cm-string">'green'</span>)</span></pre>
+              <pre class=" CodeMirror-line "><span style="padding-right: 0.1px;">      },</span></pre>
+                      <pre class=" CodeMirror-line "><span style="padding-right: 0.1px;">      <span
+                          class="cm-property">color</span>: {</span></pre>
+                      <pre class=" CodeMirror-line "><span style="padding-right: 0.1px;">        <span
+                          class="cm-property">validator</span>: <span
+                          class="cm-string-2">/^\s*#[0-9a-fA-F]{6}\s*$/</span>,</span></pre>
+                      <pre class=" CodeMirror-line "><span style="padding-right: 0.1px;">        <span
+                          class="cm-property">depends</span>: [<span class="cm-string">'red'</span>, <span
+                          class="cm-string">'green'</span>, <span class="cm-string">'blue'</span>],</span></pre>
+                      <pre class=" CodeMirror-line "><span style="padding-right: 0.1px;">        <span
+                          class="cm-property">get</span>: <span class="cm-keyword">function</span>(<span class="cm-def">props</span>) {</span></pre>
+                      <pre class=" CodeMirror-line "><span style="padding-right: 0.1px;">          <span
+                          class="cm-keyword">return</span> <span class="cm-string">'#'</span> <span class="cm-operator">+</span> <span
+                          class="cm-variable">hex2dec</span>(<span class="cm-keyword">this</span>.<span
+                          class="cm-property">red</span>) <span class="cm-operator">+</span> <span class="cm-variable">hex2dec</span>(<span
+                          class="cm-keyword">this</span>.<span class="cm-property">green</span>) <span
+                          class="cm-operator">+</span> <span class="cm-variable">hex2dec</span>(<span
+                          class="cm-keyword">this</span>.<span class="cm-property">blue</span>);</span></pre>
+              <pre class=" CodeMirror-line "><span style="padding-right: 0.1px;">        },</span></pre>
+                      <pre class=" CodeMirror-line "><span style="padding-right: 0.1px;">        <span
+                          class="cm-property">set</span>: <span class="cm-keyword">function</span>(<span class="cm-def">value</span>, <span
+                          class="cm-def">props</span>) {</span></pre>
+                      <pre class=" CodeMirror-line "><span style="padding-right: 0.1px;">          <span
+                          class="cm-variable-2">value</span> <span class="cm-operator">=</span> <span
+                          class="cm-variable-2">value</span>.<span class="cm-property">slice</span>(<span
+                          class="cm-number">1</span>); <span class="cm-comment">// delete '#'</span></span></pre>
+                      <pre class=" CodeMirror-line "><span style="padding-right: 0.1px;">          <span
+                          class="cm-keyword">this</span>.<span class="cm-property">set</span>(<span class="cm-string">'red'</span>, <span
+                          class="cm-variable">dec2hex</span>(<span class="cm-variable-2">value</span>.<span
+                          class="cm-property">slice</span>(<span class="cm-number">0</span>, <span
+                          class="cm-number">2</span>)));</span></pre>
+                      <pre class=" CodeMirror-line "><span style="padding-right: 0.1px;">          <span
+                          class="cm-keyword">this</span>.<span class="cm-property">set</span>(<span class="cm-string">'green'</span>, <span
+                          class="cm-variable">dec2hex</span>(<span class="cm-variable-2">value</span>.<span
+                          class="cm-property">slice</span>(<span class="cm-number">2</span>, <span
+                          class="cm-number">4</span>)));</span></pre>
+                      <pre class=" CodeMirror-line "><span style="padding-right: 0.1px;">          <span
+                          class="cm-keyword">this</span>.<span class="cm-property">set</span>(<span class="cm-string">'blue'</span>, <span
+                          class="cm-variable">dec2hex</span>(<span class="cm-variable-2">value</span>.<span
+                          class="cm-property">slice</span>(<span class="cm-number">4</span>, <span
+                          class="cm-number">6</span>)));</span></pre>
+              <pre class=" CodeMirror-line "><span style="padding-right: 0.1px;">        }</span></pre>
+              <pre class=" CodeMirror-line "><span style="padding-right: 0.1px;">      }</span></pre>
+              <pre class=" CodeMirror-line "><span style="padding-right: 0.1px;">    }]</span></pre>
+              <pre class=" CodeMirror-line "><span style="padding-right: 0.1px;">  },</span></pre>
+                      <pre class=" CodeMirror-line "><span style="padding-right: 0.1px;">  <span class="cm-property">defaults</span>: <span
+                          class="cm-keyword">function</span>() {</span></pre>
+              <pre class=" CodeMirror-line "><span style="padding-right: 0.1px;">    <span class="cm-keyword">return</span> {</span></pre>
+                      <pre class=" CodeMirror-line "><span style="padding-right: 0.1px;">      <span
+                          class="cm-property">red</span>: <span class="cm-number">0</span>,</span></pre>
+                      <pre class=" CodeMirror-line "><span style="padding-right: 0.1px;">      <span
+                          class="cm-property">blue</span>: <span class="cm-number">0</span>,</span></pre>
+                      <pre class=" CodeMirror-line "><span style="padding-right: 0.1px;">      <span
+                          class="cm-property">green</span>: <span class="cm-number">0</span></span></pre>
+              <pre class=" CodeMirror-line "><span style="padding-right: 0.1px;">    }</span></pre>
+              <pre class=" CodeMirror-line "><span style="padding-right: 0.1px;">  },</span></pre>
+                      <pre class=" CodeMirror-line "><span style="padding-right: 0.1px;">  <span class="cm-property">register</span>: <span
+                          class="cm-keyword">function</span>() {</span></pre>
+                      <pre class=" CodeMirror-line "><span style="padding-right: 0.1px;">    <span class="cm-variable">Exact</span>.<span
+                          class="cm-property">help</span>(<span class="cm-keyword">this</span>).<span
+                          class="cm-property">bind</span>(<span class="cm-string">'onChange'</span>);</span></pre>
+              <pre class=" CodeMirror-line "><span style="padding-right: 0.1px;">  },</span></pre>
+                      <pre class=" CodeMirror-line "><span style="padding-right: 0.1px;">  <span class="cm-property">ready</span>: <span
+                          class="cm-keyword">function</span>() {</span></pre>
+                      <pre class=" CodeMirror-line "><span style="padding-right: 0.1px;">    <span class="cm-keyword">var</span> <span
+                          class="cm-def">self</span> <span class="cm-operator">=</span> <span
+                          class="cm-keyword">this</span>;</span></pre>
+                      <pre class=" CodeMirror-line "><span style="padding-right: 0.1px;">    <span class="cm-keyword">this</span>.<span
+                          class="cm-property">on</span>(<span class="cm-string">'validated.color'</span>, <span
+                          class="cm-keyword">function</span>(<span class="cm-def">event</span>, <span class="cm-def">error</span>) {</span></pre>
+                      <pre class=" CodeMirror-line "><span style="padding-right: 0.1px;">      <span
+                          class="cm-variable-2">self</span>.<span class="cm-property">set</span>(<span
+                          class="cm-string">'isInvalid'</span>, <span class="cm-operator">!!</span><span
+                          class="cm-variable-2">error</span>);</span></pre>
+              <pre class=" CodeMirror-line "><span style="padding-right: 0.1px;">    });</span></pre>
+              <pre class=" CodeMirror-line "><span style="padding-right: 0.1px;">  },</span></pre>
+                      <pre class=" CodeMirror-line "><span style="padding-right: 0.1px;">  <span class="cm-property">onChange</span>: <span
+                          class="cm-keyword">function</span>() {</span></pre>
+                      <pre class=" CodeMirror-line "><span style="padding-right: 0.1px;">    <span class="cm-keyword">this</span>.<span
+                          class="cm-property">set</span>(<span class="cm-string">'color'</span>, <span
+                          class="cm-variable">Skin</span>.<span class="cm-property">getProp</span>(<span
+                          class="cm-keyword">this</span>.<span class="cm-property">input</span>.<span
+                          class="cm-property">$skin</span>, <span class="cm-string">'value'</span>));</span></pre>
+              <pre class=" CodeMirror-line "><span style="padding-right: 0.1px;">  }</span></pre>
+              <pre class=" CodeMirror-line "><span style="padding-right: 0.1px;">});</span></pre>
+                      <pre class=" CodeMirror-line "><span style="padding-right: 0.1px;"><span
+                          cm-text="">​</span></span></pre>
+                      <pre class=" CodeMirror-line "><span style="padding-right: 0.1px;"><span class="cm-variable">document</span>.<span
+                          class="cm-property">getElementById</span>(<span class="cm-string">'app-shell'</span>).<span
+                          class="cm-property">appendChild</span>(<span class="cm-variable">Component</span>.<span
+                          class="cm-property">create</span>(<span class="cm-variable">Palette</span>).<span
+                          class="cm-property">$skin</span>);</span></pre>
+                      <pre class=" CodeMirror-line "><span style="padding-right: 0.1px;"><span
+                          cm-text="">​</span></span></pre>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="tab-content">
+
+    </section>
+  </article>
+
+</div>
+
+<script src="../javascripts/codemirror.js"></script>
+<script src="../javascripts/xml-mode.js"></script>
+<script src="../javascripts/javascript-mode.js"></script>
+<script src="../javascripts/site.js"></script>
+</body>
+</html>

@@ -3,60 +3,12 @@
 <head lang="en">
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
-  <title>Exact</title>
+  <title>Exact |　TodoMVC</title>
 
   <link href="../stylesheets/codemirror.css" rel="stylesheet">
   <link href="../stylesheets/alice.css" rel="stylesheet">
   <link href="../stylesheets/defaults.css" rel="stylesheet">
   <!--<link href="../stylesheets/index.css" rel="stylesheet">-->
-
-  
-  <style>
-    .tab-header {
-      height: 30px;
-      width: 100%;
-      border-bottom: solid 1px #0af;
-    }
-
-    .tab-bar {
-      margin: 0;
-      float: right;
-    }
-
-    .tab-bar > li {
-      float: left;
-      list-style: none;
-      margin: 0;
-      padding: 0;
-    }
-
-    .tab-item {
-      padding: 5px 10px;
-      line-height: 30px;
-      color: #888;
-    }
-
-    .tab-item:hover, .tab-item:active {
-      color: #222;
-      /*border-bottom: solid 2px #666;*/
-    }
-
-    .tab-item.active{
-      color: #222;
-    }
-
-    .tab-content {
-      /*display: none;*/
-      height: 500px;
-      overflow-y: scroll;
-    }
-
-    .frame {
-      border: none;
-      height: 100%;
-      width: 100%;
-    }
-  </style>
 </head>
 <body>
 <header class="header">
@@ -65,9 +17,9 @@
     <a class="menu-btn"></a>
     <ul class="menu-bar">
       <li><a href="#" class="menu-item active"> Examples </a></li>
+      <li><a href="../downloads/index.html" class="menu-item"> Downloads </a></li>
       <li><a href="../documents/index.html" class="menu-item"> Documents </a></li>
-      <li><a href="#" class="menu-item"> Downloads </a></li>
-      <li><a href="#" class="menu-item"> Blogs </a></li>
+      <li><a href="../apis/index.html" class="menu-item"> APIs </a></li>
       <li><a href="#" class="menu-item"> GitHub </a></li>
     </ul>
   </nav>
@@ -77,6 +29,8 @@
     <div class="card">
       <h4>Examples</h4>
       <ul class="list">
+        <li><a href="./color-palette.html" class="link">Color Palette</a></li>
+        <li><a href="./svg-component.html" class="link">SVG Component</a></li>
         <li><a href="" class="link">TodoMVC</a></li>
       </ul>
     </div>
@@ -90,69 +44,510 @@
         <li><a href="#" class="tab-item active"> Result </a></li>
         <li><a href="#" class="tab-item"> HTML </a></li>
         <li><a href="#" class="tab-item"> JavaScript </a></li>
-        <li><a href="#" class="tab-item"> CSS </a></li>
+        <!--<li><a href="#" class="tab-item"> CSS </a></li>-->
       </ul>
     </header>
     <section class="tab-content">
-      <iframe src="./todomvc/index.html" class="frame"></iframe>
+      <iframe src="todomvc/index.html" class="frame"></iframe>
     </section>
-    <section class="tab-content">
-      <div class="code-box">
-        <script type="text/html" class="code-behind xml-mode">
-    <div class="template ">
-      <section class="todoapp">
-        <header class="header">
-          <h1>todos</h1>
-          <input class="new-todo" placeholder="What needs to be done?" autofocus keyup.enter="@{onEnter}">
-        </header>
-        <section class="main" >
-          <input class="toggle-all" id="toggle-all" type="checkbox" checked="${$.allDone @}" click="@{onCheck}">
-          <label for="toggle-all">Mark all as complete</label>
-          <ul class="todo-list" x-id="list" x-type="List" item-adapter="&{ENJ.Adapter}" items="${$.todos | $.filtering @}">
-          </ul>
-        </section>
-        <footer class="footer" x-style="display: ${$.todos.length | display @};">
-  <span class="todo-count">
-    <strong x-id="strong">`${$.remainingCount}`</strong>`${$.remainingCount | pluralize('item')} left`
-  </span>
-          <ul class="filters" click="@{onSelect}">
-            <li>
-              <a x-class="selected: ${$.filter === 'all'}" href="#/">All</a>
-            </li>
-            <li>
-              <a x-class="selected: ${$.filter === 'active'}" href="#/active">Active</a>
-            </li>
-            <li>
-              <a x-class="selected: ${$.filter === 'completed'}" href="#/completed">Completed</a>
-            </li>
-          </ul>
-          <button class="clear-completed" click="@{$.clearCompleted()}"
-                  x-style="display: ${$.todos.length > $.remainingCount | display @};" >Clear completed</button>
-        </footer>
-      </section>
-    </div>
-
-    <ul class="template">
-      <li class="adapter" x-class="todo: true; completed: ${$.item.completed}; editing: ${$.item.selected};">
-        <div class="view">
-          <!--checked="#{$.item.completed::change}"-->
-          <input class="toggle" type="checkbox" change="@{onToggle}" checked="${$.item.completed}">
-          <label dblclick="@{$.edit()}">`${$.item.title}`</label>
-          <button class="destroy" click="@{onDestroy}"></button>
-        </div>
-        <input class="edit"  x-id="editor" value="${$.item.title}"
-               blur="@{onBlur}" keyup.enter="@{$.onSubmit(event.target.value)}" keyup.escape="@{onEsc}">
-      </li>
-    </ul>
-        </script>
-
+    <section class="tab-content code-box scroll">
+      <div class="CodeMirror cm-s-alice">
+        <div class="CodeMirror-lines"><div style="position: relative; outline: none;"><div class="CodeMirror-measure"><span><span>​</span>x</span></div><div class="CodeMirror-measure"></div><div style="position: relative; z-index: 1;"></div><div class="CodeMirror-cursors"><div class="CodeMirror-cursor" style="left: 0px; top: 0px; height: 17px;">&nbsp;</div></div><div class="CodeMirror-code"><pre class=" CodeMirror-line "><span style="padding-right: 0.1px;"><span cm-text="">​</span></span></pre><pre class=" CodeMirror-line "><span style="padding-right: 0.1px;"><span class="cm-tag cm-bracket">&lt;</span><span class="cm-tag">div</span> <span class="cm-attribute">id</span>=<span class="cm-string">"app-shell"</span><span class="cm-tag cm-bracket">&gt;&lt;/</span><span class="cm-tag">div</span><span class="cm-tag cm-bracket">&gt;</span></span></pre><pre class=" CodeMirror-line "><span style="padding-right: 0.1px;"><span cm-text="">​</span></span></pre><pre class=" CodeMirror-line "><span style="padding-right: 0.1px;"><span class="cm-tag cm-bracket">&lt;</span><span class="cm-tag">div</span> <span class="cm-attribute">class</span>=<span class="cm-string">"template"</span><span class="cm-tag cm-bracket">&gt;</span></span></pre><pre class=" CodeMirror-line "><span style="padding-right: 0.1px;">  <span class="cm-tag cm-bracket">&lt;</span><span class="cm-tag">section</span> <span class="cm-attribute">class</span>=<span class="cm-string">"todoapp"</span><span class="cm-tag cm-bracket">&gt;</span></span></pre><pre class=" CodeMirror-line "><span style="padding-right: 0.1px;">    <span class="cm-tag cm-bracket">&lt;</span><span class="cm-tag">header</span> <span class="cm-attribute">class</span>=<span class="cm-string">"header"</span><span class="cm-tag cm-bracket">&gt;</span></span></pre><pre class=" CodeMirror-line "><span style="padding-right: 0.1px;">      <span class="cm-tag cm-bracket">&lt;</span><span class="cm-tag">h1</span><span class="cm-tag cm-bracket">&gt;</span>todos<span class="cm-tag cm-bracket">&lt;/</span><span class="cm-tag">h1</span><span class="cm-tag cm-bracket">&gt;</span></span></pre><pre class=" CodeMirror-line "><span style="padding-right: 0.1px;">      <span class="cm-tag cm-bracket">&lt;</span><span class="cm-tag">input</span> <span class="cm-attribute">class</span>=<span class="cm-string">"new-todo"</span> <span class="cm-attribute">placeholder</span>=<span class="cm-string">"What needs to be done?"</span> <span class="cm-attribute">autofocus</span> <span class="cm-attribute">keyup.enter+</span>=<span class="cm-string">"onEnter"</span><span class="cm-tag cm-bracket">&gt;</span></span></pre><pre class=" CodeMirror-line "><span style="padding-right: 0.1px;">    <span class="cm-tag cm-bracket">&lt;/</span><span class="cm-tag">header</span><span class="cm-tag cm-bracket">&gt;</span></span></pre><pre class=" CodeMirror-line "><span style="padding-right: 0.1px;">    <span class="cm-tag cm-bracket">&lt;</span><span class="cm-tag">section</span> <span class="cm-attribute">class</span>=<span class="cm-string">"main"</span> <span class="cm-tag cm-bracket">&gt;</span></span></pre><pre class=" CodeMirror-line "><span style="padding-right: 0.1px;">      <span class="cm-tag cm-bracket">&lt;</span><span class="cm-tag">input</span> <span class="cm-attribute">class</span>=<span class="cm-string">"toggle-all"</span> <span class="cm-attribute">id</span>=<span class="cm-string">"toggle-all"</span> <span class="cm-attribute">type</span>=<span class="cm-string">"checkbox"</span> <span class="cm-attribute">checked</span>=<span class="cm-string">"@{$.allDone *}"</span> <span class="cm-attribute">click+</span>=<span class="cm-string">"onCheck"</span><span class="cm-tag cm-bracket">&gt;</span></span></pre><pre class=" CodeMirror-line "><span style="padding-right: 0.1px;">      <span class="cm-tag cm-bracket">&lt;</span><span class="cm-tag">label</span> <span class="cm-attribute">for</span>=<span class="cm-string">"toggle-all"</span><span class="cm-tag cm-bracket">&gt;</span>Mark all as complete<span class="cm-tag cm-bracket">&lt;/</span><span class="cm-tag">label</span><span class="cm-tag cm-bracket">&gt;</span></span></pre><pre class=" CodeMirror-line "><span style="padding-right: 0.1px;">      <span class="cm-tag cm-bracket">&lt;</span><span class="cm-tag">ul</span> <span class="cm-attribute">class</span>=<span class="cm-string">"todo-list"</span> <span class="cm-attribute">x-id</span>=<span class="cm-string">"list"</span> <span class="cm-attribute">x-type</span>=<span class="cm-string">"List"</span> <span class="cm-attribute">item-adapter</span>=<span class="cm-string">"&amp;{ENJ.Adapter}"</span> <span class="cm-attribute">items</span>=<span class="cm-string">"@{$.todos | $.filtering *}"</span><span class="cm-tag cm-bracket">&gt;</span></span></pre><pre class=" CodeMirror-line "><span style="padding-right: 0.1px;">      <span class="cm-tag cm-bracket">&lt;/</span><span class="cm-tag">ul</span><span class="cm-tag cm-bracket">&gt;</span></span></pre><pre class=" CodeMirror-line "><span style="padding-right: 0.1px;">    <span class="cm-tag cm-bracket">&lt;/</span><span class="cm-tag">section</span><span class="cm-tag cm-bracket">&gt;</span></span></pre><pre class=" CodeMirror-line "><span style="padding-right: 0.1px;">    <span class="cm-tag cm-bracket">&lt;</span><span class="cm-tag">footer</span> <span class="cm-attribute">class</span>=<span class="cm-string">"footer"</span> <span class="cm-attribute">x-style</span>=<span class="cm-string">"display: @{$.todos.length | display *};"</span><span class="cm-tag cm-bracket">&gt;</span></span></pre><pre class=" CodeMirror-line "><span style="padding-right: 0.1px;"><span class="cm-tag cm-bracket">&lt;</span><span class="cm-tag">span</span> <span class="cm-attribute">class</span>=<span class="cm-string">"todo-count"</span><span class="cm-tag cm-bracket">&gt;</span></span></pre><pre class=" CodeMirror-line "><span style="padding-right: 0.1px;"><span class="cm-tag cm-bracket">&lt;</span><span class="cm-tag">strong</span> <span class="cm-attribute">x-id</span>=<span class="cm-string">"strong"</span><span class="cm-tag cm-bracket">&gt;</span>@{$.remainingCount}<span class="cm-tag cm-bracket">&lt;/</span><span class="cm-tag">strong</span><span class="cm-tag cm-bracket">&gt;</span>@{$.remainingCount | pluralize('item')} left</span></pre><pre class=" CodeMirror-line "><span style="padding-right: 0.1px;"><span class="cm-tag cm-bracket">&lt;/</span><span class="cm-tag">span</span><span class="cm-tag cm-bracket">&gt;</span></span></pre><pre class=" CodeMirror-line "><span style="padding-right: 0.1px;">      <span class="cm-tag cm-bracket">&lt;</span><span class="cm-tag">ul</span> <span class="cm-attribute">class</span>=<span class="cm-string">"filters"</span> <span class="cm-attribute">click+</span>=<span class="cm-string">"onSelect"</span><span class="cm-tag cm-bracket">&gt;</span></span></pre><pre class=" CodeMirror-line "><span style="padding-right: 0.1px;">        <span class="cm-tag cm-bracket">&lt;</span><span class="cm-tag">li</span><span class="cm-tag cm-bracket">&gt;</span></span></pre><pre class=" CodeMirror-line "><span style="padding-right: 0.1px;">          <span class="cm-tag cm-bracket">&lt;</span><span class="cm-tag">a</span> <span class="cm-attribute">x-class</span>=<span class="cm-string">"selected: @{$.filter === 'all'}"</span> <span class="cm-attribute">href</span>=<span class="cm-string">"#/"</span><span class="cm-tag cm-bracket">&gt;</span>All<span class="cm-tag cm-bracket">&lt;/</span><span class="cm-tag">a</span><span class="cm-tag cm-bracket">&gt;</span></span></pre><pre class=" CodeMirror-line "><span style="padding-right: 0.1px;">        <span class="cm-tag cm-bracket">&lt;/</span><span class="cm-tag">li</span><span class="cm-tag cm-bracket">&gt;</span></span></pre><pre class=" CodeMirror-line "><span style="padding-right: 0.1px;">        <span class="cm-tag cm-bracket">&lt;</span><span class="cm-tag">li</span><span class="cm-tag cm-bracket">&gt;</span></span></pre><pre class=" CodeMirror-line "><span style="padding-right: 0.1px;">          <span class="cm-tag cm-bracket">&lt;</span><span class="cm-tag">a</span> <span class="cm-attribute">x-class</span>=<span class="cm-string">"selected: @{$.filter === 'active'}"</span> <span class="cm-attribute">href</span>=<span class="cm-string">"#/active"</span><span class="cm-tag cm-bracket">&gt;</span>Active<span class="cm-tag cm-bracket">&lt;/</span><span class="cm-tag">a</span><span class="cm-tag cm-bracket">&gt;</span></span></pre><pre class=" CodeMirror-line "><span style="padding-right: 0.1px;">        <span class="cm-tag cm-bracket">&lt;/</span><span class="cm-tag">li</span><span class="cm-tag cm-bracket">&gt;</span></span></pre><pre class=" CodeMirror-line "><span style="padding-right: 0.1px;">        <span class="cm-tag cm-bracket">&lt;</span><span class="cm-tag">li</span><span class="cm-tag cm-bracket">&gt;</span></span></pre><pre class=" CodeMirror-line "><span style="padding-right: 0.1px;">          <span class="cm-tag cm-bracket">&lt;</span><span class="cm-tag">a</span> <span class="cm-attribute">x-class</span>=<span class="cm-string">"selected: @{$.filter === 'completed'}"</span> <span class="cm-attribute">href</span>=<span class="cm-string">"#/completed"</span><span class="cm-tag cm-bracket">&gt;</span>Completed<span class="cm-tag cm-bracket">&lt;/</span><span class="cm-tag">a</span><span class="cm-tag cm-bracket">&gt;</span></span></pre><pre class=" CodeMirror-line "><span style="padding-right: 0.1px;">        <span class="cm-tag cm-bracket">&lt;/</span><span class="cm-tag">li</span><span class="cm-tag cm-bracket">&gt;</span></span></pre><pre class=" CodeMirror-line "><span style="padding-right: 0.1px;">      <span class="cm-tag cm-bracket">&lt;/</span><span class="cm-tag">ul</span><span class="cm-tag cm-bracket">&gt;</span></span></pre><pre class=" CodeMirror-line "><span style="padding-right: 0.1px;">      <span class="cm-tag cm-bracket">&lt;</span><span class="cm-tag">button</span> <span class="cm-attribute">class</span>=<span class="cm-string">"clear-completed"</span> <span class="cm-attribute">click+</span>=<span class="cm-string">"$.clearCompleted()"</span></span></pre><pre class=" CodeMirror-line "><span style="padding-right: 0.1px;">              <span class="cm-attribute">x-style</span>=<span class="cm-string">"display: @{$.todos.length &gt; $.remainingCount | display *};"</span> <span class="cm-tag cm-bracket">&gt;</span>Clear completed<span class="cm-tag cm-bracket">&lt;/</span><span class="cm-tag">button</span><span class="cm-tag cm-bracket">&gt;</span></span></pre><pre class=" CodeMirror-line "><span style="padding-right: 0.1px;">    <span class="cm-tag cm-bracket">&lt;/</span><span class="cm-tag">footer</span><span class="cm-tag cm-bracket">&gt;</span></span></pre><pre class=" CodeMirror-line "><span style="padding-right: 0.1px;">  <span class="cm-tag cm-bracket">&lt;/</span><span class="cm-tag">section</span><span class="cm-tag cm-bracket">&gt;</span></span></pre><pre class=" CodeMirror-line "><span style="padding-right: 0.1px;"><span class="cm-tag cm-bracket">&lt;/</span><span class="cm-tag">div</span><span class="cm-tag cm-bracket">&gt;</span></span></pre><pre class=" CodeMirror-line "><span style="padding-right: 0.1px;"><span cm-text="">​</span></span></pre><pre class=" CodeMirror-line "><span style="padding-right: 0.1px;"><span class="cm-tag cm-bracket">&lt;</span><span class="cm-tag">div</span> <span class="cm-attribute">class</span>=<span class="cm-string">"template"</span><span class="cm-tag cm-bracket">&gt;</span></span></pre><pre class=" CodeMirror-line "><span style="padding-right: 0.1px;">  <span class="cm-tag cm-bracket">&lt;</span><span class="cm-tag">li</span> <span class="cm-attribute">class</span>=<span class="cm-string">"adapter"</span> <span class="cm-attribute">x-class</span>=<span class="cm-string">"todo: true; completed: @{$.item.completed}; editing: @{$.item.selected};"</span><span class="cm-tag cm-bracket">&gt;</span></span></pre><pre class=" CodeMirror-line "><span style="padding-right: 0.1px;">    <span class="cm-tag cm-bracket">&lt;</span><span class="cm-tag">div</span> <span class="cm-attribute">class</span>=<span class="cm-string">"view"</span><span class="cm-tag cm-bracket">&gt;</span></span></pre><pre class=" CodeMirror-line "><span style="padding-right: 0.1px;">      <span class="cm-tag cm-bracket">&lt;</span><span class="cm-tag">input</span> <span class="cm-attribute">class</span>=<span class="cm-string">"toggle"</span> <span class="cm-attribute">type</span>=<span class="cm-string">"checkbox"</span> <span class="cm-attribute">x-type</span>=<span class="cm-string">"CheckBox"</span> <span class="cm-attribute">change+</span>=<span class="cm-string">"onToggle"</span> <span class="cm-attribute">checked</span>=<span class="cm-string">"#{$.item.completed}"</span><span class="cm-tag cm-bracket">&gt;</span></span></pre><pre class=" CodeMirror-line "><span style="padding-right: 0.1px;">      <span class="cm-tag cm-bracket">&lt;</span><span class="cm-tag">label</span> <span class="cm-attribute">dblclick+</span>=<span class="cm-string">"$.edit()"</span><span class="cm-tag cm-bracket">&gt;</span>@{$.item.title}<span class="cm-tag cm-bracket">&lt;/</span><span class="cm-tag">label</span><span class="cm-tag cm-bracket">&gt;</span></span></pre><pre class=" CodeMirror-line "><span style="padding-right: 0.1px;">      <span class="cm-tag cm-bracket">&lt;</span><span class="cm-tag">button</span> <span class="cm-attribute">class</span>=<span class="cm-string">"destroy"</span> <span class="cm-attribute">click+</span>=<span class="cm-string">"onDestroy"</span><span class="cm-tag cm-bracket">&gt;&lt;/</span><span class="cm-tag">button</span><span class="cm-tag cm-bracket">&gt;</span></span></pre><pre class=" CodeMirror-line "><span style="padding-right: 0.1px;">    <span class="cm-tag cm-bracket">&lt;/</span><span class="cm-tag">div</span><span class="cm-tag cm-bracket">&gt;</span></span></pre><pre class=" CodeMirror-line "><span style="padding-right: 0.1px;">    <span class="cm-tag cm-bracket">&lt;</span><span class="cm-tag">input</span> <span class="cm-attribute">class</span>=<span class="cm-string">"edit"</span> <span class="cm-attribute">blur+</span>=<span class="cm-string">"onBlur"</span> <span class="cm-attribute">keyup.enter+</span>=<span class="cm-string">"$.onSubmit(event.target.value)"</span> <span class="cm-attribute">keyup.escape+</span>=<span class="cm-string">"onEsc"</span></span></pre><pre class=" CodeMirror-line "><span style="padding-right: 0.1px;">           <span class="cm-attribute">x-id</span>=<span class="cm-string">"editor"</span> <span class="cm-attribute">value</span>=<span class="cm-string">"@{$.item.title}"</span><span class="cm-tag cm-bracket">&gt;</span></span></pre><pre class=" CodeMirror-line "><span style="padding-right: 0.1px;">  <span class="cm-tag cm-bracket">&lt;/</span><span class="cm-tag">li</span><span class="cm-tag cm-bracket">&gt;</span></span></pre><pre class=" CodeMirror-line "><span style="padding-right: 0.1px;"><span class="cm-tag cm-bracket">&lt;/</span><span class="cm-tag">div</span><span class="cm-tag cm-bracket">&gt;</span></span></pre><pre class=" CodeMirror-line "><span style="padding-right: 0.1px;">      </span></pre></div></div></div>
       </div>
-    </section>
-    <section class="tab-content">
-      <div class="code-box">
-      <pre class="code-behind js-mode">
-  var ENJ = {};
+      <!--<script type="text/html" class="code-behind xml-mode">
+<div id="app-shell"></div>
 
+<div class="template">
+  <section class="todoapp">
+    <header class="header">
+      <h1>todos</h1>
+      <input class="new-todo" placeholder="What needs to be done?" autofocus keyup.enter+="onEnter">
+    </header>
+    <section class="main" >
+      <input class="toggle-all" id="toggle-all" type="checkbox" checked="@{$.allDone *}" click+="onCheck">
+      <label for="toggle-all">Mark all as complete</label>
+      <ul class="todo-list" x-id="list" x-type="List" item-adapter="&{ENJ.Adapter}" items="@{$.todos | $.filtering *}">
+      </ul>
+    </section>
+    <footer class="footer" x-style="display: @{$.todos.length | display *};">
+<span class="todo-count">
+<strong x-id="strong">@{$.remainingCount}</strong>@{$.remainingCount | pluralize('item')} left
+</span>
+      <ul class="filters" click+="onSelect">
+        <li>
+          <a x-class="selected: @{$.filter === 'all'}" href="#/">All</a>
+        </li>
+        <li>
+          <a x-class="selected: @{$.filter === 'active'}" href="#/active">Active</a>
+        </li>
+        <li>
+          <a x-class="selected: @{$.filter === 'completed'}" href="#/completed">Completed</a>
+        </li>
+      </ul>
+      <button class="clear-completed" click+="$.clearCompleted()"
+              x-style="display: @{$.todos.length > $.remainingCount | display *};" >Clear completed</button>
+    </footer>
+  </section>
+</div>
+
+<div class="template">
+  <li class="adapter" x-class="todo: true; completed: @{$.item.completed}; editing: @{$.item.selected};">
+    <div class="view">
+      <input class="toggle" type="checkbox" x-type="CheckBox" change+="onToggle" checked="#{$.item.completed}">
+      <label dblclick+="$.edit()">@{$.item.title}</label>
+      <button class="destroy" click+="onDestroy"></button>
+    </div>
+    <input class="edit" blur+="onBlur" keyup.enter+="$.onSubmit(event.target.value)" keyup.escape+="onEsc"
+           x-id="editor" value="@{$.item.title}">
+  </li>
+</div>
+      </script>-->
+    </section>
+    <section class="tab-content code-box scroll">
+      <div class="CodeMirror cm-s-alice">
+        <div class="CodeMirror-lines">
+          <div style="position: relative; outline: none;">
+            <div class="CodeMirror-measure"></div>
+            <div class="CodeMirror-measure">
+                    <pre class="CodeMirror-line"><span style="padding-right: 0.1px;">  <span
+                        class="cm-keyword">var</span> <span class="cm-def">Store</span> <span
+                        class="cm-operator">=</span> <span class="cm-variable">Exact</span>.<span class="cm-property">Store</span>;</span></pre>
+            </div>
+            <div style="position: relative; z-index: 1;"></div>
+            <div class="CodeMirror-cursors"></div>
+            <div class="CodeMirror-code">
+              <pre class=" CodeMirror-line "><span style="padding-right: 0.1px;">(<span class="cm-keyword">function</span>() {</span></pre>
+                    <pre class=" CodeMirror-line "><span style="padding-right: 0.1px;">  <span
+                        class="cm-keyword">var</span> <span class="cm-def">Skin</span> <span
+                        class="cm-operator">=</span> <span class="cm-variable">Exact</span>.<span class="cm-property">Skin</span>;</span></pre>
+                    <pre class=" CodeMirror-line "><span style="padding-right: 0.1px;">  <span
+                        class="cm-keyword">var</span> <span class="cm-def">Store</span> <span
+                        class="cm-operator">=</span> <span class="cm-variable">Exact</span>.<span class="cm-property">Store</span>;</span></pre>
+                    <pre class=" CodeMirror-line "><span style="padding-right: 0.1px;">  <span
+                        class="cm-keyword">var</span> <span class="cm-def">Collection</span> <span
+                        class="cm-operator">=</span> <span class="cm-variable">Exact</span>.<span class="cm-property">Collection</span>;</span></pre>
+                    <pre class=" CodeMirror-line "><span style="padding-right: 0.1px;">  <span
+                        class="cm-keyword">var</span> <span class="cm-def">Component</span> <span
+                        class="cm-operator">=</span> <span class="cm-variable">Exact</span>.<span class="cm-property">Component</span>;</span></pre>
+              <pre class=" CodeMirror-line "><span style="padding-right: 0.1px;"><span cm-text="">​</span></span></pre>
+                    <pre class=" CodeMirror-line "><span style="padding-right: 0.1px;">  <span
+                        class="cm-keyword">var</span> <span class="cm-def">defineClass</span> <span class="cm-operator">=</span> <span
+                        class="cm-variable">Exact</span>.<span class="cm-property">defineClass</span>;</span></pre>
+              <pre class=" CodeMirror-line "><span style="padding-right: 0.1px;"><span cm-text="">​</span></span></pre>
+                    <pre class=" CodeMirror-line "><span style="padding-right: 0.1px;">  <span
+                        class="cm-keyword">var</span> <span class="cm-def">ENJ</span> <span class="cm-operator">=</span> {</span></pre>
+                    <pre class=" CodeMirror-line "><span style="padding-right: 0.1px;">    <span class="cm-property">read</span>: <span
+                        class="cm-keyword">function</span>() {</span></pre>
+                    <pre class=" CodeMirror-line "><span style="padding-right: 0.1px;">      <span class="cm-keyword">var</span> <span
+                        class="cm-def">item</span> <span class="cm-operator">=</span> <span class="cm-variable">localStorage</span>.<span
+                        class="cm-property">getItem</span>(<span class="cm-string">'todos'</span>);</span></pre>
+              <pre class=" CodeMirror-line "><span style="padding-right: 0.1px;"><span cm-text="">​</span></span></pre>
+                    <pre class=" CodeMirror-line "><span style="padding-right: 0.1px;">      <span
+                        class="cm-keyword">if</span> (<span class="cm-variable-2">item</span>) {</span></pre>
+                    <pre class=" CodeMirror-line "><span style="padding-right: 0.1px;">        <span class="cm-keyword">var</span> <span
+                        class="cm-def">todos</span> <span class="cm-operator">=</span> <span
+                        class="cm-variable">JSON</span>.<span class="cm-property">parse</span>(<span
+                        class="cm-variable-2">item</span>);</span></pre>
+                    <pre class=" CodeMirror-line "><span style="padding-right: 0.1px;">        <span class="cm-keyword">var</span> <span
+                        class="cm-def">collection</span> <span class="cm-operator">=</span> <span
+                        class="cm-keyword">new</span> <span class="cm-variable-2">Collection</span>();</span></pre>
+                    <pre class=" CodeMirror-line "><span style="padding-right: 0.1px;">        <span class="cm-keyword">for</span> (<span
+                        class="cm-keyword">var</span> <span class="cm-def">i</span> <span
+                        class="cm-operator">=</span> <span class="cm-number">0</span>; <span
+                        class="cm-variable-2">i</span> <span class="cm-operator">&lt;</span> <span
+                        class="cm-variable-2">todos</span>.<span class="cm-property">length</span>; <span
+                        class="cm-operator">++</span><span class="cm-variable-2">i</span>) {</span></pre>
+                    <pre class=" CodeMirror-line "><span style="padding-right: 0.1px;">          <span
+                        class="cm-variable-2">collection</span>.<span class="cm-property">push</span>(<span
+                        class="cm-keyword">new</span> <span class="cm-variable-2">Store</span>(<span
+                        class="cm-variable-2">todos</span>[<span class="cm-variable-2">i</span>]));</span></pre>
+              <pre class=" CodeMirror-line "><span style="padding-right: 0.1px;">        }</span></pre>
+                    <pre class=" CodeMirror-line "><span style="padding-right: 0.1px;">        <span class="cm-keyword">return</span> <span
+                        class="cm-variable-2">collection</span>;</span></pre>
+              <pre class=" CodeMirror-line "><span style="padding-right: 0.1px;">      }</span></pre>
+              <pre class=" CodeMirror-line "><span style="padding-right: 0.1px;"><span cm-text="">​</span></span></pre>
+                    <pre class=" CodeMirror-line "><span style="padding-right: 0.1px;">      <span class="cm-keyword">return</span> <span
+                        class="cm-variable-2">Collection</span>.<span class="cm-property">from</span>([]);</span></pre>
+              <pre class=" CodeMirror-line "><span style="padding-right: 0.1px;">    },</span></pre>
+                    <pre class=" CodeMirror-line "><span style="padding-right: 0.1px;">    <span class="cm-property">save</span>: <span
+                        class="cm-keyword">function</span>(<span class="cm-def">collection</span>) {</span></pre>
+                    <pre class=" CodeMirror-line "><span style="padding-right: 0.1px;">      <span class="cm-variable">console</span>.<span
+                        class="cm-property">log</span>(<span class="cm-variable-2">collection</span>);</span></pre>
+                    <pre class=" CodeMirror-line "><span style="padding-right: 0.1px;">      <span class="cm-variable">localStorage</span>.<span
+                        class="cm-property">setItem</span>(<span class="cm-string">'todos'</span>, <span
+                        class="cm-variable">JSON</span>.<span class="cm-property">stringify</span>(<span
+                        class="cm-variable-2">collection</span>.<span class="cm-property">slice</span>(<span
+                        class="cm-number">0</span>)));</span></pre>
+              <pre class=" CodeMirror-line "><span style="padding-right: 0.1px;">    }</span></pre>
+              <pre class=" CodeMirror-line "><span style="padding-right: 0.1px;">  };</span></pre>
+              <pre class=" CodeMirror-line "><span style="padding-right: 0.1px;"><span cm-text="">​</span></span></pre>
+                    <pre class=" CodeMirror-line "><span style="padding-right: 0.1px;">  <span
+                        class="cm-variable-2">ENJ</span>.<span class="cm-property">Adapter</span> <span
+                        class="cm-operator">=</span> <span class="cm-variable-2">defineClass</span>({</span></pre>
+                    <pre class=" CodeMirror-line "><span style="padding-right: 0.1px;">    <span class="cm-property">extend</span>: <span
+                        class="cm-variable-2">Component</span>,</span></pre>
+              <pre class=" CodeMirror-line "><span style="padding-right: 0.1px;"><span cm-text="">​</span></span></pre>
+              <pre class=" CodeMirror-line "><span style="padding-right: 0.1px;">    <span class="cm-property">statics</span>: {</span></pre>
+                    <pre class=" CodeMirror-line "><span style="padding-right: 0.1px;">      <span class="cm-property">$template</span>: <span
+                        class="cm-variable-2">Skin</span>.<span class="cm-property">query</span>(<span
+                        class="cm-variable">document</span>, <span
+                        class="cm-string">'.template .adapter'</span>),</span></pre>
+              <pre class=" CodeMirror-line "><span style="padding-right: 0.1px;">      <span class="cm-property">resources</span>: {</span></pre>
+                    <pre class=" CodeMirror-line "><span style="padding-right: 0.1px;">        <span
+                        class="cm-property">CheckBox</span>: <span class="cm-variable">Exact</span>.<span
+                        class="cm-property">CheckBox</span></span></pre>
+              <pre class=" CodeMirror-line "><span style="padding-right: 0.1px;">      }</span></pre>
+              <pre class=" CodeMirror-line "><span style="padding-right: 0.1px;">    },</span></pre>
+              <pre class=" CodeMirror-line "><span style="padding-right: 0.1px;"><span cm-text="">​</span></span></pre>
+                    <pre class=" CodeMirror-line "><span style="padding-right: 0.1px;">    <span class="cm-property">register</span>: <span
+                        class="cm-keyword">function</span>() {</span></pre>
+                    <pre class=" CodeMirror-line "><span style="padding-right: 0.1px;">      <span class="cm-variable">Exact</span>.<span
+                        class="cm-property">help</span>(<span class="cm-keyword">this</span>).<span class="cm-property">bind</span>(<span
+                        class="cm-string">'onSubmit'</span>, <span class="cm-string">'onEdit'</span>, <span
+                        class="cm-string">'onEnter'</span>, <span class="cm-string">'onEsc'</span>, <span
+                        class="cm-string">'onBlur'</span>, <span class="cm-string">'onDestroy'</span>, <span
+                        class="cm-string">'onToggle'</span>);</span></pre>
+              <pre class=" CodeMirror-line "><span style="padding-right: 0.1px;">    },</span></pre>
+              <pre class=" CodeMirror-line "><span style="padding-right: 0.1px;"><span cm-text="">​</span></span></pre>
+                    <pre class=" CodeMirror-line "><span style="padding-right: 0.1px;">    <span class="cm-property">edit</span>: <span
+                        class="cm-keyword">function</span>() {</span></pre>
+                    <pre class=" CodeMirror-line "><span style="padding-right: 0.1px;">      <span class="cm-keyword">this</span>.<span
+                        class="cm-property">backup</span> <span class="cm-operator">=</span> <span class="cm-keyword">this</span>.<span
+                        class="cm-property">item</span>.<span class="cm-property">title</span>;</span></pre>
+                    <pre class=" CodeMirror-line "><span style="padding-right: 0.1px;">      <span class="cm-keyword">this</span>.<span
+                        class="cm-property">item</span>.<span class="cm-property">set</span>(<span class="cm-string">'selected'</span>, <span
+                        class="cm-atom">true</span>);</span></pre>
+              <pre class=" CodeMirror-line "><span style="padding-right: 0.1px;"><span cm-text="">​</span></span></pre>
+                    <pre class=" CodeMirror-line "><span style="padding-right: 0.1px;">      <span class="cm-keyword">this</span>.<span
+                        class="cm-property">editor</span>.<span class="cm-property">set</span>(<span class="cm-string">'value'</span>, <span
+                        class="cm-keyword">this</span>.<span class="cm-property">backup</span>);</span></pre>
+                    <pre class=" CodeMirror-line "><span style="padding-right: 0.1px;">      <span class="cm-keyword">this</span>.<span
+                        class="cm-property">editor</span>.<span class="cm-property">focus</span>();</span></pre>
+              <pre class=" CodeMirror-line "><span style="padding-right: 0.1px;">    },</span></pre>
+              <pre class=" CodeMirror-line "><span style="padding-right: 0.1px;"><span cm-text="">​</span></span></pre>
+                    <pre class=" CodeMirror-line "><span style="padding-right: 0.1px;">    <span class="cm-property">onEsc</span>: <span
+                        class="cm-keyword">function</span>(<span class="cm-def">event</span>) {</span></pre>
+                    <pre class=" CodeMirror-line "><span style="padding-right: 0.1px;">      <span class="cm-keyword">this</span>.<span
+                        class="cm-property">cancel</span> <span class="cm-operator">=</span> <span
+                        class="cm-atom">true</span>;</span></pre>
+                    <pre class=" CodeMirror-line "><span style="padding-right: 0.1px;">      <span class="cm-keyword">this</span>.<span
+                        class="cm-property">editor</span>.<span class="cm-property">blur</span>();</span></pre>
+              <pre class=" CodeMirror-line "><span style="padding-right: 0.1px;">    },</span></pre>
+              <pre class=" CodeMirror-line "><span style="padding-right: 0.1px;"><span cm-text="">​</span></span></pre>
+                    <pre class=" CodeMirror-line "><span style="padding-right: 0.1px;">    <span class="cm-property">onEnter</span>: <span
+                        class="cm-keyword">function</span>(<span class="cm-def">event</span>) {</span></pre>
+                    <pre class=" CodeMirror-line "><span style="padding-right: 0.1px;">      <span class="cm-keyword">this</span>.<span
+                        class="cm-property">onSubmit</span>(<span class="cm-variable-2">event</span>.<span
+                        class="cm-property">target</span>.<span class="cm-property">value</span>);</span></pre>
+              <pre class=" CodeMirror-line "><span style="padding-right: 0.1px;">    },</span></pre>
+              <pre class=" CodeMirror-line "><span style="padding-right: 0.1px;"><span cm-text="">​</span></span></pre>
+                    <pre class=" CodeMirror-line "><span style="padding-right: 0.1px;">    <span class="cm-property">onBlur</span>: <span
+                        class="cm-keyword">function</span>(<span class="cm-def">event</span>) {</span></pre>
+                    <pre class=" CodeMirror-line "><span style="padding-right: 0.1px;">      <span
+                        class="cm-keyword">if</span> (<span class="cm-keyword">this</span>.<span class="cm-property">cancel</span>) {</span></pre>
+                    <pre class=" CodeMirror-line "><span style="padding-right: 0.1px;">        <span class="cm-keyword">this</span>.<span
+                        class="cm-property">onSubmit</span>(<span class="cm-keyword">this</span>.<span
+                        class="cm-property">backup</span>);</span></pre>
+                    <pre class=" CodeMirror-line "><span style="padding-right: 0.1px;">        <span class="cm-keyword">this</span>.<span
+                        class="cm-property">cancel</span> <span class="cm-operator">=</span> <span
+                        class="cm-atom">false</span>;</span></pre>
+              <pre class=" CodeMirror-line "><span style="padding-right: 0.1px;">      } <span class="cm-keyword">else</span> {</span></pre>
+                    <pre class=" CodeMirror-line "><span style="padding-right: 0.1px;">        <span class="cm-keyword">this</span>.<span
+                        class="cm-property">onSubmit</span>(<span class="cm-variable-2">event</span>.<span
+                        class="cm-property">target</span>.<span class="cm-property">value</span>);</span></pre>
+              <pre class=" CodeMirror-line "><span style="padding-right: 0.1px;">      }</span></pre>
+              <pre class=" CodeMirror-line "><span style="padding-right: 0.1px;">    },</span></pre>
+              <pre class=" CodeMirror-line "><span style="padding-right: 0.1px;"><span cm-text="">​</span></span></pre>
+                    <pre class=" CodeMirror-line "><span style="padding-right: 0.1px;">    <span class="cm-property">onSubmit</span>: <span
+                        class="cm-keyword">function</span>(<span class="cm-def">title</span>) {</span></pre>
+                    <pre class=" CodeMirror-line "><span style="padding-right: 0.1px;">      <span class="cm-keyword">this</span>.<span
+                        class="cm-property">item</span>.<span class="cm-property">save</span>({</span></pre>
+                    <pre class=" CodeMirror-line "><span style="padding-right: 0.1px;">        <span
+                        class="cm-property">selected</span>: <span class="cm-atom">false</span>,</span></pre>
+                    <pre class=" CodeMirror-line "><span style="padding-right: 0.1px;">        <span
+                        class="cm-property">title</span>: <span class="cm-variable-2">title</span></span></pre>
+              <pre class=" CodeMirror-line "><span style="padding-right: 0.1px;">      });</span></pre>
+              <pre class=" CodeMirror-line "><span style="padding-right: 0.1px;">    },</span></pre>
+              <pre class=" CodeMirror-line "><span style="padding-right: 0.1px;"><span cm-text="">​</span></span></pre>
+                    <pre class=" CodeMirror-line "><span style="padding-right: 0.1px;">    <span class="cm-property">onToggle</span>: <span
+                        class="cm-keyword">function</span>() {</span></pre>
+              <pre class=" CodeMirror-line "><span style="padding-right: 0.1px;">      <span class="cm-comment">//this.item.set('completed', !this.item.completed);</span></span></pre>
+              <pre class=" CodeMirror-line "><span style="padding-right: 0.1px;">    },</span></pre>
+              <pre class=" CodeMirror-line "><span style="padding-right: 0.1px;"><span cm-text="">​</span></span></pre>
+                    <pre class=" CodeMirror-line "><span style="padding-right: 0.1px;">    <span class="cm-property">onDestroy</span>: <span
+                        class="cm-keyword">function</span>() {</span></pre>
+                    <pre class=" CodeMirror-line "><span style="padding-right: 0.1px;">      <span class="cm-keyword">this</span>.<span
+                        class="cm-property">emit</span>(<span class="cm-string">'destroy'</span>, <span
+                        class="cm-keyword">this</span>.<span class="cm-property">item</span>);</span></pre>
+              <pre class=" CodeMirror-line "><span style="padding-right: 0.1px;">    }</span></pre>
+              <pre class=" CodeMirror-line "><span style="padding-right: 0.1px;">  });</span></pre>
+              <pre class=" CodeMirror-line "><span style="padding-right: 0.1px;"><span cm-text="">​</span></span></pre>
+                    <pre class=" CodeMirror-line "><span style="padding-right: 0.1px;">  <span
+                        class="cm-variable-2">ENJ</span>.<span class="cm-property">TodoApp</span> <span
+                        class="cm-operator">=</span> <span class="cm-variable-2">defineClass</span>({</span></pre>
+                    <pre class=" CodeMirror-line "><span style="padding-right: 0.1px;">    <span class="cm-property">extend</span>: <span
+                        class="cm-variable-2">Component</span>,</span></pre>
+              <pre class=" CodeMirror-line "><span style="padding-right: 0.1px;"><span cm-text="">​</span></span></pre>
+              <pre class=" CodeMirror-line "><span style="padding-right: 0.1px;">    <span class="cm-property">statics</span>: {</span></pre>
+              <pre class=" CodeMirror-line "><span style="padding-right: 0.1px;">      <span class="cm-property">resources</span>: {</span></pre>
+                    <pre class=" CodeMirror-line "><span style="padding-right: 0.1px;">        <span
+                        class="cm-property">ENJ</span>: <span class="cm-variable-2">ENJ</span>,</span></pre>
+                    <pre class=" CodeMirror-line "><span style="padding-right: 0.1px;">        <span
+                        class="cm-property">List</span>: <span class="cm-variable">Exact</span>.<span
+                        class="cm-property">List</span>,</span></pre>
+                    <pre class=" CodeMirror-line "><span style="padding-right: 0.1px;">        <span
+                        class="cm-property">display</span>: <span class="cm-keyword">function</span>(<span
+                        class="cm-def">visible</span>) {</span></pre>
+                    <pre class=" CodeMirror-line "><span style="padding-right: 0.1px;">          <span
+                        class="cm-keyword">return</span> <span class="cm-variable-2">visible</span> <span
+                        class="cm-operator">?</span> <span class="cm-string">''</span> : <span
+                        class="cm-string">'none'</span>;</span></pre>
+              <pre class=" CodeMirror-line "><span style="padding-right: 0.1px;">        },</span></pre>
+                    <pre class=" CodeMirror-line "><span style="padding-right: 0.1px;">        <span
+                        class="cm-property">pluralize</span>: <span class="cm-keyword">function</span>(<span
+                        class="cm-def">num</span>, <span class="cm-def">str</span>) {</span></pre>
+                    <pre class=" CodeMirror-line "><span style="padding-right: 0.1px;">          <span
+                        class="cm-keyword">return</span> <span class="cm-string">' '</span> <span
+                        class="cm-operator">+</span> <span class="cm-variable-2">str</span> <span
+                        class="cm-operator">+</span> (<span class="cm-variable-2">num</span> <span class="cm-operator">&gt;</span> <span
+                        class="cm-number">1</span> <span class="cm-operator">?</span> <span class="cm-string">'s'</span>: <span
+                        class="cm-string">''</span>);</span></pre>
+              <pre class=" CodeMirror-line "><span style="padding-right: 0.1px;">        }</span></pre>
+              <pre class=" CodeMirror-line "><span style="padding-right: 0.1px;">      },</span></pre>
+                    <pre class=" CodeMirror-line "><span style="padding-right: 0.1px;">      <span class="cm-property">$template</span>: <span
+                        class="cm-variable-2">Skin</span>.<span class="cm-property">query</span>(<span
+                        class="cm-variable">document</span>, <span class="cm-string">'.template .todoapp'</span>)</span></pre>
+              <pre class=" CodeMirror-line "><span style="padding-right: 0.1px;">    },</span></pre>
+              <pre class=" CodeMirror-line "><span style="padding-right: 0.1px;"><span cm-text="">​</span></span></pre>
+                    <pre class=" CodeMirror-line "><span style="padding-right: 0.1px;">    <span class="cm-property">defaults</span>: <span
+                        class="cm-keyword">function</span>() {</span></pre>
+              <pre class=" CodeMirror-line "><span style="padding-right: 0.1px;">      <span class="cm-keyword">return</span> {</span></pre>
+                    <pre class=" CodeMirror-line "><span style="padding-right: 0.1px;">        <span
+                        class="cm-property">remainingCount</span>: <span class="cm-number">0</span></span></pre>
+              <pre class=" CodeMirror-line "><span style="padding-right: 0.1px;">      }</span></pre>
+              <pre class=" CodeMirror-line "><span style="padding-right: 0.1px;">    },</span></pre>
+              <pre class=" CodeMirror-line "><span style="padding-right: 0.1px;"><span cm-text="">​</span></span></pre>
+                    <pre class=" CodeMirror-line "><span style="padding-right: 0.1px;">    <span class="cm-property">filtering</span>: <span
+                        class="cm-keyword">function</span>(<span class="cm-def">todos</span>) {</span></pre>
+                    <pre class=" CodeMirror-line "><span style="padding-right: 0.1px;">      <span class="cm-keyword">var</span> <span
+                        class="cm-def">filter</span> <span class="cm-operator">=</span> <span
+                        class="cm-keyword">this</span>.<span class="cm-property">filter</span> <span
+                        class="cm-operator">||</span> <span class="cm-string">'all'</span>;</span></pre>
+                    <pre class=" CodeMirror-line "><span style="padding-right: 0.1px;">      <span class="cm-keyword">return</span> <span
+                        class="cm-variable-2">todos</span>.<span class="cm-property">filter</span>(<span
+                        class="cm-keyword">function</span>(<span class="cm-def">todo</span>) {</span></pre>
+                    <pre class=" CodeMirror-line "><span style="padding-right: 0.1px;">        <span class="cm-keyword">return</span> <span
+                        class="cm-variable-2">filter</span> <span class="cm-operator">===</span> <span
+                        class="cm-string">'all'</span> <span class="cm-operator">||</span> (<span class="cm-variable-2">filter</span> <span
+                        class="cm-operator">===</span> <span class="cm-string">'completed'</span> <span
+                        class="cm-operator">?</span> <span class="cm-variable-2">todo</span>.<span class="cm-property">completed</span> : <span
+                        class="cm-operator">!</span><span class="cm-variable-2">todo</span>.<span class="cm-property">completed</span>);</span></pre>
+              <pre class=" CodeMirror-line "><span style="padding-right: 0.1px;">      });</span></pre>
+              <pre class=" CodeMirror-line "><span style="padding-right: 0.1px;">    },</span></pre>
+              <pre class=" CodeMirror-line "><span style="padding-right: 0.1px;"><span cm-text="">​</span></span></pre>
+                    <pre class=" CodeMirror-line "><span style="padding-right: 0.1px;">    <span class="cm-property">ready</span>: <span
+                        class="cm-keyword">function</span>() {</span></pre>
+                    <pre class=" CodeMirror-line "><span style="padding-right: 0.1px;">      <span class="cm-keyword">var</span> <span
+                        class="cm-def">invalidate</span> <span class="cm-operator">=</span> <span class="cm-keyword">this</span>.<span
+                        class="cm-property">invalidate</span>;</span></pre>
+                    <pre class=" CodeMirror-line "><span style="padding-right: 0.1px;">      <span class="cm-keyword">var</span> <span
+                        class="cm-def">removeTodo</span> <span class="cm-operator">=</span> <span class="cm-keyword">this</span>.<span
+                        class="cm-property">removeTodo</span>;</span></pre>
+              <pre class=" CodeMirror-line "><span style="padding-right: 0.1px;"><span cm-text="">​</span></span></pre>
+              <pre class=" CodeMirror-line "><span style="padding-right: 0.1px;">      <span class="cm-comment">//this.todos.on('change', invalidate);</span></span></pre>
+                    <pre class=" CodeMirror-line "><span style="padding-right: 0.1px;">      <span class="cm-keyword">this</span>.<span
+                        class="cm-property">todos</span>.<span class="cm-property">onChange</span> <span
+                        class="cm-operator">=</span> <span class="cm-variable-2">invalidate</span>;</span></pre>
+              <pre class=" CodeMirror-line "><span style="padding-right: 0.1px;"><span cm-text="">​</span></span></pre>
+                    <pre class=" CodeMirror-line "><span style="padding-right: 0.1px;">      <span class="cm-keyword">this</span>.<span
+                        class="cm-property">list</span>.<span class="cm-property">on</span>(<span class="cm-string">'itemAdded'</span>, <span
+                        class="cm-keyword">function</span>(<span class="cm-def">event</span>, <span
+                        class="cm-def">todo</span>, <span class="cm-def">adapter</span>) {</span></pre>
+                    <pre class=" CodeMirror-line "><span style="padding-right: 0.1px;">        <span
+                        class="cm-variable-2">todo</span>.<span class="cm-property">on</span>(<span class="cm-string">'changed.completed'</span>, <span
+                        class="cm-variable-2">invalidate</span>);</span></pre>
+                    <pre class=" CodeMirror-line "><span style="padding-right: 0.1px;">        <span
+                        class="cm-variable-2">adapter</span>.<span class="cm-property">on</span>(<span
+                        class="cm-string">'destroy'</span>, <span class="cm-variable-2">removeTodo</span>);</span></pre>
+              <pre class=" CodeMirror-line "><span style="padding-right: 0.1px;">      });</span></pre>
+              <pre class=" CodeMirror-line "><span style="padding-right: 0.1px;">    },</span></pre>
+              <pre class=" CodeMirror-line "><span style="padding-right: 0.1px;"><span cm-text="">​</span></span></pre>
+                    <pre class=" CodeMirror-line "><span style="padding-right: 0.1px;">    <span class="cm-property">register</span>: <span
+                        class="cm-keyword">function</span>() {</span></pre>
+                    <pre class=" CodeMirror-line "><span style="padding-right: 0.1px;">      <span class="cm-keyword">this</span>.<span
+                        class="cm-property">todos</span> <span class="cm-operator">=</span> <span class="cm-variable-2">ENJ</span>.<span
+                        class="cm-property">read</span>();</span></pre>
+                    <pre class=" CodeMirror-line "><span style="padding-right: 0.1px;">      <span class="cm-variable">Exact</span>.<span
+                        class="cm-property">help</span>(<span class="cm-keyword">this</span>).<span class="cm-property">bind</span>(<span
+                        class="cm-string">'onEnter'</span>, <span class="cm-string">'onCheck'</span>, <span
+                        class="cm-string">'onSelect'</span>, <span class="cm-string">'allDone'</span>, <span
+                        class="cm-string">'filtering'</span>, <span class="cm-string">'removeTodo'</span>, <span
+                        class="cm-string">'refresh'</span>);</span></pre>
+              <pre class=" CodeMirror-line "><span style="padding-right: 0.1px;">    },</span></pre>
+              <pre class=" CodeMirror-line "><span style="padding-right: 0.1px;"><span cm-text="">​</span></span></pre>
+                    <pre class=" CodeMirror-line "><span style="padding-right: 0.1px;">    <span class="cm-variable">refresh</span>: <span
+                        class="cm-keyword">function</span>() {</span></pre>
+              <pre class=" CodeMirror-line "><span style="padding-right: 0.1px;">      <span class="cm-comment">// TODO: should not set self here. Instead, set children.</span></span></pre>
+                    <pre class=" CodeMirror-line "><span style="padding-right: 0.1px;">      <span class="cm-keyword">this</span>.<span
+                        class="cm-property">set</span>(<span class="cm-string">'remainingCount'</span>, <span
+                        class="cm-keyword">this</span>.<span class="cm-property">todos</span>.<span class="cm-property">filter</span>(<span
+                        class="cm-keyword">function</span>(<span class="cm-def">item</span>){</span></pre>
+                    <pre class=" CodeMirror-line "><span style="padding-right: 0.1px;">        <span class="cm-keyword">return</span> <span
+                        class="cm-operator">!</span><span class="cm-variable-2">item</span>.<span class="cm-property">completed</span>;</span></pre>
+                    <pre class=" CodeMirror-line "><span style="padding-right: 0.1px;">      }).<span
+                        class="cm-property">length</span>);</span></pre>
+              <pre class=" CodeMirror-line "><span style="padding-right: 0.1px;"><span cm-text="">​</span></span></pre>
+                    <pre class=" CodeMirror-line "><span style="padding-right: 0.1px;">      <span class="cm-variable">ENJ</span>.<span
+                        class="cm-property">save</span>(<span class="cm-keyword">this</span>.<span class="cm-property">todos</span>);</span></pre>
+              <pre class=" CodeMirror-line "><span style="padding-right: 0.1px;">    },</span></pre>
+              <pre class=" CodeMirror-line "><span style="padding-right: 0.1px;"><span cm-text="">​</span></span></pre>
+                    <pre class=" CodeMirror-line "><span style="padding-right: 0.1px;">    <span
+                        class="cm-variable">get</span> <span class="cm-variable">allDone</span>() {</span></pre>
+                    <pre class=" CodeMirror-line "><span style="padding-right: 0.1px;">      <span class="cm-keyword">return</span> <span
+                        class="cm-keyword">this</span>.<span class="cm-property">todos</span>.<span class="cm-property">length</span> <span
+                        class="cm-operator">&gt;</span> <span class="cm-number">0</span> <span class="cm-operator">&amp;&amp;</span> <span
+                        class="cm-keyword">this</span>.<span class="cm-property">todos</span>.<span class="cm-property">filter</span>(<span
+                        class="cm-keyword">function</span>(<span class="cm-def">item</span>){</span></pre>
+                    <pre class=" CodeMirror-line "><span style="padding-right: 0.1px;">        <span class="cm-keyword">return</span> <span
+                        class="cm-variable-2">item</span>.<span class="cm-property">completed</span>;</span></pre>
+                    <pre class=" CodeMirror-line "><span style="padding-right: 0.1px;">      }).<span
+                        class="cm-property">length</span> <span class="cm-operator">===</span> <span class="cm-keyword">this</span>.<span
+                        class="cm-property">todos</span>.<span class="cm-property">length</span>;</span></pre>
+              <pre class=" CodeMirror-line "><span style="padding-right: 0.1px;">    },</span></pre>
+              <pre class=" CodeMirror-line "><span style="padding-right: 0.1px;"><span cm-text="">​</span></span></pre>
+                    <pre class=" CodeMirror-line "><span style="padding-right: 0.1px;">    <span class="cm-variable">removeTodo</span>: <span
+                        class="cm-keyword">function</span>(<span class="cm-def">todo</span>) {</span></pre>
+                    <pre class=" CodeMirror-line "><span style="padding-right: 0.1px;">      <span class="cm-keyword">this</span>.<span
+                        class="cm-property">todos</span>.<span class="cm-property">splice</span>(<span
+                        class="cm-keyword">this</span>.<span class="cm-property">todos</span>.<span class="cm-property">indexOf</span>(<span
+                        class="cm-variable-2">todo</span>), <span class="cm-number">1</span>);</span></pre>
+              <pre class=" CodeMirror-line "><span style="padding-right: 0.1px;">      <span class="cm-comment">//ENJ.save(this.todos);</span></span></pre>
+              <pre class=" CodeMirror-line "><span style="padding-right: 0.1px;">    },</span></pre>
+              <pre class=" CodeMirror-line "><span style="padding-right: 0.1px;"><span cm-text="">​</span></span></pre>
+                    <pre class=" CodeMirror-line "><span style="padding-right: 0.1px;">    <span class="cm-variable">clearCompleted</span>: <span
+                        class="cm-keyword">function</span>() {</span></pre>
+                    <pre class=" CodeMirror-line "><span style="padding-right: 0.1px;">      <span class="cm-keyword">for</span> (<span
+                        class="cm-keyword">var</span> <span class="cm-def">i</span> <span
+                        class="cm-operator">=</span> <span class="cm-keyword">this</span>.<span class="cm-property">todos</span>.<span
+                        class="cm-property">length</span> <span class="cm-operator">-</span> <span
+                        class="cm-number">1</span>; <span class="cm-variable-2">i</span> <span
+                        class="cm-operator">&gt;=</span> <span class="cm-number">0</span>; <span
+                        class="cm-operator">--</span><span class="cm-variable-2">i</span>) {</span></pre>
+                    <pre class=" CodeMirror-line "><span style="padding-right: 0.1px;">        <span class="cm-keyword">if</span> (<span
+                        class="cm-keyword">this</span>.<span class="cm-property">todos</span>[<span
+                        class="cm-variable-2">i</span>].<span class="cm-property">completed</span>) {</span></pre>
+                    <pre class=" CodeMirror-line "><span style="padding-right: 0.1px;">          <span
+                        class="cm-keyword">this</span>.<span class="cm-property">todos</span>.<span class="cm-property">splice</span>(<span
+                        class="cm-variable-2">i</span>, <span class="cm-number">1</span>);</span></pre>
+              <pre class=" CodeMirror-line "><span style="padding-right: 0.1px;">        }</span></pre>
+              <pre class=" CodeMirror-line "><span style="padding-right: 0.1px;">      }</span></pre>
+              <pre class=" CodeMirror-line "><span style="padding-right: 0.1px;">    },</span></pre>
+              <pre class=" CodeMirror-line "><span style="padding-right: 0.1px;"><span cm-text="">​</span></span></pre>
+                    <pre class=" CodeMirror-line "><span style="padding-right: 0.1px;">    <span class="cm-variable">onCheck</span>: <span
+                        class="cm-keyword">function</span>(<span class="cm-def">event</span>) {</span></pre>
+                    <pre class=" CodeMirror-line "><span style="padding-right: 0.1px;">      <span class="cm-keyword">this</span>.<span
+                        class="cm-property">todos</span>.<span class="cm-property">forEach</span>(<span
+                        class="cm-keyword">function</span>(<span class="cm-def">todo</span>) {</span></pre>
+                    <pre class=" CodeMirror-line "><span style="padding-right: 0.1px;">        <span
+                        class="cm-variable-2">todo</span>.<span class="cm-property">set</span>(<span class="cm-string">'completed'</span>, <span
+                        class="cm-variable-2">event</span>.<span class="cm-property">target</span>.<span
+                        class="cm-property">checked</span>);</span></pre>
+              <pre class=" CodeMirror-line "><span style="padding-right: 0.1px;">      });</span></pre>
+              <pre class=" CodeMirror-line "><span style="padding-right: 0.1px;">    },</span></pre>
+              <pre class=" CodeMirror-line "><span style="padding-right: 0.1px;"><span cm-text="">​</span></span></pre>
+                    <pre class=" CodeMirror-line "><span style="padding-right: 0.1px;">    <span class="cm-variable">onEnter</span>: <span
+                        class="cm-keyword">function</span>(<span class="cm-def">event</span>) {</span></pre>
+                    <pre class=" CodeMirror-line "><span style="padding-right: 0.1px;">      <span class="cm-keyword">var</span> <span
+                        class="cm-def">value</span> <span class="cm-operator">=</span> <span
+                        class="cm-variable-2">event</span>.<span class="cm-property">target</span>.<span
+                        class="cm-property">value</span>.<span class="cm-property">trim</span>();</span></pre>
+              <pre class=" CodeMirror-line "><span style="padding-right: 0.1px;"><span cm-text="">​</span></span></pre>
+                    <pre class=" CodeMirror-line "><span style="padding-right: 0.1px;">      <span
+                        class="cm-variable-2">event</span>.<span class="cm-property">target</span>.<span
+                        class="cm-property">value</span> <span class="cm-operator">=</span> <span
+                        class="cm-string">''</span>;</span></pre>
+              <pre class=" CodeMirror-line "><span style="padding-right: 0.1px;"><span cm-text="">​</span></span></pre>
+                    <pre class=" CodeMirror-line "><span style="padding-right: 0.1px;">      <span
+                        class="cm-keyword">if</span> (<span class="cm-variable-2">value</span>) {</span></pre>
+                    <pre class=" CodeMirror-line "><span style="padding-right: 0.1px;">        <span class="cm-keyword">this</span>.<span
+                        class="cm-property">todos</span>.<span class="cm-property">push</span>(<span class="cm-keyword">new</span> <span
+                        class="cm-variable">Store</span>({</span></pre>
+                    <pre class=" CodeMirror-line "><span style="padding-right: 0.1px;">          <span
+                        class="cm-property">completed</span>: <span class="cm-atom">false</span>,</span></pre>
+                    <pre class=" CodeMirror-line "><span style="padding-right: 0.1px;">          <span
+                        class="cm-property">selected</span>: <span class="cm-atom">false</span>,</span></pre>
+                    <pre class=" CodeMirror-line "><span style="padding-right: 0.1px;">          <span
+                        class="cm-property">title</span>: <span class="cm-variable-2">value</span></span></pre>
+              <pre class=" CodeMirror-line "><span style="padding-right: 0.1px;">        }));</span></pre>
+              <pre class=" CodeMirror-line "><span style="padding-right: 0.1px;">        <span class="cm-comment">//ENJ.save(this.todos);</span></span></pre>
+              <pre class=" CodeMirror-line "><span style="padding-right: 0.1px;">        <span class="cm-comment">//localStorage.setItem('todos', JSON.stringify(this.todos.slice(0)));</span></span></pre>
+              <pre class=" CodeMirror-line "><span style="padding-right: 0.1px;">      }</span></pre>
+              <pre class=" CodeMirror-line "><span style="padding-right: 0.1px;">    },</span></pre>
+              <pre class=" CodeMirror-line "><span style="padding-right: 0.1px;"><span cm-text="">​</span></span></pre>
+                    <pre class=" CodeMirror-line "><span style="padding-right: 0.1px;">    <span class="cm-variable">onSelect</span>: <span
+                        class="cm-keyword">function</span>(<span class="cm-def">event</span>) {</span></pre>
+              <pre class=" CodeMirror-line "><span style="padding-right: 0.1px;">      <span class="cm-comment">//var el =  event.target;</span></span></pre>
+              <pre class=" CodeMirror-line "><span style="padding-right: 0.1px;">      <span class="cm-comment">//if (el.tagName.toLowerCase() === 'a') {</span></span></pre>
+              <pre class=" CodeMirror-line "><span style="padding-right: 0.1px;">      <span class="cm-comment">//  this.set('filter', el.textContent.toLowerCase());</span></span></pre>
+              <pre class=" CodeMirror-line "><span style="padding-right: 0.1px;">      <span class="cm-comment">//  //console.log('filter', this.filter);</span></span></pre>
+              <pre class=" CodeMirror-line "><span style="padding-right: 0.1px;">      <span class="cm-comment">//}</span></span></pre>
+              <pre class=" CodeMirror-line "><span style="padding-right: 0.1px;">    }</span></pre>
+              <pre class=" CodeMirror-line "><span style="padding-right: 0.1px;">  });</span></pre>
+              <pre class=" CodeMirror-line "><span style="padding-right: 0.1px;"><span cm-text="">​</span></span></pre>
+                    <pre class=" CodeMirror-line "><span style="padding-right: 0.1px;">  <span
+                        class="cm-keyword">var</span> <span class="cm-def">app</span> <span class="cm-operator">=</span> <span
+                        class="cm-variable">Component</span>.<span class="cm-property">create</span>(<span
+                        class="cm-variable">ENJ</span>.<span class="cm-property">TodoApp</span>);</span></pre>
+              <pre class=" CodeMirror-line "><span style="padding-right: 0.1px;"><span cm-text="">​</span></span></pre>
+                    <pre class=" CodeMirror-line "><span style="padding-right: 0.1px;">  <span
+                        class="cm-keyword">var</span> <span class="cm-def">filters</span> <span
+                        class="cm-operator">=</span> {</span></pre>
+                    <pre class=" CodeMirror-line "><span style="padding-right: 0.1px;">    <span
+                        class="cm-property">all</span>: <span class="cm-atom">true</span>, <span class="cm-property">active</span>: <span
+                        class="cm-atom">true</span>, <span class="cm-property">completed</span>: <span class="cm-atom">true</span></span></pre>
+              <pre class=" CodeMirror-line "><span style="padding-right: 0.1px;">  };</span></pre>
+              <pre class=" CodeMirror-line "><span style="padding-right: 0.1px;"><span cm-text="">​</span></span></pre>
+              <pre class=" CodeMirror-line "><span style="padding-right: 0.1px;">  <span class="cm-comment">// handle routing</span></span></pre>
+                    <pre class=" CodeMirror-line "><span style="padding-right: 0.1px;">  <span class="cm-keyword">function</span> <span
+                        class="cm-def">onHashChange</span> () {</span></pre>
+                    <pre class=" CodeMirror-line "><span style="padding-right: 0.1px;">    <span
+                        class="cm-keyword">var</span> <span class="cm-def">filter</span> <span
+                        class="cm-operator">=</span> <span class="cm-variable">window</span>.<span class="cm-property">location</span>.<span
+                        class="cm-property">hash</span>.<span class="cm-property">replace</span>(<span
+                        class="cm-string-2">/#\/?/</span>, <span class="cm-string">''</span>);</span></pre>
+                    <pre class=" CodeMirror-line "><span style="padding-right: 0.1px;">    <span
+                        class="cm-keyword">if</span> (<span class="cm-variable">filters</span>[<span
+                        class="cm-variable-2">filter</span>]) {</span></pre>
+                    <pre class=" CodeMirror-line "><span style="padding-right: 0.1px;">      <span class="cm-variable">app</span>.<span
+                        class="cm-property">set</span>(<span class="cm-string">'filter'</span>, <span
+                        class="cm-variable-2">filter</span>);</span></pre>
+              <pre class=" CodeMirror-line "><span style="padding-right: 0.1px;">    } <span class="cm-keyword">else</span> {</span></pre>
+                    <pre class=" CodeMirror-line "><span style="padding-right: 0.1px;">      <span class="cm-variable">window</span>.<span
+                        class="cm-property">location</span>.<span class="cm-property">hash</span> <span
+                        class="cm-operator">=</span> <span class="cm-string">''</span>;</span></pre>
+                    <pre class=" CodeMirror-line "><span style="padding-right: 0.1px;">      <span class="cm-variable">app</span>.<span
+                        class="cm-property">set</span>(<span class="cm-string">'filter'</span>, <span class="cm-string">'all'</span>);</span></pre>
+              <pre class=" CodeMirror-line "><span style="padding-right: 0.1px;">    }</span></pre>
+              <pre class=" CodeMirror-line "><span style="padding-right: 0.1px;">  }</span></pre>
+              <pre class=" CodeMirror-line "><span style="padding-right: 0.1px;"><span cm-text="">​</span></span></pre>
+                    <pre class=" CodeMirror-line "><span style="padding-right: 0.1px;">  <span class="cm-variable">window</span>.<span
+                        class="cm-property">addEventListener</span>(<span class="cm-string">'hashchange'</span>, <span
+                        class="cm-variable">onHashChange</span>);</span></pre>
+              <pre class=" CodeMirror-line "><span style="padding-right: 0.1px;">  <span class="cm-variable">onHashChange</span>();</span></pre>
+              <pre class=" CodeMirror-line "><span style="padding-right: 0.1px;"><span cm-text="">​</span></span></pre>
+              <pre class=" CodeMirror-line "><span style="padding-right: 0.1px;"><span cm-text="">​</span></span></pre>
+                    <pre class=" CodeMirror-line "><span style="padding-right: 0.1px;">  <span class="cm-variable">document</span>.<span
+                        class="cm-property">getElementById</span>(<span class="cm-string">'app-shell'</span>).<span
+                        class="cm-property">appendChild</span>(<span class="cm-variable">app</span>.<span
+                        class="cm-property">$skin</span>);</span></pre>
+              <pre class=" CodeMirror-line "><span style="padding-right: 0.1px;">})();</span></pre>
+              <pre class=" CodeMirror-line "><span style="padding-right: 0.1px;">      </span></pre>
+            </div>
+          </div>
+        </div>
+      </div>
+      <!--<pre class="code-behind js-mode">
+(function() {
   var Skin = Exact.Skin;
   var Store = Exact.Store;
   var Collection = Exact.Collection;
@@ -160,11 +555,35 @@
 
   var defineClass = Exact.defineClass;
 
+  var ENJ = {
+    read: function() {
+      var item = localStorage.getItem('todos');
+
+      if (item) {
+        var todos = JSON.parse(item);
+        var collection = new Collection();
+        for (var i = 0; i < todos.length; ++i) {
+          collection.push(new Store(todos[i]));
+        }
+        return collection;
+      }
+
+      return Collection.from([]);
+    },
+    save: function(collection) {
+      console.log(collection);
+      localStorage.setItem('todos', JSON.stringify(collection.slice(0)));
+    }
+  };
+
   ENJ.Adapter = defineClass({
     extend: Component,
 
     statics: {
-      $template: Skin.query(document, '.template .adapter')
+      $template: Skin.query(document, '.template .adapter'),
+      resources: {
+        CheckBox: Exact.CheckBox
+      }
     },
 
     register: function() {
@@ -198,14 +617,14 @@
     },
 
     onSubmit: function(title) {
-      this.item.set({
+      this.item.save({
         selected: false,
         title: title
       });
     },
 
     onToggle: function() {
-      this.item.set('completed', !this.item.completed);
+      //this.item.set('completed', !this.item.completed);
     },
 
     onDestroy: function() {
@@ -217,7 +636,7 @@
     extend: Component,
 
     statics: {
-      imports: {
+      resources: {
         ENJ: ENJ,
         List: Exact.List,
         display: function(visible) {
@@ -247,6 +666,7 @@
       var invalidate = this.invalidate;
       var removeTodo = this.removeTodo;
 
+      //this.todos.on('change', invalidate);
       this.todos.onChange = invalidate;
 
       this.list.on('itemAdded', function(event, todo, adapter) {
@@ -256,14 +676,17 @@
     },
 
     register: function() {
-      this.todos = new Collection();
-      Exact.help(this).bind('onEnter', 'onCheck', 'onSelect', 'allDone', 'filtering', 'removeTodo');
+      this.todos = ENJ.read();
+      Exact.help(this).bind('onEnter', 'onCheck', 'onSelect', 'allDone', 'filtering', 'removeTodo', 'refresh');
     },
 
     refresh: function() {
+      // TODO: should not set self here. Instead, set children.
       this.set('remainingCount', this.todos.filter(function(item){
         return !item.completed;
       }).length);
+
+      ENJ.save(this.todos);
     },
 
     get allDone() {
@@ -274,11 +697,11 @@
 
     removeTodo: function(todo) {
       this.todos.splice(this.todos.indexOf(todo), 1);
+      //ENJ.save(this.todos);
     },
 
     clearCompleted: function() {
-      console.log('clearCompleted', this);
-      for (var i = this.todos.length - 1; i >= 0; --i) {
+      for (var i = this.todos.length - 1; i >= 0; &#45;&#45;i) {
         if (this.todos[i].completed) {
           this.todos.splice(i, 1);
         }
@@ -296,29 +719,50 @@
 
       event.target.value = '';
 
-      this.todos.push(new Store({
-        completed: false,
-        selected: false,
-        title: value
-      }));
+      if (value) {
+        this.todos.push(new Store({
+          completed: false,
+          selected: false,
+          title: value
+        }));
+        //ENJ.save(this.todos);
+        //localStorage.setItem('todos', JSON.stringify(this.todos.slice(0)));
+      }
     },
 
     onSelect: function(event) {
-      var el =  event.target;
-      if (el.tagName.toLowerCase() === 'a') {
-        this.set('filter', el.textContent.toLowerCase());
-      }
+      //var el =  event.target;
+      //if (el.tagName.toLowerCase() === 'a') {
+      //  this.set('filter', el.textContent.toLowerCase());
+      //  //console.log('filter', this.filter);
+      //}
     }
   });
 
-  var todoApp = Component.create(ENJ.TodoApp);
+  var app = Component.create(ENJ.TodoApp);
 
-  //document.getElementById('app-shell').appendChild(todoApp.$skin);
-  document.body.appendChild(todoApp.$skin);
+  var filters = {
+    all: true, active: true, completed: true
+  };
 
-</pre>
+  // handle routing
+  function onHashChange () {
+    var filter = window.location.hash.replace(/#\/?/, '');
+    if (filters[filter]) {
+      app.set('filter', filter);
+    } else {
+      window.location.hash = '';
+      app.set('filter', 'all');
+    }
+  }
 
-      </div>
+  window.addEventListener('hashchange', onHashChange);
+  onHashChange();
+
+
+  document.getElementById('app-shell').appendChild(app.$skin);
+})();
+      </pre>-->
     </section>
 
     <section class="tab-content">

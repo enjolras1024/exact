@@ -1,0 +1,512 @@
+<!DOCTYPE html>
+<html>
+<head lang="en">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+  <title>Exact</title>
+
+  <link href="../stylesheets/codemirror.css" rel="stylesheet">
+  <link href="../stylesheets/alice.css" rel="stylesheet">
+  <link href="../stylesheets/defaults.css" rel="stylesheet">
+  <!--<link href="../stylesheets/index.css" rel="stylesheet">-->
+  <style>
+    .fig {
+
+    }
+
+    .fig > img {
+      width: 100%;
+      height: 100%;
+    }
+  </style>
+</head>
+<body>
+<header class="header">
+  <nav class="nav-bar">
+    <h3 class="brand"><a href="../" class="logo">Exact</a></h3>
+    <a class="menu-btn"></a>
+    <ul class="menu-bar">
+      <li><a href="../examples/todomvc.html" class="menu-item"> Examples </a></li>
+      <li><a href="../downloads/index.html" class="menu-item"> Downloads </a></li>
+      <li><a href="#" class="menu-item  active"> Documents </a></li>
+      <li><a href="../apis/index.html" class="menu-item"> APIs </a></li>
+      <li><a href="#" class="menu-item"> GitHub </a></li>
+    </ul>
+  </nav>
+</header>
+<div class="main">
+  <aside class="side-bar">
+    <div class="card">
+      <h4>Overview</h4>
+      <ul class="list">
+        <li><a href="./index.html#hello-world" class="link">Hello World</a></li>
+        <li><a href="./index.html#class-diagram" class="link">Class Diagram</a></li>
+      </ul>
+    </div>
+    <div class="card">
+      <h4>Events</h4>
+      <ul class="list">
+        <li><a href="./events.html#on-off-once" class="link">On / Off / Once</a></li>
+        <li><a href="./events.html#send-emit" class="link">Send / Emit</a></li>
+        <li><a href="./events.html#key-name-of-event" class="link">Key Name of Event</a></li>
+      </ul>
+    </div>
+    <div class="card">
+      <h4>Properties</h4>
+      <ul class="list">
+        <li><a href="./properties.html#setting-property" class="link">Setting Property</a></li>
+        <li><a href="./properties.html#using-descriptors" class="link">Using Descriptors</a></li>
+        <li><a href="./properties.html#adding-validation" class="link">Adding Validation</a></li>
+        <li><a href="./properties.html#dirty-marking" class="link">Dirty Marking</a></li>
+        <li><a href="./properties.html#property-changed-event" class="link">Property-Changed Event</a></li>
+      </ul>
+    </div>
+    <div class="card">
+      <h4>Models</h4>
+      <ul class="list">
+        <li><a href="./models.html#cache-or-store-for-object" class="link">Cache / Store for Object</a></li>
+        <li><a href="./models.html#collection-for-array" class="link">Collection for Array</a></li>
+      </ul>
+    </div>
+    <div class="card">
+      <h4>Components</h4>
+      <ul class="list">
+        <li><a href="./shadow-skin-template.html" class="link">Shadow & Skin & Template</a></li>
+        <li><a href="./components.html#using-template-strings-as-texts" class="link">Using Template Strings as Texts</a></li>
+        <li><a href="./components.html#setting-attributes-of-elements" class="link">Setting Attributes of Elements</a></li>
+        <li><a href="./components.html#syntax-of-events-style-class" class="link">Syntax of Events, Style, Class</a></li>
+        <li><a href="./children-and-contents" class="link">Children and Contents</a></li>
+        <li><a href="./lifecycle-and-hooks.html" class="link">Lifecycle and Hooks</a></li>
+        <li><a href="./lists-and-itemadapters.html" class="link">Lists and ItemAdapters</a></li>
+        <li><a href="./form-inputs.html" class="link">Form Inputs</a></li>
+      </ul>
+    </div>
+    <div class="card">
+      <h4>Bindings</h4>
+      <ul class="list">
+        <li><a href="./bindings.html#key-terms" class="link">Key Terms</a></li>
+        <li><a href="./bindings.html#basic-syntax" class="link">Basic Syntax</a></li>
+        <li><a href="./bindings.html#optional-converters" class="link">Optional Converters</a></li>
+        <li><a href="./bindings.html#javascript-expressions" class="link">JavaScript Expressions</a></li>
+      </ul>
+    </div>
+    <div class="card">
+      <h4>Tips</h4>
+      <ul class="list">
+        <li><a href="./data-flow.html" class="link">Data Flow</a></li>
+        <li><a href="./using-mixins.html" class="link">Using Mixins</a></li>
+        <li><a href="./merging-descriptors.html" class="link">Merging Descriptors</a></li>
+        <li><a href="./binding-instance-methods.html" class="link">Binding Instance Methods</a></li>
+        <li><a href="./using-res-to-manage-resources.html" class="link">Using RES to Manage Resources</a></li>
+        <li><a href="./using-objectutil-to-update-and-clone.html" class="link">Using ObjectUtil to Update or Clone</a></li>
+      </ul>
+    </div>
+  </aside>
+  <a class="side-btn">&gt;</a>
+  <article class="article">
+    <h2>Overview</h2>
+    <p>Exact is an event-driven JavaScript library for building web user interfaces.
+      Its core provides you with a Shadow layer which is related to real DOM.
+      Each time the shadow tree has changed, Exact helps you render the dirty parts to a DOM tree in a batch mode asynchronously.
+      Almost all the other modules and classes  paved the way for the Shadow layer.</p>
+    <a id="hello-world"></a>
+    <p>Specially, the Component in the Shadow layer is an enhanced edition of Element.  </p>
+    <p>特别地，Shadow层的Component可视作一般Element的加强版。在Exact Element已有功能的基础之上，Component还支持模板、数据绑定、属性验证等高级功能，为快速构建可靠的Web用户界面提供了帮助。
+    Component可以像Element一样监听DOM事件，又可派发自定义事件。</p>
+    <h4>Hello World</h4>
+    <p>一个简单的例子如下：</p>
+    <div class="code-box scroll">
+      <pre class="code-behind js-mode">
+  var Component = Exact.Component;
+
+  var App = Exact.defineClass({
+    extend: Component,
+    statics: {
+      $template: '&lt;div&gt;&lt;h1&gt;Hello @{ $.who }!&lt;/h1&gt;&lt;/div&gt;'
+    }
+  });
+
+  document.body.appendChild(Component.create(App, {who: 'World'}).$skin);</pre>
+      <div class="CodeMirror cm-s-alice">
+        <div class="CodeMirror-lines">
+          <div style="position: relative; outline: none;">
+            <!--<div class="CodeMirror-measure"><span><span>​</span>x</span></div>
+            <div class="CodeMirror-measure"></div>
+            <div style="position: relative; z-index: 1;"></div>
+            <div class="CodeMirror-cursors">
+              <div class="CodeMirror-cursor" style="left: 0px; top: 0px; height: 17px;">&nbsp;</div>
+            </div>-->
+            <div class="CodeMirror-code">
+              <div style="position: relative;">
+                <!--<div class="CodeMirror-gutter-wrapper" style="left: -31px;">
+                  <div class="CodeMirror-linenumber CodeMirror-gutter-elt" style="left: 0px; width: 21px;">1</div>
+                </div>-->
+                      <pre class=" CodeMirror-line "><span style="padding-right: 0.1px;">  <span
+                          class="cm-keyword">var</span> <span class="cm-def">Component</span> <span class="cm-operator">=</span> <span
+                          class="cm-variable">Exact</span>.<span class="cm-property">Component</span>;</span></pre>
+              </div>
+              <div style="position: relative;">
+                <!--<div class="CodeMirror-gutter-wrapper" style="left: -31px;">
+                  <div class="CodeMirror-linenumber CodeMirror-gutter-elt" style="left: 0px; width: 21px;">2</div>
+                </div>-->
+                      <pre class=" CodeMirror-line "><span style="padding-right: 0.1px;"><span
+                          cm-text="">​</span></span></pre>
+              </div>
+              <div style="position: relative;">
+                <!--<div class="CodeMirror-gutter-wrapper" style="left: -31px;">
+                  <div class="CodeMirror-linenumber CodeMirror-gutter-elt" style="left: 0px; width: 21px;">3</div>
+                </div>-->
+                      <pre class=" CodeMirror-line "><span style="padding-right: 0.1px;">  <span
+                          class="cm-keyword">var</span> <span class="cm-def">App</span> <span
+                          class="cm-operator">=</span> <span class="cm-variable">Exact</span>.<span class="cm-property">defineClass</span>({</span></pre>
+              </div>
+              <div style="position: relative;">
+                <!--<div class="CodeMirror-gutter-wrapper" style="left: -31px;">
+                  <div class="CodeMirror-linenumber CodeMirror-gutter-elt" style="left: 0px; width: 21px;">4</div>
+                </div>-->
+                      <pre class=" CodeMirror-line "><span style="padding-right: 0.1px;">    <span class="cm-property">extend</span>: <span
+                          class="cm-variable">Component</span>,</span></pre>
+              </div>
+              <div style="position: relative;">
+                <!--<div class="CodeMirror-gutter-wrapper" style="left: -31px;">
+                  <div class="CodeMirror-linenumber CodeMirror-gutter-elt" style="left: 0px; width: 21px;">5</div>
+                </div>-->
+                <pre class=" CodeMirror-line "><span style="padding-right: 0.1px;">    <span class="cm-property">statics</span>: {</span></pre>
+              </div>
+              <div style="position: relative;">
+                <!--<div class="CodeMirror-gutter-wrapper" style="left: -31px;">
+                  <div class="CodeMirror-linenumber CodeMirror-gutter-elt" style="left: 0px; width: 21px;">6</div>
+                </div>-->
+                      <pre class=" CodeMirror-line "><span style="padding-right: 0.1px;">      <span
+                          class="cm-property">$template</span>: <span class="cm-string">'&lt;div&gt;&lt;h1&gt;Hello @{ $.who }!&lt;/h1&gt;&lt;/div&gt;'</span></span></pre>
+              </div>
+              <div style="position: relative;">
+                <!--<div class="CodeMirror-gutter-wrapper" style="left: -31px;">
+                  <div class="CodeMirror-linenumber CodeMirror-gutter-elt" style="left: 0px; width: 21px;">7</div>
+                </div>-->
+                <pre class=" CodeMirror-line "><span style="padding-right: 0.1px;">    }</span></pre>
+              </div>
+              <div style="position: relative;">
+                <!--<div class="CodeMirror-gutter-wrapper" style="left: -31px;">
+                  <div class="CodeMirror-linenumber CodeMirror-gutter-elt" style="left: 0px; width: 21px;">8</div>
+                </div>-->
+                <pre class=" CodeMirror-line "><span style="padding-right: 0.1px;">  });</span></pre>
+              </div>
+              <div style="position: relative;">
+                <!--<div class="CodeMirror-gutter-wrapper" style="left: -31px;">
+                  <div class="CodeMirror-linenumber CodeMirror-gutter-elt" style="left: 0px; width: 21px;">9</div>
+                </div>-->
+                      <pre class=" CodeMirror-line "><span style="padding-right: 0.1px;"><span
+                          cm-text="">​</span></span></pre>
+              </div>
+              <div style="position: relative;">
+                <!--<div class="CodeMirror-gutter-wrapper" style="left: -31px;">
+                  <div class="CodeMirror-linenumber CodeMirror-gutter-elt" style="left: 0px; width: 21px;">10
+                  </div>
+                </div>-->
+                      <pre class=" CodeMirror-line "><span style="padding-right: 0.1px;">  <span class="cm-variable">document</span>.<span
+                          class="cm-property">body</span>.<span class="cm-property">appendChild</span>(<span
+                          class="cm-variable">Component</span>.<span class="cm-property">create</span>(<span
+                          class="cm-variable">App</span>, {<span class="cm-property">who</span>: <span
+                          class="cm-string">'World'</span>}).<span class="cm-property">$skin</span>);</span></pre>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <p>我们定义了类App，它继承自Component，使用了一个简单的模板作为静态属性。模板中使用了文本模板（以//包围）和单向绑定表达式（以${ }包围）。
+      实例化App时，给属性who赋了初始值。最后，页面上出现"Hello World!"的字样。</p>
+    <p>上面的例子使用了声明式定义的模板，但我们也可以过程式地创建组件和元素，达到相同的效果。</p>
+    <div class="code-box scroll">
+      <pre class="code-behind js-mode">
+  var Text = Exact.Text;
+  var Element = Exact.Element;
+  var Component = Exact.Component;
+
+  var App = Exact.defineClass({extend: Component});// 默认的空模板为'&lt;div&gt;&lt;/div&gt;'
+  var app = Component.create(App);
+  var h1 = Element.create('h1');
+  var text = Text.create('');
+
+  h1.children.insert(text);
+  app.children.insert(h1);
+
+  app.on('changed.who', function() {
+    text.set('data', 'Hello ' + app.who + '!');
+  });
+
+  app.set({who: 'World'}); // 引发事件changed.who
+
+  document.body.appendChild(app.$skin);</pre>
+      <div class="CodeMirror cm-s-alice">
+        <div class="CodeMirror-lines">
+          <div style="position: relative; outline: none;">
+            <!--<div class="CodeMirror-measure">
+              <div class="CodeMirror-linenumber CodeMirror-gutter-elt">
+                <div>19</div>
+              </div>
+            </div>
+            <div class="CodeMirror-measure"></div>
+            <div style="position: relative; z-index: 1;"></div>
+            <div class="CodeMirror-cursors">
+              <div class="CodeMirror-cursor" style="left: 158.297px; top: 0px; height: 17px;">&nbsp;</div>
+            </div>-->
+            <div class="CodeMirror-code">
+              <div style="position: relative;">
+                <div class="CodeMirror-gutter-wrapper" style="left: -31px;">
+                  <div class="CodeMirror-linenumber CodeMirror-gutter-elt" style="left: 0px; width: 21px;">1</div>
+                </div>
+                      <pre class=" CodeMirror-line "><span style="padding-right: 0.1px;">  <span
+                          class="cm-keyword">var</span> <span class="cm-def">Text</span> <span
+                          class="cm-operator">=</span> <span class="cm-variable">Exact</span>.<span class="cm-property">Text</span>;</span></pre>
+              </div>
+              <div style="position: relative;">
+                <div class="CodeMirror-gutter-wrapper" style="left: -31px;">
+                  <div class="CodeMirror-linenumber CodeMirror-gutter-elt" style="left: 0px; width: 21px;">2</div>
+                </div>
+                      <pre class=" CodeMirror-line "><span style="padding-right: 0.1px;">  <span
+                          class="cm-keyword">var</span> <span class="cm-def">Element</span> <span
+                          class="cm-operator">=</span> <span class="cm-variable">Exact</span>.<span class="cm-property">Element</span>;</span></pre>
+              </div>
+              <div style="position: relative;">
+                <div class="CodeMirror-gutter-wrapper" style="left: -31px;">
+                  <div class="CodeMirror-linenumber CodeMirror-gutter-elt" style="left: 0px; width: 21px;">3</div>
+                </div>
+                      <pre class=" CodeMirror-line "><span style="padding-right: 0.1px;">  <span
+                          class="cm-keyword">var</span> <span class="cm-def">Component</span> <span class="cm-operator">=</span> <span
+                          class="cm-variable">Exact</span>.<span class="cm-property">Component</span>;</span></pre>
+              </div>
+              <div style="position: relative;">
+                <div class="CodeMirror-gutter-wrapper" style="left: -31px;">
+                  <div class="CodeMirror-linenumber CodeMirror-gutter-elt" style="left: 0px; width: 21px;">4</div>
+                </div>
+                      <pre class=" CodeMirror-line "><span style="padding-right: 0.1px;"><span
+                          cm-text="">​</span></span></pre>
+              </div>
+              <div style="position: relative;">
+                <div class="CodeMirror-gutter-wrapper" style="left: -31px;">
+                  <div class="CodeMirror-linenumber CodeMirror-gutter-elt" style="left: 0px; width: 21px;">5</div>
+                </div>
+                      <pre class=" CodeMirror-line "><span style="padding-right: 0.1px;">  <span
+                          class="cm-keyword">var</span> <span class="cm-def">App</span> <span
+                          class="cm-operator">=</span> <span class="cm-variable">Exact</span>.<span class="cm-property">defineClass</span>({<span
+                          class="cm-property">extend</span>: <span class="cm-variable">Component</span>});<span
+                          class="cm-comment">// 默认的模板为'&lt;div&gt;&lt;/div&gt;'</span></span></pre>
+              </div>
+              <div style="position: relative;">
+                <div class="CodeMirror-gutter-wrapper" style="left: -31px;">
+                  <div class="CodeMirror-linenumber CodeMirror-gutter-elt" style="left: 0px; width: 21px;">6</div>
+                </div>
+                      <pre class=" CodeMirror-line "><span style="padding-right: 0.1px;">  <span
+                          class="cm-keyword">var</span> <span class="cm-def">app</span> <span
+                          class="cm-operator">=</span> <span class="cm-variable">Component</span>.<span
+                          class="cm-property">create</span>(<span class="cm-variable">App</span>);</span></pre>
+              </div>
+              <div style="position: relative;">
+                <div class="CodeMirror-gutter-wrapper" style="left: -31px;">
+                  <div class="CodeMirror-linenumber CodeMirror-gutter-elt" style="left: 0px; width: 21px;">7</div>
+                </div>
+                      <pre class=" CodeMirror-line "><span style="padding-right: 0.1px;">  <span
+                          class="cm-keyword">var</span> <span class="cm-def">h1</span> <span
+                          class="cm-operator">=</span> <span class="cm-variable">Element</span>.<span
+                          class="cm-property">create</span>(<span class="cm-string">'h1'</span>);</span></pre>
+              </div>
+              <div style="position: relative;">
+                <div class="CodeMirror-gutter-wrapper" style="left: -31px;">
+                  <div class="CodeMirror-linenumber CodeMirror-gutter-elt" style="left: 0px; width: 21px;">8</div>
+                </div>
+                      <pre class=" CodeMirror-line "><span style="padding-right: 0.1px;">  <span
+                          class="cm-keyword">var</span> <span class="cm-def">text</span> <span
+                          class="cm-operator">=</span> <span class="cm-variable">Text</span>.<span class="cm-property">create</span>(<span
+                          class="cm-string">''</span>);</span></pre>
+              </div>
+              <div style="position: relative;">
+                <div class="CodeMirror-gutter-wrapper" style="left: -31px;">
+                  <div class="CodeMirror-linenumber CodeMirror-gutter-elt" style="left: 0px; width: 21px;">9</div>
+                </div>
+                      <pre class=" CodeMirror-line "><span style="padding-right: 0.1px;"><span
+                          cm-text="">​</span></span></pre>
+              </div>
+              <div style="position: relative;">
+                <div class="CodeMirror-gutter-wrapper" style="left: -31px;">
+                  <div class="CodeMirror-linenumber CodeMirror-gutter-elt" style="left: 0px; width: 21px;">10
+                  </div>
+                </div>
+                      <pre class=" CodeMirror-line "><span style="padding-right: 0.1px;">  <span
+                          class="cm-variable">h1</span>.<span class="cm-property">children</span>.<span
+                          class="cm-property">insert</span>(<span class="cm-variable">text</span>);</span></pre>
+              </div>
+              <div style="position: relative;">
+                <div class="CodeMirror-gutter-wrapper" style="left: -31px;">
+                  <div class="CodeMirror-linenumber CodeMirror-gutter-elt" style="left: 0px; width: 21px;">11
+                  </div>
+                </div>
+                      <pre class=" CodeMirror-line "><span style="padding-right: 0.1px;">  <span
+                          class="cm-variable">app</span>.<span class="cm-property">children</span>.<span
+                          class="cm-property">insert</span>(<span class="cm-variable">h1</span>);</span></pre>
+              </div>
+              <div style="position: relative;">
+                <div class="CodeMirror-gutter-wrapper" style="left: -31px;">
+                  <div class="CodeMirror-linenumber CodeMirror-gutter-elt" style="left: 0px; width: 21px;">12
+                  </div>
+                </div>
+                      <pre class=" CodeMirror-line "><span style="padding-right: 0.1px;"><span
+                          cm-text="">​</span></span></pre>
+              </div>
+              <div style="position: relative;">
+                <div class="CodeMirror-gutter-wrapper" style="left: -31px;">
+                  <div class="CodeMirror-linenumber CodeMirror-gutter-elt" style="left: 0px; width: 21px;">13
+                  </div>
+                </div>
+                      <pre class=" CodeMirror-line "><span style="padding-right: 0.1px;">  <span
+                          class="cm-variable">app</span>.<span class="cm-property">on</span>(<span class="cm-string">'changed.who'</span>, <span
+                          class="cm-keyword">function</span>() {</span></pre>
+              </div>
+              <div style="position: relative;">
+                <div class="CodeMirror-gutter-wrapper" style="left: -31px;">
+                  <div class="CodeMirror-linenumber CodeMirror-gutter-elt" style="left: 0px; width: 21px;">14
+                  </div>
+                </div>
+                      <pre class=" CodeMirror-line "><span style="padding-right: 0.1px;">    <span class="cm-variable">text</span>.<span
+                          class="cm-property">set</span>(<span class="cm-string">'data'</span>, <span class="cm-string">'Hello '</span> <span
+                          class="cm-operator">+</span> <span class="cm-variable">app</span>.<span class="cm-property">who</span> <span
+                          class="cm-operator">+</span> <span class="cm-string">'!'</span>);</span></pre>
+              </div>
+              <div style="position: relative;">
+                <div class="CodeMirror-gutter-wrapper" style="left: -31px;">
+                  <div class="CodeMirror-linenumber CodeMirror-gutter-elt" style="left: 0px; width: 21px;">15
+                  </div>
+                </div>
+                <pre class=" CodeMirror-line "><span style="padding-right: 0.1px;">  });</span></pre>
+              </div>
+              <div style="position: relative;">
+                <div class="CodeMirror-gutter-wrapper" style="left: -31px;">
+                  <div class="CodeMirror-linenumber CodeMirror-gutter-elt" style="left: 0px; width: 21px;">16
+                  </div>
+                </div>
+                      <pre class=" CodeMirror-line "><span style="padding-right: 0.1px;"><span
+                          cm-text="">​</span></span></pre>
+              </div>
+              <div style="position: relative;">
+                <div class="CodeMirror-gutter-wrapper" style="left: -31px;">
+                  <div class="CodeMirror-linenumber CodeMirror-gutter-elt" style="left: 0px; width: 21px;">17
+                  </div>
+                </div>
+                      <pre class=" CodeMirror-line "><span style="padding-right: 0.1px;">  <span
+                          class="cm-variable">app</span>.<span class="cm-property">set</span>({<span
+                          class="cm-property">who</span>: <span class="cm-string">'World'</span>}); <span
+                          class="cm-comment">// 引发事件changed.who</span></span></pre>
+              </div>
+              <div style="position: relative;">
+                <div class="CodeMirror-gutter-wrapper" style="left: -31px;">
+                  <div class="CodeMirror-linenumber CodeMirror-gutter-elt" style="left: 0px; width: 21px;">18
+                  </div>
+                </div>
+                      <pre class=" CodeMirror-line "><span style="padding-right: 0.1px;"><span
+                          cm-text="">​</span></span></pre>
+              </div>
+              <div style="position: relative;">
+                <div class="CodeMirror-gutter-wrapper" style="left: -31px;">
+                  <div class="CodeMirror-linenumber CodeMirror-gutter-elt" style="left: 0px; width: 21px;">19
+                  </div>
+                </div>
+                      <pre class=" CodeMirror-line "><span style="padding-right: 0.1px;">  <span class="cm-variable">document</span>.<span
+                          class="cm-property">body</span>.<span class="cm-property">appendChild</span>(<span
+                          class="cm-variable">app</span>.<span class="cm-property">$skin</span>);</span></pre>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <a id="class-diagram">
+
+    </a>
+    <p>显然，使用声明式定义的模板更为简单直观。但是，模板主要用来初始化一个组件，它的结构和内容是相对稳定的。
+      如果一个组件的结构是易变的，则可以考虑在简单的初始化过后，过程式地调整组件的结构和内容。</p>
+
+    <h4>Class Diagram</h4>
+    <div class="fig">
+      <img src="../images/class-diagram.png">
+    </div>
+    <!--<img src="../images/class-diagram.png">-->
+    <p>Exact的类图中，RES是用来管理各种资源的，可以在RES中注册常用的组件、转换器以及命名空间等；
+      utils模块中的工具提供了一系列工具方法，辅助于其他的模块；
+      base模块中定义了几个基类，会在core模块中被继承、被混入或被用到，
+      例如Accessor提供set方法，Watcher提供事件方法，Updater提供异步批量更新方法，等等。</p>
+    <p>HTMXParser利用Skin模块从DOM模板中读取信息，最终解析得到真正可用的模板（即core模块中的templates）；
+      core模块中Shadow层的component利用这样的template进行初始化，生成其他components、elements和texts；
+      当这些shadows发生变化时，就会利用Skin模块将标记为脏的部分渲染到DOM层。</p>
+    <p>component和element的成员变量style、classes都是models中的Cache对象，children是models中的Collection对象；
+      可以在这些models和shadows之间建立bindings。</p>
+    <p>Exact核心模块中，Model层和Shadow层提供的类都有一些共用的基础功能，如下表所示。</p>
+    <table>
+      <tr>
+        <th></th>
+        <th>事件机制</th>
+        <th>脏标记</th>
+        <th>验证机制</th>
+        <th>失效机制</th>
+        <th>更改通知</th>
+        <th>onChange</th>
+      </tr>
+      <tr>
+        <td>Store</td>
+        <td>O</td>
+        <td></td>
+        <td>O</td>
+        <td></td>
+        <td>O</td>
+        <td></td>
+      </tr>
+      <tr>
+        <td>Cache</td>
+        <td></td>
+        <td>O</td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td>O</td>
+      </tr>
+      <tr>
+        <td>Text</td>
+        <td></td>
+        <td>O</td>
+        <td></td>
+        <td>O</td>
+        <td></td>
+        <td></td>
+      </tr>
+      <tr>
+        <td>Element</td>
+        <td>O</td>
+        <td>O</td>
+        <td></td>
+        <td>O</td>
+        <td></td>
+        <td></td>
+      </tr>
+      <tr>
+        <td>Component</td>
+        <td>O</td>
+        <td>O</td>
+        <td>O</td>
+        <td>O</td>
+        <td>O</td>
+        <td></td>
+      </tr>
+    </table>
+  </article>
+</div>
+<!--<footer class="footer">
+  <p>Released under the MIT license<br>
+    © 2015 Chen Junyong. All rights reserved.</p>
+</footer>-->
+<!--<script src="../javascripts/codemirror.js"></script>-->
+<!--<script src="../javascripts/javascript-mode.js"></script>-->
+<!--<script src="../javascripts/xml-mode.js"></script>-->
+<!--<script src="../javascripts/code-format.js"></script>-->
+<script src="../javascripts/menu.js"></script>
+</body>
+</html>

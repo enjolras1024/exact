@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Exact | Color Palette</title>
+  <link rel="stylesheet" href="app.css">
+</head>
+<body>
+<h1>Color Palette</h1>
+
+<div id="app-shell"></div>
+
+<p>In this example, we use:</p>
+<ul>
+  <li>one-time, one-way and two-way bindings;</li>
+  <li>`get`, `set` and `depends` in descriptors;</li>
+  <li>property validation.</li>
+</ul>
+
+<div class="template">
+  <div class="channel-editor">
+    <span>&{ $.name }:</span>
+    <input type="text" x-id="editor" value="@{$.value}" change+="onChange">
+    <input type="range" x-id="slider" min="0" max="255" value="@{$.value}" mousemove+="onSlide">
+  </div>
+</div>
+
+<div class="template">
+  <div class="palette">
+    <input type="text" value="@{$.color}" change+="onChange" x-id="input" x-class="invalid: @{$.isInvalid}">
+    <span x-id="lump" x-style="background-color: @{$.color}"></span>
+    <div x-type="ChannelEditor" name="R" value="#{$.red}"></div>
+    <div x-type="ChannelEditor" name="G" value="#{$.green}"></div>
+    <div x-type="ChannelEditor" name="B" value="#{$.blue}"></div>
+  </div>
+</div>
+
+<script src="../../javascripts/exact.js"></script>
+<script src="app.js"></script>
+</body>
+</html>

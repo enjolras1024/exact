@@ -6,14 +6,35 @@
 
   var defineClass = Exact.defineClass;
 
-  ENJ = {};
+  var ENJ = {
+    read: function() {
+      var item = localStorage.getItem('todos');
+
+      if (item) {
+        var todos = JSON.parse(item);
+        var collection = new Collection();
+        for (var i = 0; i < todos.length; ++i) {
+          collection.push(new Store(todos[i]));
+        }
+        return collection;
+      }
+
+      return Collection.from([]);
+    },
+    save: function(collection) {
+      console.log(collection);
+      localStorage.setItem('todos', JSON.stringify(collection.slice(0)));
+    }
+  };
 
   ENJ.Adapter = defineClass({
     extend: Component,
 
     statics: {
-      $template: Skin.query(document, '.template .adapter')/*.trim()*/
-      //$template: Skin.query(jQuery(document), '.adapter-template').text()/*.trim()*/
+      $template: Skin.query(document, '.template .adapter'),
+      resources: {
+        CheckBox: Exact.CheckBox
+      }
     },
 
     register: function() {
@@ -26,29 +47,14 @@
 
       this.editor.set('value', this.backup);
       this.editor.focus();
-      //this.editor.$skin.focus();
-      //requestAnimationFrame(this.editor.$skin.focus.bind(this.editor.$skin));
     },
 
-    //onEdit: function () {
-    //  //console.log('onEdit');
-    //  this.backup = this.item.title;
-    //  this.item.set('selected', true);
-    //  this.editor.set('value', this.backup);
-    //  this.editor.$skin.focus();
-    //},
-
     onEsc: function(event) {
-      //this.editor.set('value', this.backup);
-      //console.log(event);
       this.cancel = true;
       this.editor.blur();
-      //this.editor.$skin.blur();
-      //this.item.set('title', this.backup);
     },
 
     onEnter: function(event) {
-      //console.log('oooo');
       this.onSubmit(event.target.value);
     },
 
@@ -59,22 +65,17 @@
       } else {
         this.onSubmit(event.target.value);
       }
-
-      //this.onSubmit(this.editor.value);
     },
 
     onSubmit: function(title) {
-      //this.editor.set('value', '');
-      this.item.set({
+      this.item.save({
         selected: false,
         title: title
       });
-
-
     },
 
     onToggle: function() {
-      this.item.set('completed', !this.item.completed);
+      //this.item.set('completed', !this.item.completed);
     },
 
     onDestroy: function() {
@@ -86,7 +87,7 @@
     extend: Component,
 
     statics: {
-      imports: {
+      resources: {
         ENJ: ENJ,
         List: Exact.List,
         display: function(visible) {
@@ -96,8 +97,7 @@
           return ' ' + str + (num > 1 ? 's': '');
         }
       },
-      $template: Skin.query(document, '.template .todoapp')/*.trim()*/
-      //$template: Skin.query(jQuery(document), '.todoapp-template').text()/*.trim()*/
+      $template: Skin.query(document, '.template .todoapp')
     },
 
     defaults: function() {
@@ -108,11 +108,9 @@
 
     filtering: function(todos) {
       var filter = this.filter || 'all';
-      var arr = todos.filter(function(todo) {
+      return todos.filter(function(todo) {
         return filter === 'all' || (filter === 'completed' ? todo.completed : !todo.completed);
       });
-      //console.log(filter, arr);
-      return arr;
     },
 
     ready: function() {
@@ -126,23 +124,20 @@
         todo.on('changed.completed', invalidate);
         adapter.on('destroy', removeTodo);
       });
-
-      //Exact.Shadow.refresh(this);
     },
 
     register: function() {
-      this.todos = new Collection();
-
-
-      Exact.help(this).bind('onEnter', 'onCheck', 'onSelect', 'allDone', 'filtering', 'removeTodo');
+      this.todos = ENJ.read();
+      Exact.help(this).bind('onEnter', 'onCheck', 'onSelect', 'allDone', 'filtering', 'removeTodo', 'refresh');
     },
 
     refresh: function() {
-
+      // TODO: should not set self here. Instead, set children.
       this.set('remainingCount', this.todos.filter(function(item){
         return !item.completed;
       }).length);
 
+      ENJ.save(this.todos);
     },
 
     get allDone() {
@@ -153,10 +148,10 @@
 
     removeTodo: function(todo) {
       this.todos.splice(this.todos.indexOf(todo), 1);
+      //ENJ.save(this.todos);
     },
 
     clearCompleted: function() {
-      console.log('clearCompleted', this);
       for (var i = this.todos.length - 1; i >= 0; --i) {
         if (this.todos[i].completed) {
           this.todos.splice(i, 1);
@@ -173,30 +168,48 @@
     onEnter: function(event) {
       var value = event.target.value.trim();
 
-      //if (value && event.which ===  13 ) {
-        event.target.value = '';
+      event.target.value = '';
 
+      if (value) {
         this.todos.push(new Store({
           completed: false,
           selected: false,
           title: value
         }));
-
-        //console.log(this.todos);
-      //}
+        //ENJ.save(this.todos);
+        //localStorage.setItem('todos', JSON.stringify(this.todos.slice(0)));
+      }
     },
 
     onSelect: function(event) {
-      var el =  event.target;
-      if (el.tagName.toLowerCase() === 'a') {
-        this.set('filter', el.textContent.toLowerCase());
-        //console.log('filter', this.filter);
-      }
+      //var el =  event.target;
+      //if (el.tagName.toLowerCase() === 'a') {
+      //  this.set('filter', el.textContent.toLowerCase());
+      //  //console.log('filter', this.filter);
+      //}
     }
   });
 
-  var todoApp = Component.create(ENJ.TodoApp);
+  var app = Component.create(ENJ.TodoApp);
 
-  //document.getElementById('app-shell').appendChild(todoApp.$skin);
-  document.body.appendChild(todoApp.$skin);
+  var filters = {
+    all: true, active: true, completed: true
+  };
+
+  // handle routing
+  function onHashChange () {
+    var filter = window.location.hash.replace(/#\/?/, '');
+    if (filters[filter]) {
+      app.set('filter', filter);
+    } else {
+      window.location.hash = '';
+      app.set('filter', 'all');
+    }
+  }
+
+  window.addEventListener('hashchange', onHashChange);
+  onHashChange();
+
+
+  document.getElementById('app-shell').appendChild(app.$skin);
 })();

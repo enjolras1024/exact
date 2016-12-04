@@ -18,10 +18,10 @@
     <h3 class="brand"><a href="../" class="logo">Exact</a></h3>
     <a class="menu-btn"></a>
     <ul class="menu-bar">
-      <li><a href="../examples/todomvc.html" class="menu-item"> Examples </a></li>
+      <li><a href="../examples/color-palette.html" class="menu-item"> Examples </a></li>
+      <li><a href="../downloads/index.html" class="menu-item"> Downloads </a></li>
       <li><a href="#" class="menu-item  active"> Documents </a></li>
-      <li><a href="#" class="menu-item"> Downloads </a></li>
-      <li><a href="#" class="menu-item"> Blogs </a></li>
+      <li><a href="../apis/index.html" class="menu-item"> APIs </a></li>
       <li><a href="#" class="menu-item"> GitHub </a></li>
     </ul>
   </nav>
@@ -38,19 +38,20 @@
     <div class="card">
       <h4>Events</h4>
       <ul class="list">
-        <li><a href="./events.html#on-off" class="link">On / Off</a></li>
+        <li><a href="./events.html#on-off-once" class="link">On / Off / Once</a></li>
         <li><a href="./events.html#send-emit" class="link">Send / Emit</a></li>
-        <li><a href="./events.html#keys-of-event" class="link">Keys of Event</a></li>
+        <li><a href="./events.html#key-name-of-event" class="link">Key Name of Event</a></li>
       </ul>
     </div>
     <div class="card">
       <h4>Properties</h4>
       <ul class="list">
         <li><a href="./properties.html#setting-property" class="link">Setting Property</a></li>
-        <li><a href="./properties.html#using-descriptors" class="link">Using Descriptors</a></li>
-        <li><a href="./properties.html#adding-validation" class="link">Adding Validation</a></li>
         <li><a href="./properties.html#dirty-marking" class="link">Dirty Marking</a></li>
         <li><a href="./properties.html#property-changed-event" class="link">Property-Changed Event</a></li>
+        <li><a href="./properties.html#using-descriptors" class="link">Using Descriptors</a></li>
+        <li><a href="./properties.html#adding-validation" class="link">Adding Validation</a></li>
+        <li><a href="./properties.html#custom-getter-setter" class="link">Custom Getter / Setter</a></li>
       </ul>
     </div>
     <div class="card">
@@ -96,36 +97,26 @@
   </aside>
   <a class="side-btn">&gt;</a>
   <article class="article">
-    <a id="on-off"></a>
+    <a id="on-off-once"></a>
     <h2>Bindings</h2>
     <p>
       Exact中的绑定是基于事件而实现的。这意味着，即便不使用绑定，你也能完成数据的传递。
       当然，使用绑定自有好处，它以简单直观的方式极大地简化了繁琐重复的赋值操作过程。
     </p>
-    <div class="code-box">
-      <script type="text/html" class="code-behind xml-mode"><input type="text" value="${ $.message }" readonly x-id="$msg"></script>
+    <div class="code-box scroll">
+      <!--<script type="text/html" class="code-behind xml-mode"><input type="text" value="@{ $.message }" readonly x-id="$msg"></script>
+      -->
       <div class="CodeMirror cm-s-alice">
         <div class="CodeMirror-lines">
           <div style="position: relative; outline: none;">
-            <div class="CodeMirror-measure">
-              <pre>x</pre>
-            </div>
-            <div class="CodeMirror-measure"></div>
-            <div style="position: relative; z-index: 1;"></div>
-            <div class="CodeMirror-cursors">
-              <div class="CodeMirror-cursor" style="left: 72.5625px; top: 0px; height: 17px;">&nbsp;</div>
-            </div>
             <div class="CodeMirror-code">
               <div style="position: relative;">
-                <div class="CodeMirror-gutter-wrapper" style="left: -31px;">
-                  <div class="CodeMirror-linenumber CodeMirror-gutter-elt" style="left: 0px; width: 21px;">1</div>
-                </div>
-                      <pre class=" CodeMirror-line "><span style="padding-right: 0.1px;">&nbsp;&nbsp;<span
-                          class="cm-tag cm-bracket">&lt;</span><span class="cm-tag">input</span> <span
-                          class="cm-attribute">type</span>=<span class="cm-string">"text"</span> <span
-                          class="cm-attribute">value</span>=<span class="cm-string">"${ $.message }"</span> <span
-                          class="cm-attribute">readonly</span> <span class="cm-attribute">x-id</span>=<span
-                          class="cm-string">"$msg"</span><span class="cm-tag cm-bracket">&gt;</span></span></pre>
+                <pre class=" CodeMirror-line "><span style="padding-right: 0.1px;"><span
+                    class="cm-tag cm-bracket">&lt;</span><span class="cm-tag">input</span> <span
+                    class="cm-attribute">type</span>=<span class="cm-string">"text"</span> <span
+                    class="cm-attribute">value</span>=<span class="cm-string">"@{ $.message }"</span> <span
+                    class="cm-attribute">readonly</span> <span class="cm-attribute">x-id</span>=<span
+                    class="cm-string">"$msg"</span><span class="cm-tag cm-bracket">&gt;</span></span></pre>
               </div>
             </div>
           </div>
@@ -134,52 +125,21 @@
     </div>
     <a id="key-terms"></a>
     <p>几乎等价于：</p>
-    <div class="code-box">
-      <pre class="code-behind js-mode">
-  this.on('changed.text', function() {
-    this.$msg.set('value', this.message);
-  });</pre>
+    <div class="code-box scroll">
+      <!--<pre class="code-behind js-mode">
+this.on('changed.text', function() {
+  this.$msg.set('value', this.message);
+});</pre>-->
       <div class="CodeMirror cm-s-alice">
         <div class="CodeMirror-lines">
           <div style="position: relative; outline: none;">
-            <div class="CodeMirror-measure">
-              <pre>x</pre>
-            </div>
-            <div class="CodeMirror-measure"></div>
-            <div style="position: relative; z-index: 1;"></div>
-            <div class="CodeMirror-cursors">
-              <div class="CodeMirror-cursor" style="left: 32.9844px; top: 34px; height: 17px;">&nbsp;</div>
-            </div>
-            <div class="CodeMirror-code">
-              <div style="position: relative;">
-                <div class="CodeMirror-gutter-wrapper" style="left: -31px;">
-                  <div class="CodeMirror-linenumber CodeMirror-gutter-elt" style="left: 0px; width: 21px;">1</div>
-                </div>
-                      <pre class=" CodeMirror-line "><span style="padding-right: 0.1px;">  <span
-                          class="cm-keyword">this</span>.<span class="cm-property">on</span>(<span class="cm-string">'changed.text'</span>, <span
-                          class="cm-keyword">function</span>() {</span></pre>
-              </div>
-              <div style="position: relative;">
-                <div class="CodeMirror-gutter-wrapper" style="left: -31px;">
-                  <div class="CodeMirror-linenumber CodeMirror-gutter-elt" style="left: 0px; width: 21px;">2</div>
-                </div>
-                      <pre class=" CodeMirror-line "><span style="padding-right: 0.1px;">    <span class="cm-keyword">this</span>.<span
-                          class="cm-property">$msg</span>.<span class="cm-property">set</span>(<span class="cm-string">'value'</span>, <span
-                          class="cm-keyword">this</span>.<span class="cm-property">message</span>);</span></pre>
-              </div>
-              <div style="position: relative;">
-                <div class="CodeMirror-gutter-wrapper" style="left: -31px;">
-                  <div class="CodeMirror-linenumber CodeMirror-gutter-elt" style="left: 0px; width: 21px;">3</div>
-                </div>
-                <pre class=" CodeMirror-line "><span style="padding-right: 0.1px;">  });</span></pre>
-              </div>
-            </div>
+            <div class="CodeMirror-code"><pre class=" CodeMirror-line "><span style="padding-right: 0.1px;"><span class="cm-keyword">this</span>.<span class="cm-property">on</span>(<span class="cm-string">'changed.message'</span>, <span class="cm-keyword">function</span>() {</span></pre><pre class=" CodeMirror-line "><span style="padding-right: 0.1px;">  <span class="cm-keyword">this</span>.<span class="cm-property">$msg</span>.<span class="cm-property">set</span>(<span class="cm-string">'value'</span>, <span class="cm-keyword">this</span>.<span class="cm-property">message</span>);</span></pre><pre class=" CodeMirror-line "><span style="padding-right: 0.1px;">});</span></pre></div>
           </div>
         </div>
       </div>
     </div>
     <h4 >Key Terms</h4>
-    <p>使用好绑定，需要了解几个关键词。</p>
+    <p>在Exact中使用好绑定，需要了解几个关键词。</p>
     <p>（1）绑定模式：基本上有3种绑定模式可选，即单次、单向和双向。其中单次绑定是单向绑定中特殊的一种绑定，它只在绑定建立时立即起效，不关心之后的变化。</p>
     <p>（2）绑定对象和绑定对象属性：绑定的目的是要将绑定表达式的运算结果赋给一个对象的属性。
       对于单次或单向绑定，这样的对象是任意的，这样的对象属性也是任意的。
@@ -196,98 +156,21 @@
     <h4>Basic Syntax</h4>
     <p>模板中绑定的语法是由Exact的HTMX解析器规定的，可以有不同的实现。默认的基本语法如下：</p>
     <a id="optional-converters"></a>
-    <div class="code-box">
-      <pre class="code-behind js-mode">
-  // &lt;绑定对象属性名&gt;="&lt;绑定模式符&gt;{&lt;求值器表达式&gt; [|转换器表达式] [@绑定域事件]}"
-  // 求值器表达式可以是单个绑定路径或一段JavaScript表达式
-  // 转换器表达式的参数列表中可包含绑定路径或JavaScript表达式
-  value="&{ $.text }"                                   // 单次绑定，单个路径
-  value="${ $.text | upper }"                           // 单向绑定，单个路径，无参转换器
-  value="${ $.time | format('HH:MM:SS', $.use24) }"     // 单向绑定，多个路径，带参数的转换器
-  value="${ $.getFullName($.firstName, $.lastName) }"   // 单向绑定，多个路径，绑定域上的函数
-  value="${ $.firstName + ' ' + $.lastName @changed }"  // 单向绑定，多个路径，事件为changed
-  value="#{ $.color | hex2rgb }"                        // 双向绑定，双向转换器，必须是单个路径</pre>
+    <div class="code-box scroll">
+      <!--<pre class="code-behind js-mode">
+// &lt;绑定对象属性名&gt;="&lt;绑定模式符&gt;{&lt;求值器表达式&gt; [|转换器表达式] [@绑定域事件]}"
+// 求值器表达式可以是单个绑定路径或一段JavaScript表达式
+// 转换器表达式的参数列表中可包含绑定路径或JavaScript表达式
+value="&{ $.text }"                                   // 单次绑定，单个路径
+value="@{ $.text | upper }"                           // 单向绑定，单个路径，无参转换器
+value="@{ $.time | format('HH:MM:SS', $.use24) }"     // 单向绑定，多个路径，带参数的转换器
+value="@{ $.getFullName($.firstName, $.lastName) }"   // 单向绑定，多个路径，绑定域上的函数
+value="@{ $.firstName + ' ' + $.lastName *changed }"  // 单向绑定，多个路径，事件为changed
+value="#{ $.color | hex2rgb }"                        // 双向绑定，双向转换器，必须是单个路径</pre>-->
       <div class="CodeMirror cm-s-alice">
         <div class="CodeMirror-lines">
           <div style="position: relative; outline: none;">
-            <div class="CodeMirror-measure">
-              <div class="CodeMirror-linenumber CodeMirror-gutter-elt">
-                <div>9</div>
-              </div>
-            </div>
-            <div class="CodeMirror-measure"></div>
-            <div style="position: relative; z-index: 1;"></div>
-            <div class="CodeMirror-cursors">
-              <div class="CodeMirror-cursor" style="left: 201px; top: 34px; height: 17px;">&nbsp;</div>
-            </div>
-            <div class="CodeMirror-code">
-              <div style="position: relative;">
-                <div class="CodeMirror-gutter-wrapper" style="left: -31px;">
-                  <div class="CodeMirror-linenumber CodeMirror-gutter-elt" style="left: 0px; width: 21px;">1</div>
-                </div>
-                <pre class=" CodeMirror-line "><span style="padding-right: 0.1px;">  <span class="cm-comment">// &lt;绑定对象属性名&gt;="&lt;绑定模式符&gt;{&lt;求值器表达式&gt; [|转换器表达式] [@绑定域事件]}"</span></span></pre>
-              </div>
-              <div style="position: relative;">
-                <div class="CodeMirror-gutter-wrapper" style="left: -31px;">
-                  <div class="CodeMirror-linenumber CodeMirror-gutter-elt" style="left: 0px; width: 21px;">2</div>
-                </div>
-                <pre class=" CodeMirror-line "><span style="padding-right: 0.1px;">  <span class="cm-comment">// 求值器表达式可以是单个绑定路径或一段JavaScript表达式</span></span></pre>
-              </div>
-              <div style="position: relative;">
-                <div class="CodeMirror-gutter-wrapper" style="left: -31px;">
-                  <div class="CodeMirror-linenumber CodeMirror-gutter-elt" style="left: 0px; width: 21px;">3</div>
-                </div>
-                <pre class=" CodeMirror-line "><span style="padding-right: 0.1px;">  <span class="cm-comment">// 转换器表达式的参数列表中可包含绑定路径或JavaScript表达式</span></span></pre>
-              </div>
-              <div style="position: relative;">
-                <div class="CodeMirror-gutter-wrapper" style="left: -31px;">
-                  <div class="CodeMirror-linenumber CodeMirror-gutter-elt" style="left: 0px; width: 21px;">4</div>
-                </div>
-                      <pre class=" CodeMirror-line "><span style="padding-right: 0.1px;">  <span class="cm-variable">value</span><span
-                          class="cm-operator">=</span><span class="cm-string">"&amp;{ $.text }"</span>                                   <span
-                          class="cm-comment">// 单次绑定，单个路径</span></span></pre>
-              </div>
-              <div style="position: relative;">
-                <div class="CodeMirror-gutter-wrapper" style="left: -31px;">
-                  <div class="CodeMirror-linenumber CodeMirror-gutter-elt" style="left: 0px; width: 21px;">5</div>
-                </div>
-                      <pre class=" CodeMirror-line "><span style="padding-right: 0.1px;">  <span class="cm-variable">value</span><span
-                          class="cm-operator">=</span><span class="cm-string">"${ $.text | upper }"</span>                           <span
-                          class="cm-comment">// 单向绑定，单个路径，无参转换器</span></span></pre>
-              </div>
-              <div style="position: relative;">
-                <div class="CodeMirror-gutter-wrapper" style="left: -31px;">
-                  <div class="CodeMirror-linenumber CodeMirror-gutter-elt" style="left: 0px; width: 21px;">6</div>
-                </div>
-                      <pre class=" CodeMirror-line "><span style="padding-right: 0.1px;">  <span class="cm-variable">value</span><span
-                          class="cm-operator">=</span><span class="cm-string">"${ $.time | format('HH:MM:SS', $.use24) }"</span>     <span
-                          class="cm-comment">// 单向绑定，多个路径，带参数的转换器</span></span></pre>
-              </div>
-              <div style="position: relative;">
-                <div class="CodeMirror-gutter-wrapper" style="left: -31px;">
-                  <div class="CodeMirror-linenumber CodeMirror-gutter-elt" style="left: 0px; width: 21px;">7</div>
-                </div>
-                      <pre class=" CodeMirror-line "><span style="padding-right: 0.1px;">  <span class="cm-variable">value</span><span
-                          class="cm-operator">=</span><span class="cm-string">"${ $.getFullName($.firstName, $.lastName) }"</span>   <span
-                          class="cm-comment">// 单向绑定，多个路径，绑定域上的函数</span></span></pre>
-              </div>
-              <div style="position: relative;">
-                <div class="CodeMirror-gutter-wrapper" style="left: -31px;">
-                  <div class="CodeMirror-linenumber CodeMirror-gutter-elt" style="left: 0px; width: 21px;">8</div>
-                </div>
-                      <pre class=" CodeMirror-line "><span style="padding-right: 0.1px;">  <span class="cm-variable">value</span><span
-                          class="cm-operator">=</span><span class="cm-string">"${ $.firstName + ' ' + $.lastName @changed }"</span>  <span
-                          class="cm-comment">// 单向绑定，多个路径，事件为changed</span></span></pre>
-              </div>
-              <div style="position: relative;">
-                <div class="CodeMirror-gutter-wrapper" style="left: -31px;">
-                  <div class="CodeMirror-linenumber CodeMirror-gutter-elt" style="left: 0px; width: 21px;">9</div>
-                </div>
-                      <pre class=" CodeMirror-line "><span style="padding-right: 0.1px;">  <span class="cm-variable">value</span><span
-                          class="cm-operator">=</span><span class="cm-string">"#{ $.color | hex2rgb }"</span>                        <span
-                          class="cm-comment">// 双向绑定，双向转换器，必须是单个路径</span></span></pre>
-              </div>
-            </div>
+            <div class="CodeMirror-code"><pre class=" CodeMirror-line "><span style="padding-right: 0.1px;"><span class="cm-comment">// &amp;lt;绑定对象属性名&amp;gt;="&amp;lt;绑定模式符&amp;gt;{&amp;lt;求值器表达式&amp;gt; [|转换器表达式] [@绑定域事件]}"</span></span></pre><pre class=" CodeMirror-line "><span style="padding-right: 0.1px;"><span class="cm-comment">// 求值器表达式可以是单个绑定路径或一段JavaScript表达式</span></span></pre><pre class=" CodeMirror-line "><span style="padding-right: 0.1px;"><span class="cm-comment">// 转换器表达式的参数列表中可包含绑定路径或JavaScript表达式</span></span></pre><pre class=" CodeMirror-line "><span style="padding-right: 0.1px;"><span class="cm-variable">value</span><span class="cm-operator">=</span><span class="cm-string">"&amp;{ $.text }"</span>                                   <span class="cm-comment">// 单次绑定，单个路径</span></span></pre><pre class=" CodeMirror-line "><span style="padding-right: 0.1px;"><span class="cm-variable">value</span><span class="cm-operator">=</span><span class="cm-string">"@{ $.text | upper }"</span>                           <span class="cm-comment">// 单向绑定，单个路径，无参转换器</span></span></pre><pre class=" CodeMirror-line "><span style="padding-right: 0.1px;"><span class="cm-variable">value</span><span class="cm-operator">=</span><span class="cm-string">"@{ $.time | format('HH:MM:SS', $.use24) }"</span>     <span class="cm-comment">// 单向绑定，多个路径，带参数的转换器</span></span></pre><pre class=" CodeMirror-line "><span style="padding-right: 0.1px;"><span class="cm-variable">value</span><span class="cm-operator">=</span><span class="cm-string">"@{ $.getFullName($.firstName, $.lastName) }"</span>   <span class="cm-comment">// 单向绑定，多个路径，绑定域上的函数</span></span></pre><pre class=" CodeMirror-line "><span style="padding-right: 0.1px;"><span class="cm-variable">value</span><span class="cm-operator">=</span><span class="cm-string">"@{ $.firstName + ' ' + $.lastName *changed }"</span>  <span class="cm-comment">// 单向绑定，多个路径，事件为changed</span></span></pre><pre class=" CodeMirror-line "><span style="padding-right: 0.1px;"><span class="cm-variable">value</span><span class="cm-operator">=</span><span class="cm-string">"#{ $.color | hex2rgb }"</span>                        <span class="cm-comment">// 双向绑定，双向转换器，必须是单个路径</span></span></pre></div>
           </div>
         </div>
       </div>
@@ -296,188 +179,127 @@
       若在双向绑定使用转换器，转换器也必须是双向的，可参见下文。</p>
     <h4>Optional Converters</h4>
     <p>一些场景下，在视图上呈现数据时需要有一个格式化的过程，比如标题要大写：</p>
-    <div class="code-box">
-      <pre class="code-behind js-mode">
-  {
-    descriptors: ['title'],
-    resources: {
-      Header: Header, //已定义的Header组件类
-      format: function(value, brackets) {
-       return brackets[0] + value.toUpperCase() + brackets[1];
-      }
-    },
-    $template: '&lt;header text="${$.title | format(\'##\')}" x-id="header" x-type="&{Header}"&gt;&lt;/header&gt;...'
-  }
-  // this.title = 'hello' => this.header.text = '#HELLO#'</pre>
-<div class="CodeMirror cm-s-alice">
-      <div class="CodeMirror-lines"><div style="position: relative; outline: none;"><div class="CodeMirror-measure"><div class="CodeMirror-linenumber CodeMirror-gutter-elt"><div>11</div></div></div><div class="CodeMirror-measure"></div><div style="position: relative; z-index: 1;"></div><div class="CodeMirror-cursors"><div class="CodeMirror-cursor" style="left: 19.7813px; top: 0px; height: 17px;">&nbsp;</div></div><div class="CodeMirror-code"><div style="position: relative;"><div class="CodeMirror-gutter-wrapper" style="left: -31px;"><div class="CodeMirror-linenumber CodeMirror-gutter-elt" style="left: 0px; width: 21px;">1</div></div><pre class=" CodeMirror-line "><span style="padding-right: 0.1px;">  {</span></pre></div><div style="position: relative;"><div class="CodeMirror-gutter-wrapper" style="left: -31px;"><div class="CodeMirror-linenumber CodeMirror-gutter-elt" style="left: 0px; width: 21px;">2</div></div><pre class=" CodeMirror-line "><span style="padding-right: 0.1px;">    <span class="cm-variable">descriptors</span>: [<span class="cm-string">'title'</span>],</span></pre></div><div style="position: relative;"><div class="CodeMirror-gutter-wrapper" style="left: -31px;"><div class="CodeMirror-linenumber CodeMirror-gutter-elt" style="left: 0px; width: 21px;">3</div></div><pre class=" CodeMirror-line "><span style="padding-right: 0.1px;">    <span class="cm-variable">resources</span>: {</span></pre></div><div style="position: relative;"><div class="CodeMirror-gutter-wrapper" style="left: -31px;"><div class="CodeMirror-linenumber CodeMirror-gutter-elt" style="left: 0px; width: 21px;">4</div></div><pre class=" CodeMirror-line "><span style="padding-right: 0.1px;">      <span class="cm-variable">Header</span>: <span class="cm-variable">Header</span>, <span class="cm-comment">//已定义的Header组件类</span></span></pre></div><div style="position: relative;"><div class="CodeMirror-gutter-wrapper" style="left: -31px;"><div class="CodeMirror-linenumber CodeMirror-gutter-elt" style="left: 0px; width: 21px;">5</div></div><pre class=" CodeMirror-line "><span style="padding-right: 0.1px;">      <span class="cm-variable">format</span>: <span class="cm-keyword">function</span>(<span class="cm-def">value</span>, <span class="cm-def">brackets</span>) {</span></pre></div><div style="position: relative;"><div class="CodeMirror-gutter-wrapper" style="left: -31px;"><div class="CodeMirror-linenumber CodeMirror-gutter-elt" style="left: 0px; width: 21px;">6</div></div><pre class=" CodeMirror-line "><span style="padding-right: 0.1px;">       <span class="cm-keyword">return</span> <span class="cm-variable-2">brackets</span>[<span class="cm-number">0</span>] <span class="cm-operator">+</span> <span class="cm-variable-2">value</span>.<span class="cm-property">toUpperCase</span>() <span class="cm-operator">+</span> <span class="cm-variable-2">brackets</span>[<span class="cm-number">1</span>];</span></pre></div><div style="position: relative;"><div class="CodeMirror-gutter-wrapper" style="left: -31px;"><div class="CodeMirror-linenumber CodeMirror-gutter-elt" style="left: 0px; width: 21px;">7</div></div><pre class=" CodeMirror-line "><span style="padding-right: 0.1px;">      }</span></pre></div><div style="position: relative;"><div class="CodeMirror-gutter-wrapper" style="left: -31px;"><div class="CodeMirror-linenumber CodeMirror-gutter-elt" style="left: 0px; width: 21px;">8</div></div><pre class=" CodeMirror-line "><span style="padding-right: 0.1px;">    },</span></pre></div><div style="position: relative;"><div class="CodeMirror-gutter-wrapper" style="left: -31px;"><div class="CodeMirror-linenumber CodeMirror-gutter-elt" style="left: 0px; width: 21px;">9</div></div><pre class=" CodeMirror-line "><span style="padding-right: 0.1px;">    <span class="cm-variable">$template</span>: <span class="cm-string">'&lt;header text="${$.title | format(\'##\')}" x-id="header" x-type="&amp;{Header}"&gt;&lt;/header&gt;...'</span></span></pre></div><div style="position: relative;"><div class="CodeMirror-gutter-wrapper" style="left: -31px;"><div class="CodeMirror-linenumber CodeMirror-gutter-elt" style="left: 0px; width: 21px;">10</div></div><pre class=" CodeMirror-line "><span style="padding-right: 0.1px;">  }</span></pre></div><div style="position: relative;"><div class="CodeMirror-gutter-wrapper" style="left: -31px;"><div class="CodeMirror-linenumber CodeMirror-gutter-elt" style="left: 0px; width: 21px;">11</div></div><pre class=" CodeMirror-line "><span style="padding-right: 0.1px;">  <span class="cm-comment">// this.title = 'hello' =&gt; this.header.text = '#HELLO#'</span></span></pre></div></div></div></div>
-     </div>
+    <div class="code-box scroll">
+<!--      <pre class="code-behind js-mode">
+{
+  descriptors: ['title'],
+  resources: {
+    Header: Header, //已定义的Header组件类
+    format: function(value, brackets) {
+     return brackets[0] + value.toUpperCase() + brackets[1];
+    }
+  },
+  $template: '&lt;header text="@{$.title | format(\'##\')}" x-id="header" x-type="&{Header}"&gt;&lt;/header&gt;...'
+}
+// this.title = 'hello' => this.header.text = '#HELLO#'</pre>-->
+      <div class="CodeMirror cm-s-alice">
+        <div class="CodeMirror-lines">
+          <div style="position: relative; outline: none;">
+            <div class="CodeMirror-code"><pre class=" CodeMirror-line "><span style="padding-right: 0.1px;">{</span></pre><pre class=" CodeMirror-line "><span style="padding-right: 0.1px;">  <span class="cm-variable">descriptors</span>: [<span class="cm-string">'title'</span>],</span></pre><pre class=" CodeMirror-line "><span style="padding-right: 0.1px;">  <span class="cm-variable">resources</span>: {</span></pre><pre class=" CodeMirror-line "><span style="padding-right: 0.1px;">    <span class="cm-variable">format</span>: <span class="cm-keyword">function</span>(<span class="cm-def">value</span>, <span class="cm-def">brackets</span>) {</span></pre><pre class=" CodeMirror-line "><span style="padding-right: 0.1px;">     <span class="cm-keyword">return</span> <span class="cm-variable-2">brackets</span>[<span class="cm-number">0</span>] <span class="cm-operator">+</span> <span class="cm-variable-2">value</span>.<span class="cm-property">toUpperCase</span>() <span class="cm-operator">+</span> <span class="cm-variable-2">brackets</span>[<span class="cm-number">1</span>];</span></pre><pre class=" CodeMirror-line "><span style="padding-right: 0.1px;">    }</span></pre><pre class=" CodeMirror-line "><span style="padding-right: 0.1px;">  },</span></pre><pre class=" CodeMirror-line "><span style="padding-right: 0.1px;">  <span class="cm-variable">$template</span>: <span class="cm-string">'&lt;h1&gt;@{$.title | format(\'##\')}&lt;/h1&gt;'</span></span></pre><pre class=" CodeMirror-line "><span style="padding-right: 0.1px;">}</span></pre><pre class=" CodeMirror-line "><span style="padding-right: 0.1px;"><span class="cm-comment">// this.title = 'hello' =&gt; &lt;h1&gt;#HELLO#&lt;/h1&gt;</span></span></pre></div>
+          </div>
+        </div>
+      </div>
     </div>
     <p>等价地，</p>
-    <div class="code-box">
-      <pre class="code-behind js-mode">
-  var format = function(value, brackets) {
-     return brackets[0] + value.toUpperCase() + brackets[1];
-  }
-  var args = ['title'];
-  args.flags = [1]; // flag： 0=>常量（默认），1=>路径，2=>求值器
+    <div class="code-box scroll">
+      <!--<pre class="code-behind js-mode">
+var format = function(value, brackets) {
+   return brackets[0] + value.toUpperCase() + brackets[1];
+}
+var args = ['title'];
+args.flags = [1]; // flag： 0=>常量（默认），1=>路径，2=>求值器
 
-  Exact.Binding.build(this.header, 'title', this, {
-    mode: 1,
-    scopePaths: ['title'],
-    evaluator: Exact.Evaluator.makeGetEvaluator(args),
-    converters: [Exact.Evaluator.makeEvaluator(format, ["##"])]
-  })</pre>
+Exact.Binding.build(this.header, 'title', this, {
+  mode: 1,
+  scopePaths: ['title'],
+  evaluator: Exact.Evaluator.makeGetEvaluator(args),
+  converters: [Exact.Evaluator.makeEvaluator(format, ["##"])]
+})</pre>-->
       <div class="CodeMirror cm-s-alice">
-        <div class="CodeMirror-lines"><div style="position: relative; outline: none;"><div class="CodeMirror-measure"><span><span>​</span>x</span></div><div class="CodeMirror-measure"></div><div style="position: relative; z-index: 1;"></div><div class="CodeMirror-cursors"><div class="CodeMirror-cursor" style="left: 0px; top: 0px; height: 17px;">&nbsp;</div></div><div class="CodeMirror-code"><div style="position: relative;"><div class="CodeMirror-gutter-wrapper" style="left: -31px;"><div class="CodeMirror-linenumber CodeMirror-gutter-elt" style="left: 0px; width: 21px;">1</div></div><pre class=" CodeMirror-line "><span style="padding-right: 0.1px;">  <span class="cm-keyword">var</span> <span class="cm-def">format</span> <span class="cm-operator">=</span> <span class="cm-keyword">function</span>(<span class="cm-def">value</span>, <span class="cm-def">brackets</span>) {</span></pre></div><div style="position: relative;"><div class="CodeMirror-gutter-wrapper" style="left: -31px;"><div class="CodeMirror-linenumber CodeMirror-gutter-elt" style="left: 0px; width: 21px;">2</div></div><pre class=" CodeMirror-line "><span style="padding-right: 0.1px;">     <span class="cm-keyword">return</span> <span class="cm-variable-2">brackets</span>[<span class="cm-number">0</span>] <span class="cm-operator">+</span> <span class="cm-variable-2">value</span>.<span class="cm-property">toUpperCase</span>() <span class="cm-operator">+</span> <span class="cm-variable-2">brackets</span>[<span class="cm-number">1</span>];</span></pre></div><div style="position: relative;"><div class="CodeMirror-gutter-wrapper" style="left: -31px;"><div class="CodeMirror-linenumber CodeMirror-gutter-elt" style="left: 0px; width: 21px;">3</div></div><pre class=" CodeMirror-line "><span style="padding-right: 0.1px;">  }</span></pre></div><div style="position: relative;"><div class="CodeMirror-gutter-wrapper" style="left: -31px;"><div class="CodeMirror-linenumber CodeMirror-gutter-elt" style="left: 0px; width: 21px;">4</div></div><pre class=" CodeMirror-line "><span style="padding-right: 0.1px;">  <span class="cm-keyword">var</span> <span class="cm-def">args</span> <span class="cm-operator">=</span> [<span class="cm-string">'title'</span>];</span></pre></div><div style="position: relative;"><div class="CodeMirror-gutter-wrapper" style="left: -31px;"><div class="CodeMirror-linenumber CodeMirror-gutter-elt" style="left: 0px; width: 21px;">5</div></div><pre class=" CodeMirror-line "><span style="padding-right: 0.1px;">  <span class="cm-variable">args</span>.<span class="cm-property">flags</span> <span class="cm-operator">=</span> [<span class="cm-number">1</span>]; <span class="cm-comment">// flag： 0=&gt;常量（默认），1=&gt;路径，2=&gt;求值器</span></span></pre></div><div style="position: relative;"><div class="CodeMirror-gutter-wrapper" style="left: -31px;"><div class="CodeMirror-linenumber CodeMirror-gutter-elt" style="left: 0px; width: 21px;">6</div></div><pre class=" CodeMirror-line "><span style="padding-right: 0.1px;"><span cm-text="">​</span></span></pre></div><div style="position: relative;"><div class="CodeMirror-gutter-wrapper" style="left: -31px;"><div class="CodeMirror-linenumber CodeMirror-gutter-elt" style="left: 0px; width: 21px;">7</div></div><pre class=" CodeMirror-line "><span style="padding-right: 0.1px;">  <span class="cm-variable">Exact</span>.<span class="cm-property">Binding</span>.<span class="cm-property">build</span>(<span class="cm-keyword">this</span>.<span class="cm-property">header</span>, <span class="cm-string">'title'</span>, <span class="cm-keyword">this</span>, {</span></pre></div><div style="position: relative;"><div class="CodeMirror-gutter-wrapper" style="left: -31px;"><div class="CodeMirror-linenumber CodeMirror-gutter-elt" style="left: 0px; width: 21px;">8</div></div><pre class=" CodeMirror-line "><span style="padding-right: 0.1px;">    <span class="cm-property">mode</span>: <span class="cm-number">1</span>,</span></pre></div><div style="position: relative;"><div class="CodeMirror-gutter-wrapper" style="left: -31px;"><div class="CodeMirror-linenumber CodeMirror-gutter-elt" style="left: 0px; width: 21px;">9</div></div><pre class=" CodeMirror-line "><span style="padding-right: 0.1px;">    <span class="cm-property">scopePaths</span>: [<span class="cm-string">'title'</span>],</span></pre></div><div style="position: relative;"><div class="CodeMirror-gutter-wrapper" style="left: -31px;"><div class="CodeMirror-linenumber CodeMirror-gutter-elt" style="left: 0px; width: 21px;">10</div></div><pre class=" CodeMirror-line "><span style="padding-right: 0.1px;">    <span class="cm-property">evaluator</span>: <span class="cm-variable">Exact</span>.<span class="cm-property">Evaluator</span>.<span class="cm-property">makeGetEvaluator</span>(<span class="cm-variable">args</span>),</span></pre></div><div style="position: relative;"><div class="CodeMirror-gutter-wrapper" style="left: -31px;"><div class="CodeMirror-linenumber CodeMirror-gutter-elt" style="left: 0px; width: 21px;">11</div></div><pre class=" CodeMirror-line "><span style="padding-right: 0.1px;">    <span class="cm-property">converters</span>: [<span class="cm-variable">Exact</span>.<span class="cm-property">Evaluator</span>.<span class="cm-property">makeEvaluator</span>(<span class="cm-variable">format</span>, [<span class="cm-string">"##"</span>])]</span></pre></div><div style="position: relative;"><div class="CodeMirror-gutter-wrapper" style="left: -31px;"><div class="CodeMirror-linenumber CodeMirror-gutter-elt" style="left: 0px; width: 21px;">12</div></div><pre class=" CodeMirror-line "><span style="padding-right: 0.1px;">  })</span></pre></div></div></div></div>
+        <div class="CodeMirror-lines">
+          <div style="position: relative; outline: none;">
+            <div class="CodeMirror-code"><pre class=" CodeMirror-line "><span style="padding-right: 0.1px;"><span class="cm-keyword">var</span> <span class="cm-def">format</span> <span class="cm-operator">=</span> <span class="cm-keyword">function</span>(<span class="cm-def">value</span>, <span class="cm-def">brackets</span>) {</span></pre><pre class=" CodeMirror-line "><span style="padding-right: 0.1px;">   <span class="cm-keyword">return</span> <span class="cm-variable-2">brackets</span>[<span class="cm-number">0</span>] <span class="cm-operator">+</span> <span class="cm-variable-2">value</span>.<span class="cm-property">toUpperCase</span>() <span class="cm-operator">+</span> <span class="cm-variable-2">brackets</span>[<span class="cm-number">1</span>];</span></pre><pre class=" CodeMirror-line "><span style="padding-right: 0.1px;">}</span></pre><pre class=" CodeMirror-line "><span style="padding-right: 0.1px;"><span class="cm-keyword">var</span> <span class="cm-def">args</span> <span class="cm-operator">=</span> [<span class="cm-string">'title'</span>];</span></pre><pre class=" CodeMirror-line "><span style="padding-right: 0.1px;"><span class="cm-variable">args</span>.<span class="cm-property">flags</span> <span class="cm-operator">=</span> [<span class="cm-number">1</span>]; <span class="cm-comment">// flag： 0=&gt;常量（默认），1=&gt;路径，2=&gt;求值器</span></span></pre><pre class=" CodeMirror-line "><span style="padding-right: 0.1px;"><span cm-text="">​</span></span></pre><pre class=" CodeMirror-line "><span style="padding-right: 0.1px;"><span class="cm-variable">Exact</span>.<span class="cm-property">Binding</span>.<span class="cm-property">build</span>(<span class="cm-keyword">this</span>.<span class="cm-property">header</span>, <span class="cm-string">'title'</span>, <span class="cm-keyword">this</span>, {</span></pre><pre class=" CodeMirror-line "><span style="padding-right: 0.1px;">  <span class="cm-property">mode</span>: <span class="cm-number">1</span>,</span></pre><pre class=" CodeMirror-line "><span style="padding-right: 0.1px;">  <span class="cm-property">scopePaths</span>: [<span class="cm-string">'title'</span>],</span></pre><pre class=" CodeMirror-line "><span style="padding-right: 0.1px;">  <span class="cm-property">evaluator</span>: <span class="cm-variable">Exact</span>.<span class="cm-property">Evaluator</span>.<span class="cm-property">makeGetEvaluator</span>(<span class="cm-variable">args</span>),</span></pre><pre class=" CodeMirror-line "><span style="padding-right: 0.1px;">  <span class="cm-property">converters</span>: [<span class="cm-variable">Exact</span>.<span class="cm-property">Evaluator</span>.<span class="cm-property">makeEvaluator</span>(<span class="cm-variable">format</span>, [<span class="cm-string">"##"</span>])]</span></pre><pre class=" CodeMirror-line "><span style="padding-right: 0.1px;">})</span></pre></div>
+          </div>
+        </div>
       </div>
     </div>
     <p>可见转换器本质上也是求值器，只是它接受的第一个参数为已求得的值。可以使用多个转换器（建议不超过2个），在声明式绑定表达式中以符号'|'连接。
     更多示例如下：</p>
     <a id="javascript-expressions"></a>
-    <div class="code-box">
-      <pre class="code-behind js-mode">
-  // 本地resources或全局RES中定义了函数（或转换器对象）upper，没有额外参数；
-  // 绑定域上定义了函数（或转换器对象）wrapIn，额外参数为常量。
-  ${$.title | upper | $.wrapIn('##')}
+    <div class="code-box scroll">
+      <!--<pre class="code-behind js-mode">
+// 本地resources或全局RES中定义了函数（或转换器对象）upper，没有额外参数；
+// 绑定域上定义了函数（或转换器对象）wrapIn，额外参数为常量。
+@{$.title | upper | $.wrapIn('##')}
 
-  // 转换器中可以使用路径，当title、brackets或upperOrNot改变时都有可能触发绑定
-  ${$.title | $.format($.upperOrNot, $.brackets)}
-  // 等价于
-  ${$.format($.title, $.upperOrNot, $.brackets)}
+// 转换器中可以使用路径，当title、brackets或upperOrNot改变时都有可能触发绑定
+@{$.title | $.format($.upperOrNot, $.brackets)}
+// 等价于
+@{$.format($.title, $.upperOrNot, $.brackets)}
 
-  // 双向转换器
-  Exact.RES.register('num2str', {
-    exec: String, //正向
-    back: Number  //反向
-  };
-  #{$.price | num2str} </pre>
-  <div class="CodeMirror cm-s-alice"><div class="CodeMirror-lines"><div style="position: relative; outline: none;"><div class="CodeMirror-measure"><div class="CodeMirror-linenumber CodeMirror-gutter-elt"><div>15</div></div></div><div class="CodeMirror-measure"></div><div style="position: relative; z-index: 1;"></div><div class="CodeMirror-cursors"><div class="CodeMirror-cursor" style="left: 0px; top: 0px; height: 17px;">&nbsp;</div></div><div class="CodeMirror-code"><div style="position: relative;"><div class="CodeMirror-gutter-wrapper" style="left: -31px;"><div class="CodeMirror-linenumber CodeMirror-gutter-elt" style="left: 0px; width: 21px;">1</div></div><pre class=" CodeMirror-line "><span style="padding-right: 0.1px;">  <span class="cm-comment">// 本地resources或全局RES中定义了函数（或转换器对象）upper，没有额外参数；</span></span></pre></div><div style="position: relative;"><div class="CodeMirror-gutter-wrapper" style="left: -31px;"><div class="CodeMirror-linenumber CodeMirror-gutter-elt" style="left: 0px; width: 21px;">2</div></div><pre class=" CodeMirror-line "><span style="padding-right: 0.1px;">  <span class="cm-comment">// 绑定域上定义了函数（或转换器对象）wrapIn，额外参数为常量。</span></span></pre></div><div style="position: relative;"><div class="CodeMirror-gutter-wrapper" style="left: -31px;"><div class="CodeMirror-linenumber CodeMirror-gutter-elt" style="left: 0px; width: 21px;">3</div></div><pre class=" CodeMirror-line "><span style="padding-right: 0.1px;">  <span class="cm-variable">$</span>{<span class="cm-variable">$</span>.<span class="cm-property">title</span> <span class="cm-operator">|</span> <span class="cm-variable">upper</span> <span class="cm-operator">|</span> <span class="cm-variable">$</span>.<span class="cm-property">wrapIn</span>(<span class="cm-string">'##'</span>)}</span></pre></div><div style="position: relative;"><div class="CodeMirror-gutter-wrapper" style="left: -31px;"><div class="CodeMirror-linenumber CodeMirror-gutter-elt" style="left: 0px; width: 21px;">4</div></div><pre class=" CodeMirror-line "><span style="padding-right: 0.1px;"><span cm-text="">​</span></span></pre></div><div style="position: relative;"><div class="CodeMirror-gutter-wrapper" style="left: -31px;"><div class="CodeMirror-linenumber CodeMirror-gutter-elt" style="left: 0px; width: 21px;">5</div></div><pre class=" CodeMirror-line "><span style="padding-right: 0.1px;">  <span class="cm-comment">// 转换器中可以使用路径，当title、brackets或upperOrNot改变时都有可能触发绑定</span></span></pre></div><div style="position: relative;"><div class="CodeMirror-gutter-wrapper" style="left: -31px;"><div class="CodeMirror-linenumber CodeMirror-gutter-elt" style="left: 0px; width: 21px;">6</div></div><pre class=" CodeMirror-line "><span style="padding-right: 0.1px;">  <span class="cm-variable">$</span>{<span class="cm-variable">$</span>.<span class="cm-property">title</span> <span class="cm-operator">|</span> <span class="cm-variable">$</span>.<span class="cm-property">format</span>(<span class="cm-variable">$</span>.<span class="cm-property">upperOrNot</span>, <span class="cm-variable">$</span>.<span class="cm-property">brackets</span>)}</span></pre></div><div style="position: relative;"><div class="CodeMirror-gutter-wrapper" style="left: -31px;"><div class="CodeMirror-linenumber CodeMirror-gutter-elt" style="left: 0px; width: 21px;">7</div></div><pre class=" CodeMirror-line "><span style="padding-right: 0.1px;">  <span class="cm-comment">// 等价于</span></span></pre></div><div style="position: relative;"><div class="CodeMirror-gutter-wrapper" style="left: -31px;"><div class="CodeMirror-linenumber CodeMirror-gutter-elt" style="left: 0px; width: 21px;">8</div></div><pre class=" CodeMirror-line "><span style="padding-right: 0.1px;">  <span class="cm-variable">$</span>{<span class="cm-variable">$</span>.<span class="cm-property">format</span>(<span class="cm-variable">$</span>.<span class="cm-property">title</span>, <span class="cm-variable">$</span>.<span class="cm-property">upperOrNot</span>, <span class="cm-variable">$</span>.<span class="cm-property">brackets</span>)}</span></pre></div><div style="position: relative;"><div class="CodeMirror-gutter-wrapper" style="left: -31px;"><div class="CodeMirror-linenumber CodeMirror-gutter-elt" style="left: 0px; width: 21px;">9</div></div><pre class=" CodeMirror-line "><span style="padding-right: 0.1px;"><span cm-text="">​</span></span></pre></div><div style="position: relative;"><div class="CodeMirror-gutter-wrapper" style="left: -31px;"><div class="CodeMirror-linenumber CodeMirror-gutter-elt" style="left: 0px; width: 21px;">10</div></div><pre class=" CodeMirror-line "><span style="padding-right: 0.1px;">  <span class="cm-comment">// 双向转换器</span></span></pre></div><div style="position: relative;"><div class="CodeMirror-gutter-wrapper" style="left: -31px;"><div class="CodeMirror-linenumber CodeMirror-gutter-elt" style="left: 0px; width: 21px;">11</div></div><pre class=" CodeMirror-line "><span style="padding-right: 0.1px;">  <span class="cm-variable">Exact</span>.<span class="cm-property">RES</span>.<span class="cm-property">register</span>(<span class="cm-string">'num2str'</span>, {</span></pre></div><div style="position: relative;"><div class="CodeMirror-gutter-wrapper" style="left: -31px;"><div class="CodeMirror-linenumber CodeMirror-gutter-elt" style="left: 0px; width: 21px;">12</div></div><pre class=" CodeMirror-line "><span style="padding-right: 0.1px;">    <span class="cm-property">exec</span>: <span class="cm-variable">String</span>, <span class="cm-comment">//正向</span></span></pre></div><div style="position: relative;"><div class="CodeMirror-gutter-wrapper" style="left: -31px;"><div class="CodeMirror-linenumber CodeMirror-gutter-elt" style="left: 0px; width: 21px;">13</div></div><pre class=" CodeMirror-line "><span style="padding-right: 0.1px;">    <span class="cm-property">back</span>: <span class="cm-variable">Number</span>  <span class="cm-comment">//反向</span></span></pre></div><div style="position: relative;"><div class="CodeMirror-gutter-wrapper" style="left: -31px;"><div class="CodeMirror-linenumber CodeMirror-gutter-elt" style="left: 0px; width: 21px;">14</div></div><pre class=" CodeMirror-line "><span style="padding-right: 0.1px;">  };</span></pre></div><div style="position: relative;"><div class="CodeMirror-gutter-wrapper" style="left: -31px;"><div class="CodeMirror-linenumber CodeMirror-gutter-elt" style="left: 0px; width: 21px;">15</div></div><pre class=" CodeMirror-line "><span style="padding-right: 0.1px;">  <span class="cm-error">#{$.price | num2str} </span></span></pre></div></div></div></div></div>
-      
+// 双向转换器
+Exact.RES.register('num2str', {
+  exec: String, //正向
+  back: Number  //反向
+};
+#{$.price | num2str} </pre>-->
+      <div class="CodeMirror cm-s-alice">
+        <div class="CodeMirror-lines">
+          <div style="position: relative; outline: none;">
+            <div class="CodeMirror-code"><pre class=" CodeMirror-line "><span style="padding-right: 0.1px;"><span class="cm-comment">// 本地resources或全局RES中定义了函数（或转换器对象）upper，没有额外参数；</span></span></pre><pre class=" CodeMirror-line "><span style="padding-right: 0.1px;"><span class="cm-comment">// 绑定域上定义了函数（或转换器对象）wrapIn，额外参数为常量。</span></span></pre><pre class=" CodeMirror-line "><span style="padding-right: 0.1px;">@{<span class="cm-variable">$</span>.<span class="cm-property">title</span> <span class="cm-operator">|</span> <span class="cm-variable">upper</span> <span class="cm-operator">|</span> <span class="cm-variable">$</span>.<span class="cm-property">wrapIn</span>(<span class="cm-string">'##'</span>)}</span></pre><pre class=" CodeMirror-line "><span style="padding-right: 0.1px;"><span cm-text="">​</span></span></pre><pre class=" CodeMirror-line "><span style="padding-right: 0.1px;"><span class="cm-comment">// 转换器中可以使用路径，当title、brackets或upperOrNot改变时都有可能触发绑定</span></span></pre><pre class=" CodeMirror-line "><span style="padding-right: 0.1px;">@{<span class="cm-variable">$</span>.<span class="cm-property">title</span> <span class="cm-operator">|</span> <span class="cm-variable">$</span>.<span class="cm-property">format</span>(<span class="cm-variable">$</span>.<span class="cm-property">upperOrNot</span>, <span class="cm-variable">$</span>.<span class="cm-property">brackets</span>)}</span></pre><pre class=" CodeMirror-line "><span style="padding-right: 0.1px;"><span class="cm-comment">// 等价于</span></span></pre><pre class=" CodeMirror-line "><span style="padding-right: 0.1px;">@{<span class="cm-variable">$</span>.<span class="cm-property">format</span>(<span class="cm-variable">$</span>.<span class="cm-property">title</span>, <span class="cm-variable">$</span>.<span class="cm-property">upperOrNot</span>, <span class="cm-variable">$</span>.<span class="cm-property">brackets</span>)}</span></pre><pre class=" CodeMirror-line "><span style="padding-right: 0.1px;"><span cm-text="">​</span></span></pre><pre class=" CodeMirror-line "><span style="padding-right: 0.1px;"><span class="cm-comment">// 双向转换器</span></span></pre><pre class=" CodeMirror-line "><span style="padding-right: 0.1px;"><span class="cm-variable">Exact</span>.<span class="cm-property">RES</span>.<span class="cm-property">register</span>(<span class="cm-string">'num2str'</span>, {</span></pre><pre class=" CodeMirror-line "><span style="padding-right: 0.1px;">  <span class="cm-property">exec</span>: <span class="cm-variable">String</span>, <span class="cm-comment">//正向</span></span></pre><pre class=" CodeMirror-line "><span style="padding-right: 0.1px;">  <span class="cm-property">back</span>: <span class="cm-variable">Number</span>  <span class="cm-comment">//反向</span></span></pre><pre class=" CodeMirror-line "><span style="padding-right: 0.1px;">};</span></pre><pre class=" CodeMirror-line "><span style="padding-right: 0.1px;"><span class="cm-error">#{$.price | num2str}</span></span></pre></div>
+          </div>
+        </div>
+      </div>
+
     </div>
     <h4>JavaScript Expressions</h4>
     <p>声明式定义绑定表达式时，除了直接书写单个的绑定路径外，你还可以在其中书写简单的JavaScript表达式，例如：</p>
-    <div class="code-box">
-      <pre class="code-behind js-mode">
-  ${ $.state === 'ok' }
-  ${ $.firstName + ' ' + $.lastName }
-  ${ $.amount > 100 ? 'large' : 'normal' }</pre>
+    <div class="code-box scroll">
+      <!--<pre class="code-behind js-mode">
+@{ $.state === 'ok' }
+@{ $.firstName + ' ' + $.lastName }
+@{ $.amount > 100 ? 'large' : 'normal' }</pre>-->
       <div class="CodeMirror cm-s-alice">
         <div class="CodeMirror-lines">
           <div style="position: relative; outline: none;">
-            <div class="CodeMirror-measure">
-              <div class="CodeMirror-linenumber CodeMirror-gutter-elt">
-                <div>3</div>
-              </div>
-            </div>
-            <div class="CodeMirror-measure"></div>
-            <div style="position: relative; z-index: 1;"></div>
-            <div class="CodeMirror-cursors">
-              <div class="CodeMirror-cursor" style="left: 0px; top: 0px; height: 17px;">&nbsp;</div>
-            </div>
-            <div class="CodeMirror-code">
-              <div style="position: relative;">
-                <div class="CodeMirror-gutter-wrapper" style="left: -31px;">
-                  <div class="CodeMirror-linenumber CodeMirror-gutter-elt" style="left: 0px; width: 21px;">1</div>
-                </div>
-                      <pre class=" CodeMirror-line "><span style="padding-right: 0.1px;">  <span
-                          class="cm-variable">$</span>{ <span class="cm-variable">$</span>.<span class="cm-property">state</span> <span
-                          class="cm-operator">===</span> <span class="cm-string">'ok'</span> }</span></pre>
-              </div>
-              <div style="position: relative;">
-                <div class="CodeMirror-gutter-wrapper" style="left: -31px;">
-                  <div class="CodeMirror-linenumber CodeMirror-gutter-elt" style="left: 0px; width: 21px;">2</div>
-                </div>
-                      <pre class=" CodeMirror-line "><span style="padding-right: 0.1px;">  <span
-                          class="cm-variable">$</span>{ <span class="cm-variable">$</span>.<span class="cm-property">firstName</span> <span
-                          class="cm-operator">+</span> <span class="cm-string">' '</span> <span
-                          class="cm-operator">+</span> <span class="cm-variable">$</span>.<span class="cm-property">lastName</span> }</span></pre>
-              </div>
-              <div style="position: relative;">
-                <div class="CodeMirror-gutter-wrapper" style="left: -31px;">
-                  <div class="CodeMirror-linenumber CodeMirror-gutter-elt" style="left: 0px; width: 21px;">3</div>
-                </div>
-                      <pre class=" CodeMirror-line "><span style="padding-right: 0.1px;">  <span
-                          class="cm-variable">$</span>{ <span class="cm-variable">$</span>.<span class="cm-property">amount</span> <span
-                          class="cm-operator">&gt;</span> <span class="cm-number">100</span> <span
-                          class="cm-operator">?</span> <span class="cm-string">'large'</span> : <span class="cm-string">'normal'</span> }</span></pre>
-              </div>
-            </div>
+            <div class="CodeMirror-code"><pre class=" CodeMirror-line "><span style="padding-right: 0.1px;">@{ <span class="cm-variable">$</span>.<span class="cm-property">state</span> <span class="cm-operator">===</span> <span class="cm-string">'ok'</span> }</span></pre><pre class=" CodeMirror-line "><span style="padding-right: 0.1px;">@{ <span class="cm-variable">$</span>.<span class="cm-property">firstName</span> <span class="cm-operator">+</span> <span class="cm-string">' '</span> <span class="cm-operator">+</span> <span class="cm-variable">$</span>.<span class="cm-property">lastName</span> }</span></pre><pre class=" CodeMirror-line "><span style="padding-right: 0.1px;">@{ <span class="cm-variable">$</span>.<span class="cm-property">amount</span> <span class="cm-operator">&gt;</span> <span class="cm-number">100</span> <span class="cm-operator">?</span> <span class="cm-string">'large'</span> : <span class="cm-string">'normal'</span> }</span></pre><pre class=" CodeMirror-line "><span style="padding-right: 0.1px;"><span cm-text="">​</span></span></pre><pre class=" CodeMirror-line "><span style="padding-right: 0.1px;"><span class="cm-comment">// 本地resources形如</span></span></pre><pre class=" CodeMirror-line "><span style="padding-right: 0.1px;"><span class="cm-comment">// { _: tooltip:'long long string...', others: ... }</span></span></pre><pre class=" CodeMirror-line "><span style="padding-right: 0.1px;">@{ <span class="cm-variable">Math</span>.<span class="cm-property">floor</span>(<span class="cm-variable">$</span>.<span class="cm-property">num</span>) <span class="cm-operator">&gt;</span> <span class="cm-number">0</span> <span class="cm-operator">?</span> <span class="cm-variable">_</span>.<span class="cm-property">tooltip</span> : <span class="cm-string">''</span> } </span></pre></div>
           </div>
         </div>
       </div>
     </div>
-    <p>对于上述含有运算符的表达式，Exact使用new Function(...)将JavaScript表达式转化成函数，因而无法访问绑定域以外的用户自定义变量，
-      并存在一定的安全问题。所以我们建议在声明式定义的绑定表达式中尽量使用资源中定义过的函数或绑定域内的函数。</p>
-    <div class="code-box">
-      <pre class="code-behind js-mode">
-  {
-    resources: {
-      equal: function(a, b) { return a === b; }
-    },
-    $template: '&lt;a x-class="active: ${equal($.state, \'ok\')}; stay: ${$.check($.state)}"&gt;&lt;/a&gt;'
-  }</pre>
+    <p>对于上述含有运算符的表达式，Exact使用new Function(...)将JavaScript表达式转化成函数，
+      因而只能访问绑定域上、本地resources._中的变量以及全局对象（如Math），并存在一定的安全问题。
+      我们建议在声明式定义的绑定表达式中尽量使用函数形式的表达式，例如：</p>
+    <div class="code-box scroll">
+      <!--<pre class="code-behind js-mode">
+{
+  resources: {
+    equal: function(a, b) { return a === b; }
+  },
+  $template: '&lt;a x-class="active: @{equal($.state, \'ok\')}; stay: @{$.check($.state)}"&gt;&lt;/a&gt;'
+}</pre>-->
       <div class="CodeMirror cm-s-alice">
         <div class="CodeMirror-lines">
           <div style="position: relative; outline: none;">
-            <div class="CodeMirror-measure">
-              <div class="CodeMirror-linenumber CodeMirror-gutter-elt">
-                <div>6</div>
-              </div>
-            </div>
-            <div class="CodeMirror-measure"></div>
-            <div style="position: relative; z-index: 1;"></div>
-            <div class="CodeMirror-cursors">
-              <div class="CodeMirror-cursor" style="left: 0px; top: 0px; height: 17px;">&nbsp;</div>
-            </div>
-            <div class="CodeMirror-code">
-              <div style="position: relative;">
-                <div class="CodeMirror-gutter-wrapper" style="left: -31px;">
-                  <div class="CodeMirror-linenumber CodeMirror-gutter-elt" style="left: 0px; width: 21px;">1</div>
-                </div>
-                <pre class=" CodeMirror-line "><span style="padding-right: 0.1px;">  {</span></pre>
-              </div>
-              <div style="position: relative;">
-                <div class="CodeMirror-gutter-wrapper" style="left: -31px;">
-                  <div class="CodeMirror-linenumber CodeMirror-gutter-elt" style="left: 0px; width: 21px;">2</div>
-                </div>
-                <pre class=" CodeMirror-line "><span style="padding-right: 0.1px;">    <span class="cm-variable">resources</span>: {</span></pre>
-              </div>
-              <div style="position: relative;">
-                <div class="CodeMirror-gutter-wrapper" style="left: -31px;">
-                  <div class="CodeMirror-linenumber CodeMirror-gutter-elt" style="left: 0px; width: 21px;">3</div>
-                </div>
-                      <pre class=" CodeMirror-line "><span style="padding-right: 0.1px;">      <span
-                          class="cm-variable">equal</span>: <span class="cm-keyword">function</span>(<span
-                          class="cm-def">a</span>, <span class="cm-def">b</span>) { <span
-                          class="cm-keyword">return</span> <span class="cm-variable-2">a</span> <span
-                          class="cm-operator">===</span> <span class="cm-variable-2">b</span>; }</span></pre>
-              </div>
-              <div style="position: relative;">
-                <div class="CodeMirror-gutter-wrapper" style="left: -31px;">
-                  <div class="CodeMirror-linenumber CodeMirror-gutter-elt" style="left: 0px; width: 21px;">4</div>
-                </div>
-                <pre class=" CodeMirror-line "><span style="padding-right: 0.1px;">    },</span></pre>
-              </div>
-              <div style="position: relative;">
-                <div class="CodeMirror-gutter-wrapper" style="left: -31px;">
-                  <div class="CodeMirror-linenumber CodeMirror-gutter-elt" style="left: 0px; width: 21px;">5</div>
-                </div>
-                      <pre class=" CodeMirror-line "><span style="padding-right: 0.1px;">    <span class="cm-variable">$template</span>: <span
-                          class="cm-string">'&lt;a x-class="active: ${equal($.state, \'ok\')}; stay: ${$.check($.state)}"&gt;&lt;/a&gt;'</span></span></pre>
-              </div>
-              <div style="position: relative;">
-                <div class="CodeMirror-gutter-wrapper" style="left: -31px;">
-                  <div class="CodeMirror-linenumber CodeMirror-gutter-elt" style="left: 0px; width: 21px;">6</div>
-                </div>
-                <pre class=" CodeMirror-line "><span style="padding-right: 0.1px;">  }</span></pre>
-              </div>
-            </div>
+            <div class="CodeMirror-code"><pre class=" CodeMirror-line "><span style="padding-right: 0.1px;">{</span></pre><pre class=" CodeMirror-line "><span style="padding-right: 0.1px;">  <span class="cm-variable">resources</span>: {</span></pre><pre class=" CodeMirror-line "><span style="padding-right: 0.1px;">    <span class="cm-variable">equal</span>: <span class="cm-keyword">function</span>(<span class="cm-def">a</span>, <span class="cm-def">b</span>) { <span class="cm-keyword">return</span> <span class="cm-variable-2">a</span> <span class="cm-operator">===</span> <span class="cm-variable-2">b</span>; }</span></pre><pre class=" CodeMirror-line "><span style="padding-right: 0.1px;">  },</span></pre><pre class=" CodeMirror-line "><span style="padding-right: 0.1px;">  <span class="cm-variable">$template</span>: <span class="cm-string">'&amp;lt;a x-class="active: @{equal($.state, \'ok\')}; stay: @{$.check($.state)}"&amp;gt;&amp;lt;/a&amp;gt;'</span></span></pre><pre class=" CodeMirror-line "><span style="padding-right: 0.1px;">}</span></pre></div>
           </div>
         </div>
       </div>
     </div>
 
+    <h4>Using Depends in Descriptors</h4>
+    <p>虽然Exact支持的绑定表达式是丰富的，但是Exact建议不要书写冗长而难以阅读的绑定表达式。
+      如果一个绑定表达式含有多个绑定路径或者逻辑过于复杂，你可以考虑在`descriptors`中定义一个依赖于其他绑定路径的属性，像这样：</p>
+
+    <div class="code-box scroll">
+      <div class="CodeMirror cm-s-alice">
+        <div class="CodeMirror-lines">
+          <div style="position: relative; outline: none;">
+            <div class="CodeMirror-code"><pre class=" CodeMirror-line "><span style="padding-right: 0.1px;">{</span></pre><pre class=" CodeMirror-line "><span style="padding-right: 0.1px;">  <span class="cm-variable">$template</span>: <span class="cm-string">'&lt;h2&gt;@{$.fullName}&lt;/h2&gt;'</span></span></pre><pre class=" CodeMirror-line "><span style="padding-right: 0.1px;">  <span class="cm-variable">descriptors</span>: [{</span></pre><pre class=" CodeMirror-line "><span style="padding-right: 0.1px;">    <span class="cm-property">fullName</span>: {</span></pre><pre class=" CodeMirror-line "><span style="padding-right: 0.1px;">      <span class="cm-property">depends</span>: [<span class="cm-string">'firstName'</span>, <span class="cm-string">'lastName'</span>],</span></pre><pre class=" CodeMirror-line "><span style="padding-right: 0.1px;">      <span class="cm-property">get</span>: <span class="cm-keyword">function</span>(<span class="cm-def">props</span>) {</span></pre><pre class=" CodeMirror-line "><span style="padding-right: 0.1px;">        <span class="cm-keyword">return</span> <span class="cm-keyword">this</span>.<span class="cm-property">firstName</span> <span class="cm-operator">+</span> <span class="cm-string">' '</span> <span class="cm-operator">+</span> <span class="cm-keyword">this</span>.<span class="cm-property">lastName</span>;</span></pre><pre class=" CodeMirror-line "><span style="padding-right: 0.1px;">      }</span></pre><pre class=" CodeMirror-line "><span style="padding-right: 0.1px;">      <span class="cm-comment">//,set: function(value, props) {</span></span></pre><pre class=" CodeMirror-line "><span class="cm-tab-wrap-hack" style="padding-right: 0.1px;">      <span class="cm-comment">//<span class="cm-tab" role="presentation" cm-text="	">    </span>var names = value.split(' ');</span></span></pre><pre class=" CodeMirror-line "><span style="padding-right: 0.1px;">      <span class="cm-comment">//  this.save({firtName: names[0], lastName: names[1]});</span></span></pre><pre class=" CodeMirror-line "><span style="padding-right: 0.1px;">      <span class="cm-comment">//}</span></span></pre><pre class=" CodeMirror-line "><span style="padding-right: 0.1px;">    }</span></pre><pre class=" CodeMirror-line "><span style="padding-right: 0.1px;">  }]</span></pre><pre class=" CodeMirror-line "><span style="padding-right: 0.1px;">}</span></pre></div>
+          </div>
+        </div>
+      </div>
+    </div>
   </article>
 </div>
 <!--<footer class="footer">

@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html>
+<head lang="en">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+  <title>Exact</title>
+
+  <link href="../stylesheets/defaults.css" rel="stylesheet">
+  <!--<link href="./stylesheets/index.css" rel="stylesheet">-->
+  <style>
+    .blank {
+      width: 100%;
+      height: 50px;
+    }
+    .block {
+      width: 100%;
+      height: 200px;
+      /*font-size: 2em;*/
+    }
+    .block:nth-child(odd) {
+      background-color: #eee;
+    }
+    .block:nth-child(even) {
+      background-color: #ccc;
+    }
+    .block h2 {
+      color: #222;
+      margin: 0;
+      padding: 20px 0;
+      font-size: 2.7em;
+    }
+
+    .desc {
+      margin: 0;
+      color: #222;
+    }
+  </style>
+</head>
+<body>
+  <header class="header">
+    <nav class="nav-bar">
+      <h3 class="brand"><a href="../" class="logo" >Exact</a></h3>
+      <a class="menu-btn"></a>
+      <ul class="menu-bar">
+        <li><a href="../examples/color-palette.html" class="menu-item"> Examples </a></li>
+        <li><a href="#" class="menu-item active"> Downloads </a></li>
+        <li><a href="../documents/index.html" class="menu-item"> Documents </a></li>
+        <li><a href="../apis/index.html" class="menu-item"> APIs </a></li>
+        <li><a href="#" class="menu-item"> GitHub </a></li>
+      </ul>
+    </nav>
+  </header>
+  <div class="blank"></div>
+  <div class="content">
+    <div class="block">
+      <div class="panel">
+        <h2>exact</h2>
+        <p class="desc">It's for modern browser. It uses ES5 and HTML5 APIs. Coding in ES6 are recommended for development.</p>
+        <!--<a class="button">DOWNLOAD v0.0.4</a>-->
+      </div>
+    </div>
+
+    <div class="block">
+      <div class="panel">
+        <h2>exact-jQuery</h2>
+        <p class="desc">It's for old browser. It uses jQuery to operate DOM.
+          Besides jQuery 1.x, es5-shim and es5-sham are also required.
+          It's important to note that some features are not supported in this edition. <a>See here.</a></p>
+        <!--<a class="button">DOWNLOAD v0.0.4</a>-->
+      </div>
+    </div>
+
+    <div class="block">
+      <div class="panel">
+        <h2>exact-cheerio</h2>
+        <p class="desc">It's for server-side rendering. Thanks to cheerio.</p>
+        <!--<a class="button">DOWNLOAD v0.0.4</a>-->
+      </div>
+    </div>
+  </div>
+  <!--<footer class="footer">
+    <p>Released under the MIT license<br>
+        © 2015 Chen Junyong. All rights reserved.</p>
+  </footer>-->
+  <script src="./javascripts/menu.js"></script>
+</body>
+</html>
