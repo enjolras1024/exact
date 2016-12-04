@@ -21,7 +21,7 @@
   <div class="channel-editor">
     <span>&{ $.name }:</span>
     <input type="text" x-id="editor" value="@{$.value}" change+="onChange">
-    <input type="range" x-id="slider" min="0" max="255" value="@{$.value}" mousemove+="onSlide">
+    <input type="range" x-id="slider" min="0" max="255" value="@{$.value}" input+="onSlide">
   </div>
 </div>
 
