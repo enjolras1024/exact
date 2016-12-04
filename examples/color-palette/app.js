@@ -14,7 +14,7 @@ Exact.defineClass({
     this.set('value', Skin.getProp(this.slider.$skin, 'value'));
   },
   onChange: function() {
-    var value = Number(Skin.getProp(this.slider.$skin, 'value'));
+    var value = Number(Skin.getProp(this.editor.$skin, 'value'));
     if (!isNaN(value)) {
       this.set('value', value);
     }
