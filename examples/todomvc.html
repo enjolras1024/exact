@@ -44,7 +44,7 @@
         <li><a href="#" class="tab-item active"> Result </a></li>
         <li><a href="#" class="tab-item"> HTML </a></li>
         <li><a href="#" class="tab-item"> JavaScript </a></li>
-        <!--<li><a href="#" class="tab-item"> CSS </a></li>-->
+        <li><a href="#" class="tab-item"> CSS </a></li>
       </ul>
     </header>
     <section class="tab-content">
@@ -765,8 +765,14 @@
       </pre>-->
     </section>
 
-    <section class="tab-content">
-
+    <section class="tab-content code-box scroll">
+      <div class="CodeMirror cm-s-alice">
+        <div class="CodeMirror-lines">
+          <div style="position: relative; outline: none;">
+            <div class="CodeMirror-code"><pre class=" CodeMirror-line "><span style="padding-right: 0.1px;"><span class="cm-qualifier">.template</span> {</span></pre><pre class=" CodeMirror-line "><span style="padding-right: 0.1px;">  <span class="cm-property">display</span>: <span class="cm-atom">none</span>;</span></pre><pre class=" CodeMirror-line "><span style="padding-right: 0.1px;">}</span></pre><pre class=" CodeMirror-line "><span style="padding-right: 0.1px;"><span cm-text="">​</span></span></pre></div>
+          </div>
+        </div>
+      </div>
     </section>
   </article>
 
@@ -775,37 +781,7 @@
 <script src="../javascripts/codemirror.js"></script>
 <script src="../javascripts/xml-mode.js"></script>
 <script src="../javascripts/javascript-mode.js"></script>
-<script src="../javascripts/code-format.js"></script>
-<script src="../javascripts/menu.js"></script>
-<script>
-  var tabItems = document.getElementsByClassName('tab-item');
-  var tabContents = document.getElementsByClassName('tab-content');
-  var selectedIndex = 0;
-
-
-  
-  for (var i = 0; i < tabItems.length; ++i) {
-    tabContents[i].style.display = 'none';
-    tabItems[i].addEventListener('click', onClick);
-  }
-
-  tabContents[selectedIndex].style.display = '';
-  
-  function onClick(event) {
-    for (var i = 0; i < tabItems.length; ++i) {
-      if (tabItems[i] === event.target) {
-        tabItems[selectedIndex].className = 'tab-item';
-        tabContents[selectedIndex].style.display = 'none';
-
-        selectedIndex = i;
-
-        tabItems[selectedIndex].className = 'tab-item active';
-        tabContents[selectedIndex].style.display = '';
-        break;
-      }
-    }
-  }
-</script>
+<script src="../javascripts/site.js"></script>
 <!--<footer class="footer">
   <p>Released under the MIT license<br>
     © 2015 Chen Junyong. All rights reserved.</p>

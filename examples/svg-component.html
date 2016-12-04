@@ -43,7 +43,7 @@
         <li><a href="#" class="tab-item active"> Result </a></li>
         <li><a href="#" class="tab-item"> HTML </a></li>
         <li><a href="#" class="tab-item"> JavaScript </a></li>
-        <!--<li><a href="#" class="tab-item"> CSS </a></li>-->
+        <li><a href="#" class="tab-item"> CSS </a></li>
       </ul>
     </header>
     <section class="tab-content code-box scroll">
@@ -330,12 +330,6 @@ document.getElementById('app-shell').appendChild(Component.create(App).$skin);
       <div class="CodeMirror cm-s-alice">
         <div class="CodeMirror-lines">
           <div style="position: relative; outline: none;">
-            <div class="CodeMirror-measure"></div>
-            <div class="CodeMirror-measure"></div>
-            <div style="position: relative; z-index: 1;"></div>
-            <div class="CodeMirror-cursors">
-              <div class="CodeMirror-cursor" style="left: 26px; top: 187px; height: 17px;">&nbsp;</div>
-            </div>
             <div class="CodeMirror-code">
                     <pre class=" CodeMirror-line "><span style="padding-right: 0.1px;"><span
                         class="cm-keyword">var</span> <span class="cm-def">Component</span> <span
@@ -554,8 +548,14 @@ document.getElementById('app-shell').appendChild(Component.create(App).$skin);
       </div>
     </section>
 
-    <section class="tab-content">
-
+    <section class="tab-content code-box scroll">
+      <div class="CodeMirror cm-s-alice">
+        <div class="CodeMirror-lines">
+          <div style="position: relative; outline: none;">
+            <div class="CodeMirror-code"><pre class=" CodeMirror-line "><span style="padding-right: 0.1px;">* {</span></pre><pre class=" CodeMirror-line "><span style="padding-right: 0.1px;">  <span class="cm-property">font-family</span>: <span class="cm-string">"Helvetica Neue"</span>, <span class="cm-variable">Helvetica</span>, <span class="cm-variable">Arial</span>, <span class="cm-string">"Microsoft Yahei"</span>, <span class="cm-atom">sans-serif</span>;</span></pre><pre class=" CodeMirror-line "><span style="padding-right: 0.1px;">}</span></pre><pre class=" CodeMirror-line "><span style="padding-right: 0.1px;"><span cm-text="">​</span></span></pre><pre class=" CodeMirror-line "><span style="padding-right: 0.1px;"><span class="cm-qualifier">.template</span> {</span></pre><pre class=" CodeMirror-line "><span style="padding-right: 0.1px;">  <span class="cm-property">display</span>: <span class="cm-atom">none</span>;</span></pre><pre class=" CodeMirror-line "><span style="padding-right: 0.1px;">}</span></pre><pre class=" CodeMirror-line "><span style="padding-right: 0.1px;"><span cm-text="">​</span></span></pre><pre class=" CodeMirror-line "><span style="padding-right: 0.1px;"><span class="cm-tag">svg</span> {</span></pre><pre class=" CodeMirror-line "><span style="padding-right: 0.1px;">  <span class="cm-property">background-color</span>: <span class="cm-atom">#eee</span>;</span></pre><pre class=" CodeMirror-line "><span style="padding-right: 0.1px;">  <span class="cm-property">user-select</span>: <span class="cm-atom">none</span>;</span></pre><pre class=" CodeMirror-line "><span style="padding-right: 0.1px;">  <span class="cm-meta">-ms-</span><span class="cm-property">user-select</span>: <span class="cm-atom">none</span>;</span></pre><pre class=" CodeMirror-line "><span style="padding-right: 0.1px;">  <span class="cm-meta">-moz-</span><span class="cm-property">user-select</span>: <span class="cm-atom">none</span>;</span></pre><pre class=" CodeMirror-line "><span style="padding-right: 0.1px;">  <span class="cm-meta">-webkit-</span><span class="cm-property">user-select</span>:<span class="cm-atom">none</span></span></pre><pre class=" CodeMirror-line "><span style="padding-right: 0.1px;">}</span></pre><pre class=" CodeMirror-line "><span style="padding-right: 0.1px;"><span cm-text="">​</span></span></pre><pre class=" CodeMirror-line "><span style="padding-right: 0.1px;"><span class="cm-qualifier">.slider</span> <span class="cm-qualifier">.track</span> {</span></pre><pre class=" CodeMirror-line "><span style="padding-right: 0.1px;">  <span class="cm-property">fill</span>: <span class="cm-atom">rgb</span>(<span class="cm-number">200</span>,<span class="cm-number">200</span>,<span class="cm-number">200</span>);</span></pre><pre class=" CodeMirror-line "><span style="padding-right: 0.1px;">}</span></pre><pre class=" CodeMirror-line "><span style="padding-right: 0.1px;"><span cm-text="">​</span></span></pre><pre class=" CodeMirror-line "><span style="padding-right: 0.1px;"><span class="cm-qualifier">.slider</span> <span class="cm-qualifier">.button</span> {</span></pre><pre class=" CodeMirror-line "><span style="padding-right: 0.1px;">  <span class="cm-property">cursor</span>: <span class="cm-atom">pointer</span>;</span></pre><pre class=" CodeMirror-line "><span style="padding-right: 0.1px;">  <span class="cm-property">fill</span>: <span class="cm-atom">rgb</span>(<span class="cm-number">240</span>,<span class="cm-number">240</span>,<span class="cm-number">240</span>);</span></pre><pre class=" CodeMirror-line "><span style="padding-right: 0.1px;">  <span class="cm-property">stroke-width</span>: <span class="cm-number">1px</span>;</span></pre><pre class=" CodeMirror-line "><span style="padding-right: 0.1px;">  <span class="cm-property">stroke</span>: <span class="cm-atom">rgb</span>(<span class="cm-number">160</span>,<span class="cm-number">160</span>,<span class="cm-number">160</span>);</span></pre><pre class=" CodeMirror-line "><span style="padding-right: 0.1px;">}</span></pre></div>
+          </div>
+        </div>
+      </div>
     </section>
   </article>
 
@@ -564,37 +564,8 @@ document.getElementById('app-shell').appendChild(Component.create(App).$skin);
 <script src="../javascripts/codemirror.js"></script>
 <script src="../javascripts/xml-mode.js"></script>
 <script src="../javascripts/javascript-mode.js"></script>
-<script src="../javascripts/code-format.js"></script>
-<script src="../javascripts/menu.js"></script>
-<script>
-  var tabItems = document.getElementsByClassName('tab-item');
-  var tabContents = document.getElementsByClassName('tab-content');
-  var selectedIndex = 0;
+<script src="../javascripts/site.js"></script>
 
-
-  
-  for (var i = 0; i < tabItems.length; ++i) {
-    tabContents[i].style.display = 'none';
-    tabItems[i].addEventListener('click', onClick);
-  }
-
-  tabContents[selectedIndex].style.display = '';
-  
-  function onClick(event) {
-    for (var i = 0; i < tabItems.length; ++i) {
-      if (tabItems[i] === event.target) {
-        tabItems[selectedIndex].className = 'tab-item';
-        tabContents[selectedIndex].style.display = 'none';
-
-        selectedIndex = i;
-
-        tabItems[selectedIndex].className = 'tab-item active';
-        tabContents[selectedIndex].style.display = '';
-        break;
-      }
-    }
-  }
-</script>
 <!--<footer class="footer">
   <p>Released under the MIT license<br>
     © 2015 Chen Junyong. All rights reserved.</p>

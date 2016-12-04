@@ -43,7 +43,7 @@
         <li><a href="#" class="tab-item active"> Result </a></li>
         <li><a href="#" class="tab-item"> HTML </a></li>
         <li><a href="#" class="tab-item"> JavaScript </a></li>
-        <!--<li><a href="#" class="tab-item"> CSS </a></li>-->
+        <li><a href="#" class="tab-item"> CSS </a></li>
       </ul>
     </header>
     <section class="tab-content code-box scroll">
@@ -185,12 +185,6 @@ document.getElementById('app-shell').appendChild(Component.create(Palette).$skin
       <div class="CodeMirror cm-s-alice">
         <div class="CodeMirror-lines">
           <div style="position: relative; outline: none;">
-            <div class="CodeMirror-measure"><span><span>​</span>x</span></div>
-            <div class="CodeMirror-measure"></div>
-            <div style="position: relative; z-index: 1;"></div>
-            <div class="CodeMirror-cursors">
-              <div class="CodeMirror-cursor" style="left: 79px; top: 1411px; height: 17px;">&nbsp;</div>
-            </div>
             <div class="CodeMirror-code">
                       <pre class=" CodeMirror-line "><span style="padding-right: 0.1px;"><span
                           class="cm-keyword">var</span> <span class="cm-def">Skin</span> <span
@@ -440,8 +434,14 @@ document.getElementById('app-shell').appendChild(Component.create(Palette).$skin
       </div>
     </section>
 
-    <section class="tab-content">
-
+    <section class="tab-content code-box scroll">
+      <div class="CodeMirror cm-s-alice">
+        <div class="CodeMirror-lines">
+          <div style="position: relative; outline: none;">
+            <div class="CodeMirror-code"><pre class=" CodeMirror-line "><span style="padding-right: 0.1px;">* {</span></pre><pre class=" CodeMirror-line "><span style="padding-right: 0.1px;">  <span class="cm-property">vertical-align</span>: <span class="cm-atom">middle</span>;</span></pre><pre class=" CodeMirror-line "><span style="padding-right: 0.1px;">  <span class="cm-property">font-family</span>: <span class="cm-string">"Helvetica Neue"</span>, <span class="cm-variable">Helvetica</span>, <span class="cm-variable">Arial</span>, <span class="cm-string">"Microsoft Yahei"</span>, <span class="cm-atom">sans-serif</span>;</span></pre><pre class=" CodeMirror-line "><span style="padding-right: 0.1px;">}</span></pre><pre class=" CodeMirror-line "><span style="padding-right: 0.1px;"><span cm-text="">​</span></span></pre><pre class=" CodeMirror-line "><span style="padding-right: 0.1px;"><span class="cm-qualifier">.template</span> {</span></pre><pre class=" CodeMirror-line "><span style="padding-right: 0.1px;">  <span class="cm-property">display</span>: <span class="cm-atom">none</span>;</span></pre><pre class=" CodeMirror-line "><span style="padding-right: 0.1px;">}</span></pre><pre class=" CodeMirror-line "><span style="padding-right: 0.1px;"><span cm-text="">​</span></span></pre><pre class=" CodeMirror-line "><span style="padding-right: 0.1px;"><span class="cm-qualifier">.invalid</span> {</span></pre><pre class=" CodeMirror-line "><span style="padding-right: 0.1px;">  <span class="cm-property">outline</span>: <span class="cm-atom">solid</span> <span class="cm-number">1px</span> <span class="cm-atom">#ff0000</span>;</span></pre><pre class=" CodeMirror-line "><span style="padding-right: 0.1px;">}</span></pre><pre class=" CodeMirror-line "><span style="padding-right: 0.1px;"><span cm-text="">​</span></span></pre><pre class=" CodeMirror-line "><span style="padding-right: 0.1px;"><span class="cm-qualifier">.palette</span> [<span class="cm-tag">x-id</span>=<span class="cm-string">"lump"</span>] {</span></pre><pre class=" CodeMirror-line "><span style="padding-right: 0.1px;">  <span class="cm-property">display</span>: <span class="cm-atom">inline-block</span>;</span></pre><pre class=" CodeMirror-line "><span style="padding-right: 0.1px;">  <span class="cm-property">width</span>: <span class="cm-number">110px</span>;</span></pre><pre class=" CodeMirror-line "><span style="padding-right: 0.1px;">  <span class="cm-property">height</span>: <span class="cm-number">18px</span>;</span></pre><pre class=" CodeMirror-line "><span style="padding-right: 0.1px;">  <span class="cm-property">margin-left</span>: <span class="cm-number">10px</span>;</span></pre><pre class=" CodeMirror-line "><span style="padding-right: 0.1px;">  <span class="cm-property">border</span>: <span class="cm-atom">solid</span> <span class="cm-number">1px</span> <span class="cm-atom">#000000</span>;</span></pre><pre class=" CodeMirror-line "><span style="padding-right: 0.1px;">}</span></pre><pre class=" CodeMirror-line "><span style="padding-right: 0.1px;"><span cm-text="">​</span></span></pre><pre class=" CodeMirror-line "><span style="padding-right: 0.1px;"><span class="cm-qualifier">.palette</span> [<span class="cm-tag">x-id</span>=<span class="cm-string">"input"</span>] {</span></pre><pre class=" CodeMirror-line "><span style="padding-right: 0.1px;">  <span class="cm-property">width</span>: <span class="cm-number">50px</span>;</span></pre><pre class=" CodeMirror-line "><span style="padding-right: 0.1px;">  <span class="cm-property">margin-left</span>: <span class="cm-number">2px</span>;</span></pre><pre class=" CodeMirror-line "><span style="padding-right: 0.1px;">}</span></pre><pre class=" CodeMirror-line "><span style="padding-right: 0.1px;"><span cm-text="">​</span></span></pre><pre class=" CodeMirror-line "><span style="padding-right: 0.1px;"><span class="cm-qualifier">.channel-editor</span> {</span></pre><pre class=" CodeMirror-line "><span style="padding-right: 0.1px;">  <span class="cm-property">padding</span>: <span class="cm-number">5px</span> <span class="cm-number">0</span>;</span></pre><pre class=" CodeMirror-line "><span style="padding-right: 0.1px;">}</span></pre><pre class=" CodeMirror-line "><span style="padding-right: 0.1px;"><span cm-text="">​</span></span></pre><pre class=" CodeMirror-line "><span style="padding-right: 0.1px;"><span class="cm-qualifier">.channel-editor</span> [<span class="cm-tag">x-id</span>=<span class="cm-string">"editor"</span>] {</span></pre><pre class=" CodeMirror-line "><span style="padding-right: 0.1px;">  <span class="cm-property">width</span>: <span class="cm-number">30px</span>;</span></pre><pre class=" CodeMirror-line "><span style="padding-right: 0.1px;">  <span class="cm-property">margin</span>: <span class="cm-number">0</span> <span class="cm-number">5px</span>;</span></pre><pre class=" CodeMirror-line "><span style="padding-right: 0.1px;">  <span class="cm-property">text-align</span>: <span class="cm-atom">right</span>;</span></pre><pre class=" CodeMirror-line "><span style="padding-right: 0.1px;">}</span></pre><pre class=" CodeMirror-line "><span style="padding-right: 0.1px;"><span cm-text="">​</span></span></pre><pre class=" CodeMirror-line "><span style="padding-right: 0.1px;"><span class="cm-qualifier">.channel-editor</span> [<span class="cm-tag">x-id</span>=<span class="cm-string">"slider"</span>] {</span></pre><pre class=" CodeMirror-line "><span style="padding-right: 0.1px;">  <span class="cm-property">width</span>: <span class="cm-number">120px</span>;</span></pre><pre class=" CodeMirror-line "><span style="padding-right: 0.1px;">}</span></pre></div>
+          </div>
+        </div>
+      </div>
     </section>
   </article>
 

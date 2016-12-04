@@ -28,6 +28,8 @@
   var tabContents = document.getElementsByClassName('tab-content');
   var selectedIndex = 0;
 
+  if (!tabItems || !tabItems.length) { return; }
+
   for (var i = 0; i < tabItems.length; ++i) {
     tabContents[i].style.display = 'none';
     tabItems[i].addEventListener('click', onClick);
