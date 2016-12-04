@@ -441,6 +441,26 @@
     return subClass;
   };
 
+  Exact.mergeDescriptors =  function(source, target) {
+    var m = source.length, n = target.length, options = {}, descriptors = [];
+
+    if (typeof source[m - 1] === 'object') {
+      ObjectUtil_assign(options, source[m - 1]);
+      --m;
+    }
+
+    if (typeof target[n - 1] === 'object') {
+      ObjectUtil_assign(options, target[n - 1]);
+      --n;
+    }
+
+    descriptors.push.apply(descriptors, source.slice(0, m));
+    descriptors.push.apply(descriptors, target.slice(0, n));
+    descriptors.push(options);
+
+    return descriptors;
+  }
+
 })();
 
 //######################################################################################################################
@@ -726,6 +746,9 @@
 
   var RES = Exact.RES;
 
+  var THIS_SYMBOL = '$'; //TODO:
+  var EVENT_SYMBOL = 'event'; //TODO:
+
   function Evaluator(exec, args, back) {
     this.exec = exec;
     this.back = back;
@@ -748,8 +771,21 @@
     return new Evaluator($not, args);
   }
 
-  function makeExpressionEvaluator(expr, args) {
-    return new Evaluator(new Function(args || '', 'var $ = this; return ' + expr + ';'), '$');
+  function makeExpressionEvaluator(expr, args, rest) {
+    args = args || [];
+    args.event = true;
+
+    var body = 'var ' + THIS_SYMBOL + ' = this; return ' + expr + ';';
+
+    var list = [EVENT_SYMBOL];
+    if (rest && rest.length) {
+      list.push.apply(list, rest);
+    }
+    list.push(body);
+
+    var exec = Function.apply(null, list);
+
+    return new Evaluator(exec, args);
   }
 
   function evaluateArgs(args, flags, scope) {
@@ -784,7 +820,7 @@
    * @returns {*}
    */
   function applyEvaluator(evaluator, name, scope, event, value) {
-    var $ = null, exec, args, flags, hasFirstValue = arguments.length > 4;
+    var $ = null, exec, args, flags, need,  hasFirstValue = arguments.length > 4;
 
     exec = evaluator[name];
 
@@ -802,25 +838,29 @@
       exec = $[name];
     }
 
-    args = evaluator.args;
+    args = evaluator.args || []; //TODO: emptyArray
 
-    if (!args) {
-      return hasFirstValue ? exec.call($, value) : exec.call($);
-    }
+    //if (!args) {
+    //  return hasFirstValue ? exec.call($, value) : exec.call($);
+    //}
 
-    if (args === '$') {
-      return exec.call(scope, event);
-    }
+    //if (args === THIS_SYMBOL) {
+    //  args = [];
+    //  //return exec.call(scope, event);
+    //}
 
     flags = args.flags;
-    args = args.slice(0); //copy
-
-    if (flags) {
+    need = args.event;
+    if (flags && flags.length) {
+      args = args.slice(0); //copy
       evaluateArgs(args, flags, scope);
     }
 
     if (hasFirstValue) {
       args.unshift(value);
+    } else if (need) {
+      args.unshift(event);
+      $ = scope;
     }
 
     return exec.apply($, args);
@@ -1018,6 +1058,10 @@
         return camelCaseCache[key];
       },
 
+      /**
+       * @required
+       * @internal
+       */
       toKebabCase: function toKebabCase(key) {
         if (!(key in kebabCaseCache)) {
           //key.replace(/-(.)?/g, function(match, char) {
@@ -1209,6 +1253,7 @@
 
       /**
        * @required
+       * @internal
        */
       setAttr: function setAttr($skin, name, value) {
         var type = typeof value;
@@ -1226,6 +1271,7 @@
 
       /**
        * @required
+       * @internal
        */
       removeAttr: function removeAttr($skin, name) {
         return $skin.removeAttribute(name);
@@ -1245,15 +1291,13 @@
 
       /**
        * @required
+       * @internal
        */
       setProp: function setProp($skin, name, value) {
         //console.log($skin, $skin[name], Object.getOwnPropertyDescriptor($skin, name));
         $skin[name] = value;
       },
 
-      /**
-       * @required
-       */
       removeProp: function removeProp($skin, name) {
         delete $skin[name];
       },
@@ -1264,6 +1308,7 @@
 
       /**
        * @required
+       * @internal
        */
       setStyleProp: function setStyleProp($skin, name, value) {
         //TODO: name = toCamelCase(name);
@@ -1293,6 +1338,7 @@
 
       /**
        * @required
+       * @internal
        */
       removeStyleProp: function removeStyleProp($skin, name) {
         $skin.style[name] = '';
@@ -1331,6 +1377,7 @@
 
       /**
        * @required
+       * @internal
        */
       appendChild: function appendChild($skin, child) {
         return $skin.appendChild(child);
@@ -1338,20 +1385,19 @@
 
       /**
        * @required
+       * @internal
        */
       insertChild: function insertChild($skin, child, before) {
         return $skin.insertBefore(child, before);
       },
 
-      /**
-       * @required
-       */
       replaceChild: function replaceChild($skin, child, existed) {
         return $skin.replaceChild(child, existed);
       },
 
       /**
        * @required
+       * @internal
        */
       removeChild: function removeChild($skin, child) {
         return $skin.removeChild(child);
@@ -1499,18 +1545,31 @@
        * @required
        */
       renderClasses: function renderClasses($skin, classes, dirty) {
-        var key, names = [];
+        var key, classList = $skin.classList;
 
         if (!dirty) { return; }
 
-        for (key in dirty) {
-          if (dirty.hasOwnProperty(key) && classes[key]) {
-            names.push(key);
+        if (classList) {
+          for (key in dirty) {
+            if (dirty.hasOwnProperty(key)) {
+              if (classes[key]) {
+                classList.add(key);
+              } else {
+                classList.remove(key);
+              }
+            }
           }
-        }
+        } else {
+          var names = [];
 
-        //Skin.setProp($skin, 'className', names.join(' '));
-        Skin.setAttr($skin, 'class', names.join(' '));
+          for (key in dirty) {
+            if (dirty.hasOwnProperty(key) && classes[key]) {
+              names.push(key);
+            }
+          }
+          //Skin.setProp($skin, 'className', names.join(' '));
+          Skin.setAttr($skin, 'class', names.join(' '));
+        }
       },
 
       /**
@@ -2111,17 +2170,17 @@
         --n;
       }
     }
-
-    descriptors = descriptors || {};
+    //descriptors = descriptors || {};
+    descriptors = ObjectUtil_assign({}, descriptors);
 
     while (--n >= 0) {
       key = keys[n];
-      if (!(key in descriptors)) {
+      if (key && !(key in descriptors)) {
         descriptors[key] = undefined; // must be undefined
       }
     }
 
-    var opts = descriptorShared;
+    //var opts = descriptorShared;
     for (key in descriptors) {
       if (!descriptors.hasOwnProperty(key)/* || !descriptors[key]*/) { continue; }
 
@@ -2135,10 +2194,10 @@
         //  configurable: /*'configurable' in desc ? desc.configurable :*/ true
         //};
 
-        opts.get = makeGetter(key);
-        opts.set = makeSetter(key);
+        descriptorShared.get = makeGetter(key);
+        descriptorShared.set = makeSetter(key);
 
-        ObjectUtil_defineProp(prototype, key, opts);
+        ObjectUtil_defineProp(prototype, key, descriptorShared);
       }
 
       descriptors[key] = desc;
@@ -3760,9 +3819,9 @@
   'use strict';
 
   var RES = Exact.RES;
-  var ObjectUtil = Exact.ObjectUtil;
   var EvaluatorUtil = Exact.EvaluatorUtil;
   var applyEvaluator = EvaluatorUtil.applyEvaluator;
+  var ObjectUtil_defineProp = Exact.ObjectUtil.defineProp;
 
   function Binding(scope, target, options) {
     this.scope = scope;
@@ -4025,7 +4084,7 @@
       _bindings.push(binding);
     } else {
       //target._bindings = [binding];
-      ObjectUtil.defineProp(target, '_bindings', {value: [binding]});
+      ObjectUtil_defineProp(target, '_bindings', {value: [binding]});
     }
   }
 
@@ -4604,7 +4663,7 @@
     if (/^[\w\$]+$/.test(expr)) {
       template.name = expr;
     } else {
-      template.exec = EvaluatorUtil.makeExpressionEvaluator(expr, 'event').exec;
+      template.exec = EvaluatorUtil.makeExpressionEvaluator(expr/*, []*/).exec;
     }
 
     return ExpressionUtil.makeExpression(HandlerTemplate, template);
@@ -4652,8 +4711,9 @@
   };
 
   var BINDING_BRACKETS = '{}';
-
   var SCOPE_EVENT_SYMBOL = '*';
+  var INLINE_RES_SYMBOL = '_';
+  //var THIS_SYMBOL = '$';
 
   //var BINDING_LIKE_REGEXP = /([&@#]\{)/;
   var BINDING_LIKE_REGEXP = new RegExp(
@@ -4662,42 +4722,6 @@
   );
 
   var SCOPE_EVENT_REGEXP = /\*(\w(\.\w+)?)*[ ]*}$/;
-
-  function likeFuncExpr(expr, i) {
-    var n = expr.length, ct, cc, cb, iq;
-
-    if (i >= 0/* && i < n - 1*/) {
-      ct = 1;
-
-      while (++i < n) {
-        cc = expr.charAt(i);
-
-        if (cc === "'" && cb != "\\") {
-          cb = cc;
-          iq = !iq;
-        }
-
-        if (iq) {
-          continue;
-        }
-
-        if (cc === ')') {
-          --ct;
-          if (!ct) {
-            break;
-          }
-        } else if (cc === '(') {
-          ++ct;
-        }
-      }
-
-      if (ct) {
-        throw new Error('expression "'+expr+'" is illegal');
-      }
-    }
-
-    return i === n-1;
-  }
 
   function parseArgs(args, resources) { //TODO: 1, $.b, red, exec(), $.f()
     var arg, res, flag, flags, parsed;
@@ -4818,7 +4842,24 @@
     }
 
     if (!evaluator) {
-      evaluator = makeExpressionEvaluator(expr);
+      // TODO: not efficient
+      // args = [];
+      // var rest = [];
+      //for (var key in resources) {
+      //  if (resources.hasOwnProperty(key) && expr.indexOf(key) >= 0) {
+      //    rest.push(key);
+      //    args.push(resources[key]);
+      //  }
+      //}
+
+      args = null;
+      res = resources[INLINE_RES_SYMBOL];
+      if (res && expr.indexOf(INLINE_RES_SYMBOL + '.') >= 0) {
+        args = [res];
+        var rest = [INLINE_RES_SYMBOL];
+      }
+
+      evaluator = makeExpressionEvaluator(expr, args, rest);
     }
 
     return evaluator;
@@ -4874,22 +4915,6 @@
       expr = expr.slice(2, expr.length-1);
     }
 
-    //i = expr.lastIndexOf('@'); //TODO:
-    //
-    //if (i > 2 && i > expr.lastIndexOf("'")) {
-    //  tail = expr.slice(i+1, expr.length-1);
-    //  expr = expr.slice(2, i);
-    //
-    //  scopeEvent = tail.trim();
-    //
-    //  if (!scopeEvent) {
-    //    scopeEvent = 'refreshed';// TODO: updated
-    //  }
-    //} else {
-    //  expr = expr.slice(2, expr.length-1);
-    //}
-
-
     if (/*mode > 0 && */!scopeEvent) {
       var scopePaths = extractScopePaths(expr);// TODO: later
     }
@@ -4935,6 +4960,7 @@
   Exact.BindingParser = {
     BINDING_BRACKETS: BINDING_BRACKETS,
     BINDING_SYMBOLS: BINDING_SYMBOLS,
+    //THIS_SYMBOL: '$',
     parse: parse,
     like: like
   }
@@ -4947,7 +4973,6 @@
 (function() {
   'use strict';
 
-
   var TextTemplate = Exact.TextTemplate;
   //var ExpressionParser = Exact.ExpressionParser;
   var BindingParser = Exact.BindingParser;
@@ -4957,16 +4982,6 @@
   var BINDING_BRACKETS = BindingParser.BINDING_BRACKETS;
 
   var StringUtil_range = Exact.StringUtil.range;
-
-  ////var BINDING_REGEXP = /([@&#]\{.+?\})/;
-  //var BINDING_REGEXP = /([@&#]\{.+?\})/;
-  //
-  ////var TEXT_FRAG_REG_EXP = /^`.*([@&\$]\{[\$\w\.]+\}).*`$/;
-  ////var TEXT_FRAG_REG_EXP = /^`[^`]*([@&\$]\{[\$\w\.\, ]*(\|[^`]+)*\})[^`]*`$/;
-  ////var STRING_TEMPLATE_REG_EXP = /^`[^`]*([@&\$]\{[^`]+})?[^`]*`$/;
-  ////var STRING_TEMPLATE_REG_EXP = /^\^[^\^]*([#&@]\{[^\^]+\})?[^\^]*\^$/;
-  ////var STRING_TEMPLATE_REG_EXP = /^\/[^\/]*([#&@]\{[^\/]+\})?[^\/]*\/$/;
-  //var STRING_TEMPLATE_REG_EXP = /.*([@&#]\{.+?\}).*/;
 
   Exact.TextParser = {
     /**
@@ -5012,8 +5027,6 @@
       }
 
       indices.push(expr.length);
-
-
 
       for (i = 0, j = indices.length - 1; i < j; ++i) {
         piece = expr.slice(indices[i], indices[i+1]);
@@ -5375,6 +5388,14 @@
       $template = Skin.parse($template.trim())[0];
     }
 
+    //if (typeof $template === 'string') {
+    //  var $nodes = Skin.parse($template.trim());
+    //  for (var i = 0; i < $nodes.length; ++i) {
+    //    if (Skin.isElement($nodes[i])) { break; } // TODO: maybe comment
+    //  }
+    //  $template = $nodes[i];
+    //}
+
     if (!Skin.isElement($template)) { return; }
 
     parseSelf(host, $template, resources);
@@ -5400,7 +5421,7 @@
 
   var Skin = Exact.Skin;
   var Component = Exact.Component;
-
+  // TODO: add validator to value. min, max, pattern...
   function Input() {
     Component.apply(this, arguments);
   }
@@ -5435,6 +5456,8 @@
 
   Exact.Input = Input;
 
+  Exact.RES.register('Input', Input);
+
 })();
 
 //######################################################################################################################
@@ -5459,6 +5482,8 @@
   });
 
   Exact.TextBox = TextBox;
+
+  Exact.RES.register('TextBox', TextBox);
 
 })();
 
@@ -5502,24 +5527,28 @@
     },
 
     onChoicesChanged: function() {
-      this.set('checked', this.choices.indexOf(this.value) >= 0);
+      if (this.choices) {
+        this.set('checked', this.choices.indexOf(this.value) >= 0);
+      }
     },
 
     onChange: function() {
       this.toggle();
 
-      //if (this.choices instanceof Array) {
+      if (this.choices) {
         if (this.checked) {
           this.choices.push(this.value);
         } else {
           this.choices.splice(this.choices.indexOf(this.value), 1);
         }
-      //}
+      }
 
     }
   });
 
   Exact.CheckBox = CheckBox;
+
+  Exact.RES.register('CheckBox', CheckBox);
 
 })();
 
@@ -5570,6 +5599,8 @@
 
   Exact.Radio = Radio;
 
+  Exact.RES.register('Radio', Radio);
+
 })();
 
 //######################################################################################################################
@@ -5604,6 +5635,8 @@
 
   Exact.Select = Select;
 
+  Exact.RES.register('Select', Select);
+
 })();
 
 //######################################################################################################################
@@ -5628,6 +5661,8 @@
   });
 
   Exact.TextArea = TextArea;
+
+  Exact.RES.register('TextArea', TextArea);
 
 })();
 
