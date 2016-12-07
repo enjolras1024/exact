@@ -14,19 +14,19 @@
     <section class="todoapp">
       <header class="header">
         <h1>todos</h1>
-        <input class="new-todo" placeholder="What needs to be done?" autofocus keyup.enter+="onEnter">
+        <input class="new-todo" placeholder="What needs to be done?" autofocus x-type="Input" value="#{$.newTitle}" keyup.enter+="onEnter">
       </header>
       <section class="main" >
-        <input class="toggle-all" id="toggle-all" type="checkbox" checked="@{$.allDone *}" click+="onCheck">
+        <input class="toggle-all" id="toggle-all" checked="#{$.allDone}" x-type="CheckBox">
         <label for="toggle-all">Mark all as complete</label>
         <ul class="todo-list" x-id="list" x-type="List" item-adapter="&{ENJ.Adapter}" items="@{$.todos | $.filtering *}">
         </ul>
       </section>
-      <footer class="footer" x-style="display: @{$.todos.length | display *};">
+      <footer class="footer" x-style="display: @{$.todos.length | display};">
         <span class="todo-count">
           <strong x-id="strong">@{$.remainingCount}</strong>@{$.remainingCount | pluralize('item')} left
         </span>
-        <ul class="filters" click+="onSelect">
+        <ul class="filters">
           <li>
             <a x-class="selected: @{$.filter === 'all'}" href="#/">All</a>
           </li>
@@ -37,23 +37,23 @@
             <a x-class="selected: @{$.filter === 'completed'}" href="#/completed">Completed</a>
           </li>
         </ul>
-        <button class="clear-completed" click+="$.clearCompleted()"
-                x-style="display: @{$.todos.length > $.remainingCount | display *};" >Clear completed</button>
+        <button class="clear-completed" click+="clearCompleted"
+                x-style="display: @{$.todos.length > $.remainingCount | display};" >Clear completed</button>
       </footer>
     </section>
   </div>
 
-  <div class="template">
-    <li class="adapter" x-class="todo: true; completed: @{$.item.completed}; editing: @{$.item.selected};">
+  <ul class="template">
+    <li class="adapter" x-class="todo: true; completed: @{$.item.completed}; editing: @{$.backup};">
       <div class="view">
-        <input class="toggle" type="checkbox" x-type="CheckBox" change+="onToggle" checked="#{$.item.completed}">
-        <label dblclick+="$.edit()">@{$.item.title}</label>
-        <button class="destroy" click+="onDestroy"></button>
+        <input class="toggle" x-type="CheckBox" checked="#{$.item.completed}">
+        <label dblclick+="edit">@{$.item.title}</label>
+        <button class="destroy" click+="destroy"></button>
       </div>
-      <input class="edit" blur+="onBlur" keyup.enter+="$.onSubmit(event.target.value)" keyup.escape+="onEsc"
-             x-id="editor" value="@{$.item.title}">
+      <input class="edit" x-id="editor" x-type="TextBox" value="@{$.item.title}"
+             keyup.escape+="cancelEdit" keyup.enter+="doneEdit" blur+="doneEdit">
     </li>
-  </div>
+  </ul>
 
   <script src="../../javascripts/exact.js"></script>
   <script src="app.js"></script>

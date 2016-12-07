@@ -660,9 +660,9 @@
     return !!parse(expr);
   }
 
-  function toNumber(expr) {
-    return Number(expr);
-  }
+  //function toNumber(expr) {
+  //  return Number(expr);
+  //}
 
   function toString(expr) {
     return expr;
@@ -670,10 +670,11 @@
 
   //string in single quotes
   function toStrISQ(expr) {
-    var i = expr.indexOf("'");
-    var j = expr.lastIndexOf("'");
+    //var i = expr.indexOf("'");
+    //var j = expr.lastIndexOf("'");
 
-    return expr.slice(i+1, j);
+    //return expr.slice(i+1, j);
+    return expr.slice(1, expr.length - 1);
   }
 
   function toJSON(expr) {
@@ -682,7 +683,7 @@
 
   var typedParsers = {
     'boolean': toBoolean,
-    'number': toNumber,
+    'number': Number,
     'string': toString,
     'json': toJSON
   };
@@ -712,10 +713,10 @@
       return typedParsers[type](expr);
     }
 
-    if (SPECIAL_VALUES.hasOwnProperty(expr)) {
+    if (expr in SPECIAL_VALUES) {
       return toSpecial(expr);//SPECIAL_VALUES[expr];
     } else if (!isNaN(expr)) {
-      return toNumber(expr);//Number(expr);
+      return Number(expr);
     } else if (STRING_IN_SINGLE_QUOTES_REGEXP.test(expr)) {
       return toStrISQ(expr);
     } else /*if (JSON_LIKE_REGEXP.test(expr))*/ {
@@ -728,7 +729,7 @@
 
     parse: parse,
 
-    toNumber: toNumber,
+    toNumber: Number,
 
     toBoolean: toBoolean,
 
@@ -745,9 +746,13 @@
   'use strict';
 
   var RES = Exact.RES;
-
+  var emptyArray = [];
   var THIS_SYMBOL = '$'; //TODO:
   var EVENT_SYMBOL = 'event'; //TODO:
+  
+  var ARG_FLAG_LITE = 0;
+  var ARG_FLAG_PATH = 1;
+  var ARG_FLAG_EVAL = 2;
 
   function Evaluator(exec, args, back) {
     this.exec = exec;
@@ -798,12 +803,12 @@
 
       arg = args[i];
 
-      if (flag === 1) {       // arg is path
+      if (flag === ARG_FLAG_PATH) {       // arg is path
         args[i] = RES.search(arg, scope, true);
         continue;
       }
 
-      if (flag === 2) {       // arg is evaluator
+      if (flag === ARG_FLAG_EVAL) {       // arg is evaluator
         args[i] = applyEvaluator(arg, 'exec', scope);
       }
 
@@ -838,21 +843,14 @@
       exec = $[name];
     }
 
-    args = evaluator.args || []; //TODO: emptyArray
-
-    //if (!args) {
-    //  return hasFirstValue ? exec.call($, value) : exec.call($);
-    //}
-
-    //if (args === THIS_SYMBOL) {
-    //  args = [];
-    //  //return exec.call(scope, event);
-    //}
+    args = evaluator.args || emptyArray; //TODO: emptyArray
 
     flags = args.flags;
     need = args.event;
+
+    args = args.slice(0); //copy
+
     if (flags && flags.length) {
-      args = args.slice(0); //copy
       evaluateArgs(args, flags, scope);
     }
 
@@ -871,7 +869,10 @@
     makeGetEvaluator: makeGetEvaluator,
     makeNotEvaluator: makeNotEvaluator,
     makeEvaluator: makeEvaluator,
-    applyEvaluator: applyEvaluator
+    applyEvaluator: applyEvaluator,
+    ARG_FLAG_LITE: ARG_FLAG_LITE,
+    ARG_FLAG_PATH: ARG_FLAG_PATH,
+    ARG_FLAG_EVAL: ARG_FLAG_EVAL
   }
 })();
 
@@ -1654,12 +1655,12 @@
   }
 
   function getFixedEvent(info) {
-    //var event;
+    var event;
 
-    //if (info.type) {
-    //  event = info;
-    //} else {
-      var event = {};
+    if (info.type) {
+      event = info;
+    } else {
+      event = {};
 
       var i = info.indexOf('.');
 
@@ -1669,7 +1670,7 @@
       } else {
         event.type = info;
       }
-    //}
+    }
 
     return event;
   }
@@ -1678,12 +1679,12 @@
    * Add DOM event or custom event listener.
    *
    * @param {Watcher} watcher
-   * @param {string} event
+   * @param {Object|string} type
    * @param {Function} exec
    * @param {boolean} useCapture
    * @returns {Object}
    */
-  function register(watcher, event, exec, useCapture) {
+  function register(watcher, type, exec, useCapture) {
     var actions = watcher._actions, constructor = watcher.constructor;
 
     // !(exec instanceof Function)
@@ -1694,25 +1695,31 @@
       actions = watcher._actions;// = {};
     }
 
-    var action = actions[event];
+    var event = getFixedEvent(type);
+
+    var action = actions[event.type];
 
     //  Create action
     if (!action) {// <=> action === undefined
-      action = actions[event] = { handlers: []/*, keys: {}, listener: null*/ }; //TODO: {handlers: [], keys: {enter: []}}
+      action = actions[event.type] = { handlers: []/*, keys: {}, listener: null*/ }; //TODO: {handlers: [], keys: {enter: []}}
     }
 
-    var handlers = action.handlers;
+    var handlers = action.handlers, keyName = event.keyName;
 
     var handler, i, n = handlers.length;
     // Check if exec exists in handlers.
     for (i = 0; i < n; ++i) {
       handler = handlers[i];
-      if (exec === handler.exec) {
+      if (exec === handler.exec && keyName === handler.keyName) {
         return action;
       }
     }
 
     handler = {exec: exec};
+
+    if (keyName) {
+      handler.keyName = keyName;
+    }
 
     if (useCapture) {
       handler.useCapture = useCapture;
@@ -1723,7 +1730,7 @@
     //May add DOM event listener.
     if (!('listener' in action)){
       if (typeof constructor.addEventListenerFor === 'function') {
-        constructor.addEventListenerFor(watcher, event, getFixedEvent(event).type, useCapture);
+        constructor.addEventListenerFor(watcher, event.type, useCapture);
       } else {
         handler.listener = null;
       }
@@ -1736,34 +1743,36 @@
    * Remove DOM event or custom event listener.
    *
    * @param {Watcher} watcher
-   * @param {Object|string} event
+   * @param {Object|string} type
    * @param {Function|string} exec
    * @param {boolean} useCapture
    * @returns {Object}
    */
-  function remove(watcher, event, exec, useCapture) {
+  function remove(watcher, type, exec, useCapture) {
     var actions = watcher._actions, constructor = watcher.constructor, all = arguments.length === 2;
 
     if (!actions) { return; }
 
-    var action = actions[event];
+    var event = getFixedEvent(type);
+
+    var action = actions[event.type];
 
     if (!action) { return; }
 
-    var handlers = action.handlers;
+    var handlers = action.handlers, keyName = event.keyName;
 
     //if (!handlers) { return; }
 
     var handler, i, n = handlers.length;
 
-    if (all) {
+    if (all && !keyName) {
       handlers.splice(0);
     } else {
       for (i = 0; i < n; ++i) {
         handler = handlers[i];
-        if (exec === handler.exec) {
+        if ((all || exec === handler.exec) && (!keyName || keyName === handler.keyName)) {
           handlers.splice(i, 1);
-          //--action.count;
+          --action.count;
           break;
         }
       }
@@ -1771,38 +1780,23 @@
 
     if (handlers.length === 0) {
       if (action.listener && typeof constructor.removeEventListenerFor === 'function') {/* <=> element && ('on' + type) in element*/
-        constructor.removeEventListenerFor(watcher, event, getFixedEvent(event).type, useCapture);
+        constructor.removeEventListenerFor(watcher, event.type, useCapture);
       }
 
-      delete actions[event];
+      delete actions[event.type];
     }
 
     return action;
   }
 
   function clean(watcher) {
-    var actions = watcher._actions, event;
+    var actions = watcher._actions, type;
 
     if (!actions) { return; }
 
-    for (event in actions) {
-      if (actions.hasOwnProperty(event)) {
-        remove(watcher, event);
-      }
-    }
-  }
-
-  function fire(action, event, params) {
-    var i, n, exec, handler, handlers = action.handlers;
-
-    n = handlers.length;
-    // trigger handlers
-    for (i = n-1; i >= 0; --i) {
-      handler = handlers[i];// handlers[ i ]( event.clone() );
-
-      if ((event.eventPhase === 1) === !!handler.useCapture) {
-        exec = handler.exec;
-        exec.apply(null, params);
+    for (type in actions) {
+      if (actions.hasOwnProperty(type)) {
+        remove(watcher, type);
       }
     }
   }
@@ -1815,32 +1809,35 @@
    * @param {Array} params
    */
   function dispatch(watcher, keep, event, params) {
-    var actions = watcher._actions, action1;
+    var actions = watcher._actions, action;
 
     if (actions) {
-      if (!event.type) {
-        event = getFixedEvent(event);
-      }
+      event = getFixedEvent(event);
+      //TODO: fix event
+      action = actions[event.type];
 
-      action1 = actions[event.type];
-
-      if (event.keyName) {
-        var action2 = actions[event.type + '.' + event.keyName];
-      }
-
-      if (action1 || action2) {
+      if (action) {
         event.dispatcher = watcher;
 
         if (keep) {
           params.unshift(event); //[event].concat(params);
         }
 
-        if (action1) {
-          fire(action1, event, params);
-        }
+        var i, n, exec, handler, handlers = action.handlers;
 
-        if (action2) {
-          fire(action2, event, params);
+        n = handlers.length;
+        // trigger handlers
+        //for (i = 0; i < n; ++i) {
+        for (i = n-1; i >= 0; --i) {
+          handler = handlers[i];// handlers[ i ]( event.clone() );
+
+          if (!handler || (handler.keyName && handler.keyName !== event.keyName)) { continue; }
+
+          if (/*!event.eventPhase ||  */(event.eventPhase === 1) === !!handler.useCapture) {
+            exec = handler.exec;
+            exec.apply(null, params);
+          }
+
         }
       }
     }
@@ -1857,30 +1854,30 @@
     /**
      * Use Watcher to add DOM event or custom event handler.
      *
-     * @param {string|Object} event
+     * @param {Object|string} type
      * @param {Function} exec
      * @param {boolean} useCapture
      * @returns {self}
      */
-    on: function on(event, exec, useCapture) {
+    on: function on(type, exec, useCapture) {
       var opts, value;
 
-      if (typeof event === 'string') {
-        register(this, event, exec, useCapture);
-      } else {
-        opts = event;
+      if (typeof type === 'object') {
+        opts = type;
 
-        for (event in opts) {
-          if (!opts.hasOwnProperty(event)) { continue; }
+        for (type in opts) {
+          if (!opts.hasOwnProperty(type)) { continue; }
 
-          value = opts[event];
+          value = opts[type];
 
           if (Array.isArray(value)){//  .on({click: [function(){...}}, true]);
-            register(this, event, value[0], value[1]);
+            register(this, type, value[0], value[1]);
           } else {//  .on({click: function(){...}});
-            register(this, event, value);
+            register(this, type, value);
           }
         }
+      } else if (type) {//  .on('click', context.onClick);
+        register(this, type, exec, useCapture);
       }
 
       return this;
@@ -1890,36 +1887,35 @@
     /**
      * Use Watcher to remove DOM event or custom event handler.
      *
-     * @param {string|Object} event
+     * @param {Object|string} type
      * @param {Function} exec
      * @param {boolean} useCapture
      * @returns {self}
      */
-    off: function off(event, exec, useCapture) {
-      var n = arguments.length, type = typeof event, opts, value;
+    off: function off(type, exec, useCapture) {
+      var n = arguments.length, t = typeof type, opts, value;
 
       if (n === 0) {// .off()
 
         clean(this);
 
-      } else if (type === 'string') {
+      } else if (t === 'string') {
 
         if (n === 1) {//  .off('click');
-          remove(this, event);
+          remove(this, type);
         } else {//  .off('click', context.onClick);
-          remove(this, event, exec, useCapture);
+          remove(this, type, exec, useCapture);
         }
 
-      } else if (type === 'object') {
-
-        opts = event;
-        for (event in opts) {
-          if (!opts.hasOwnProperty(event)) { continue; }
-          value = opts[event];
+      } else if (t === 'object') {
+        opts = type;
+        for (type in opts) {
+          if (!opts.hasOwnProperty(type)) { continue; }
+          value = opts[type];
           if (Array.isArray(value)) {//  .off({click: [context.onClick, true]});
-            remove(this, event, value[0], value[1]);
+            remove(this, type, value[0], value[1]);
           } else {//  .off({click: context.onClick});
-            remove(this, event, value);
+            remove(this, type, value);
           }
         }
 
@@ -1931,20 +1927,20 @@
     /**
      * It works like `on`. But the handler will be removed once it executes for the first time.
      *
-     * @param {string} event
+     * @param {Object|string} type
      * @param {Function} exec
      * @param {boolean} useCapture
      * @returns {self}
      */
-    once: function(event, exec, useCapture) {
+    once: function(type, exec, useCapture) {
       var self = this;
 
       function func() {
-        self.off(event, func, useCapture);
+        self.off(type, func, useCapture);
         exec.apply(null, arguments);
       }
 
-      this.on(event, func, useCapture);
+      this.on(type, func, useCapture);
 
       return this;
     },
@@ -1953,12 +1949,12 @@
      * Dispatch custom event, handlers accept rest arguments.
      *
      * @example #emit('ok', a, b) may trigger function(a, b){}
-     * @param {Event|string} event
+     * @param {Event|Object|string} type
      * @returns {self}
      */
-    emit: function emit(event/*, ...rest*/) {
+    emit: function emit(type/*, ...rest*/) {
       var params = Array$slice.call(arguments, 1);
-      dispatch(this, false, event, params);
+      dispatch(this, false, type, params);
       return this;
     },
 
@@ -1966,12 +1962,12 @@
      * Dispatch custom event with extras.
      *
      * @example #send('ok', a, b) may trigger function(event, a, b){}
-     * @param {Event|string} event
+     * @param {Event|Object|string} type
      * @returns {self}
      */
-    send: function send(event/*, ...rest*/) {
+    send: function send(type/*, ...rest*/) {
       var params = Array$slice.call(arguments, 1);
-      dispatch(this, true, event, params);
+      dispatch(this, true, type, params);
       return this;
     }
 
@@ -2006,6 +2002,10 @@
     constructor: Updater,
 
     statics: {
+      /**
+       * target to be inserted must have method `update`
+       * @param {Object} target
+       */
       insert: function(target) {
         if (!target) { return; }
 
@@ -2037,6 +2037,10 @@
         }
       },
 
+      /**
+       * target to be appended must have method `render`
+       * @param {Object} target
+       */
       append: function(target) {
         queue.push(target);
       }
@@ -2141,7 +2145,6 @@
     return function() {
       var _props = this._props;
       return _props.get(key, this, this.constructor._descriptors_);
-      //return this._props[key];
     }
   }
 
@@ -2161,7 +2164,7 @@
   function applyDescriptors(prototype, constructor, descriptors) {
     var desc, keys, key, n = 0;
 
-    if (Array.isArray(descriptors)) {
+    if (Array.isArray(descriptors)) { // like ['title', 'name', {price: {type: 'number'}}]
       keys = descriptors;//.slice(0);
       descriptors = null;
       n = keys.length;
@@ -2207,8 +2210,6 @@
     //return descriptors;
   }
 
-  //var deps = [];
-
   function Accessor(props) {
     throw new Error('Accessor is abstract class and can not be instantiated');
   }
@@ -2235,13 +2236,19 @@
         //  return true;
         //}
 
-        var set = /*descriptors &&*/ descriptors[key] && descriptors[key].set;
+        if (val !== old) {
+          var set = /*descriptors &&*/ descriptors[key] && descriptors[key].set;
 
-        if (set) {
-          set.call(accessor, val, this);
-        } else {
-          this[key] = val;
+          if (set) {
+            set.call(accessor, val, this);
+          } else {
+            this[key] = val;
+          }
+
+          //return true;
         }
+
+
 
         return this[key] !== old;
       },
@@ -2256,7 +2263,7 @@
           ObjectUtil_defineProp(_props, 'set', {value: constructor.set});
         }
 
-        if (!constructor._descriptors_ /*&& Array.isArray(descriptors)*/) { // like ['title', 'name', {price: {type: 'number'}}]
+        if (!constructor._descriptors_ /*&& Array.isArray(descriptors)*/) {
           applyDescriptors(prototype, constructor, descriptors);
         }
 
@@ -2284,11 +2291,11 @@
 
   'use strict';
 
-  var TYPE_REGEXPS = {
-    number: /\bnumber\b/,
-    string: /\bstring\b/,
-    boolean: /\bboolean\b/
-  };
+  //var TYPE_REGEXPS = {
+  //  number: /\bnumber\b/,
+  //  string: /\bstring\b/,
+  //  boolean: /\bboolean\b/
+  //};
 
   function getType(value) {
     if (value instanceof Object) {
@@ -2372,7 +2379,7 @@
    *
    * @example A constructor has descriptors:
    *
-   *  { name: 'string', role: Student, age: {type: 'number', validate: validateRange} }
+   *  { name: 'string', role: Student, age: {type: 'number', validator: validateRange} }
    *
    * The validator can check if the type of `name` is 'string', `role` is an instance of Student, and `age` is number
    * in the legal range.
@@ -2438,11 +2445,6 @@
             if ('development' === 'development') {
               console.warn('Invalid:', error.message);
             }
-
-            //if (accessor.on && accessor.send) {
-            //  accessor.send('invalid.' + key, error);
-            //}
-
             return false;
           }
         }
@@ -2451,8 +2453,6 @@
       }
     }
   });
-
-
 
   Exact.Validator = Validator;
 
@@ -2529,7 +2529,7 @@
      * @param {string} key
      * @returns {boolean}
      */
-    hasDirty: function hasDirty(key) { // hasDirtyAttr, hasDirty
+    hasDirty: function hasDirty(key) {
       var _dirty = this._dirty;
       return _dirty ? (key === undefined || _dirty.hasOwnProperty(key)) : false;
     }
@@ -2566,18 +2566,16 @@
 
     mixins: [Accessor.prototype, DirtyMarker.prototype],
 
-    //onChange: null,
-
     statics: {
 
-      set: function set(key, val, old, model, descriptors) {
-        var changed = Accessor_set.call(this, key, val, old, model, descriptors);
+      set: function set(key, val, old, cache, descriptors) {
+        var changed = Accessor_set.call(this, key, val, old, cache, descriptors);
 
         if (changed) {
-          DirtyMarker_check(model, key, this[key], old);
+          DirtyMarker_check(cache, key, this[key], old);
 
-          if (model.onChange) {
-            model.onChange();
+          if (cache.onChange) {
+            cache.onChange();
           }
         }
 
@@ -2621,7 +2619,6 @@
       /**
        * Set the prop of the store by given key.
        *
-
        * @returns {boolean}
        */
       set: function set(key, val, old, store, descriptors) {
@@ -2669,9 +2666,9 @@
 
   function invalidate(collection, key) {
     collection.isInvalidated = true;
-    collection.send('changed'); //collection.send(key ? 'change.' + key : 'change);
+    collection.send(key ? 'changed.' + key : 'changed'); //collection.send(key ? 'change.' + key : 'change);
 
-    if (collection.onChange) {
+    if (collection.onChange) { // TODO: remove
       collection.onChange();
     }
   }
@@ -2692,51 +2689,54 @@
 
       clean: function(collection) {
         collection.isInvalidated = false;
-      }//,
+      }
     },
-
-    //invalidate: null,
 
 //    clean: function() {
 //      this.isInvalidated = false;
 //    },
 
     push: function() {
-      base.push.apply(this, arguments);
-
-      invalidate(this);
+      if (arguments.length) {
+        base.push.apply(this, arguments);
+        invalidate(this, 'length');
+      }
 
       return this.length;
     },
 
     pop: function() {
-      var popped = base.pop.call(this);
-
-      invalidate(this);
+      if (this.length) {
+        var popped = base.pop.call(this);
+        invalidate(this, 'length');
+      }
 
       return popped;
     },
 
     unshift: function() {
-      base.unshift.apply(this, arguments);
-
-      invalidate(this);
+      if (arguments.length) {
+        base.unshift.apply(this, arguments);
+        invalidate(this, 'length');
+      }
 
       return this.length;
     },
 
     shift: function() {
-      var shifted = base.shift.call(this);
-
-      invalidate(this);
+      if (this.length) {
+        var shifted = base.shift.call(this);
+        invalidate(this, 'length');
+      }
 
       return shifted;
     },
 
     splice: function() {
+      var n = this.length;
       var spliced = base.splice.apply(this, arguments);
 
-      invalidate(this);
+      invalidate(this, this.length !== n ? 'length' : '');
 
       return spliced;
     },
@@ -2748,26 +2748,6 @@
 
       return this;
     },
-
-    //slice: function() { //proxy('slice', true)
-    //  var array = base.slice.apply(this, arguments);
-    //
-    //  var collection = new Collection();
-    //
-    //  base.push.apply(collection, array);
-    //
-    //  return collection;
-    //},
-    //
-    //concat: function() { //proxy('concat', true)
-    //  var array = base.concat.apply(this, arguments);
-    //
-    //  var collection = new Collection();
-    //
-    //  base.push.apply(collection, array);
-    //
-    //  return collection;
-    //},
 
     //TODO: filter, sort, map, ...
 
@@ -2794,16 +2774,11 @@
       n = this.length;
       m = items.length;
 
-      //console.log(n,items,items.length,items[0]);
 
       if (n > m) {
-//        min = m;
         base.splice.call(this, m);
         flag = true;
-      } /*else {
-       min = n;
-       base.push.apply(this, items.slice(min));
-       }*/
+      }
 
       for (i = 0;  i < m; ++i) {
         if (!flag && this[i] !== items[i]) {
@@ -2816,7 +2791,7 @@
       this.length = m;
 
       if (flag) {
-        invalidate(this);
+        invalidate(this, m != n ? 'length' : '');
       }
 
       return this;
@@ -2836,13 +2811,8 @@
 
       for (i = 0; i < n; ++i) {
         if (this[i] === item) {
-          //if (i === n-1) {
-          //  return this;
-          //}
-
           base.splice.call(this, i, 1);
           n = this.length;// <=> --n;
-
           break;
         }
       }
@@ -2863,7 +2833,7 @@
         base.push.call(this, item);
       }
 
-      invalidate(this);
+      invalidate(this, 'length');
 
       return this;
     },
@@ -2891,7 +2861,7 @@
         base.pop.call(this);
       }
 
-      invalidate(this);
+      invalidate(this, 'length');
 
       return this;
     },
@@ -2901,13 +2871,12 @@
         throw new TypeError("Failed to execute `insert` on `Collection`: 2 arguments must be object.");
       }
 
-//      if (item === existed) { return this; }
+      if (item === existed) { return this; }
 
       var i, n;
 
       for (i = 0, n = this.length; i < n; ++i) {
         if (this[i] === existed) {
-          this.set(i, item);
           break;
         }
       }
@@ -2916,18 +2885,12 @@
         throw new Error('The item to be replaced is not existed in this collection');
       }
 
-//      invalidate(this);
+      this.set(i, item);
+
+      invalidate(this);
 
       return this;
-    }/*,
-
-    empty: function() {
-      this.splice(0);
-
-//      invalidate(this);
-
-      return this;
-    }*/
+    }
   });
 
   Exact.Collection = Collection;
@@ -3114,7 +3077,7 @@
         Updater.insert(this);
       }
 
-      return this;
+      //return this;
     },
 
     update: function update() { //TODO: enumerable = false
@@ -3147,9 +3110,15 @@
         children = this._children,
         dirty = null;
 
-      if (props && props._dirty) { //TODO: textContent => children
+      if (props && props._dirty) {
         dirty = props._dirty;
         //Shadow.clean(props);
+        if ('excluded' in dirty) {
+          var parent = Shadow.getParent(this);
+          parent.children.invalidated = true;
+          parent.invalidate();
+          delete dirty.excluded;
+        } // TODO: support more directives
 
         Skin.renderProps($skin, props, dirty, this._secrets.final);
       }
@@ -3192,7 +3161,7 @@
               }
             }
           }
-          // It is a little hard for IE 8
+          // TODO: It is a little hard for IE 8
         }
       }
     },
@@ -3206,18 +3175,16 @@
       return (constructor.fullName || constructor.name) + '<' + (tag ? tag.toLowerCase() : '') + '>('+this.guid+')';
     },
 
-    blur: function blur() {
+    blur: function blur() { //TODO: remove
       var $skin = this.$skin;
       setImmediate(function() {
-        //Skin.blur($skin);
         Skin.call($skin, 'blur');
       });
     },
 
-    focus: function focus() {
+    focus: function focus() { //TODO: remove
       var $skin = this.$skin;
       setImmediate(function() {
-        //Skin.focus($skin);
         Skin.call($skin, 'focus');
       });
     },
@@ -3348,11 +3315,11 @@
       },
 
 
-      addEventListenerFor: function (shadow, event, type, useCapture) {
+      addEventListenerFor: function (shadow, type, useCapture) {
         var $skin = shadow.$skin;
         if (!$skin) { return; }
 
-        var action = shadow._actions[event];
+        var action = shadow._actions[type];
 
         if (Skin.mayDispatchEvent($skin, type)) {//TODO: No problem?
           action.listener = function (event) {
@@ -3365,11 +3332,11 @@
         }
       },
 
-      removeEventListenerFor: function (shadow, event, type, useCapture) {
+      removeEventListenerFor: function (shadow, type, useCapture) {
         var $skin = shadow.$skin;
         if (!$skin) { return; }
 
-        var action = shadow._actions[event];
+        var action = shadow._actions[type];
 
         if (action.listener && Skin.mayDispatchEvent($skin, type)) {
           Skin.removeEventListener($skin, type, action.listener, useCapture);
@@ -3392,7 +3359,7 @@
   'use strict';
 
   var Shadow = Exact.Shadow;
-  //var hasDirty = Exact.DirtyChecker.hasDirty;
+  //var hasDirty = Exact.DirtyMarker.hasDirty;
 
   function Text(data) {
     Text.initialize(this, data);
@@ -3418,7 +3385,6 @@
 
       initialize: function(text, data) {
         Shadow.initialize(text, {data: data}, '');
-        //Shadow.initialize(text, 'TEXT', {data: data});
       }
     },
 
@@ -3496,7 +3462,6 @@
 
   var Watcher = Exact.Watcher;
   var Updater = Exact.Updater;
-  //var Commander = Exact.Commander;
   var Validator = Exact.Validator;
 
   var Text = Exact.Text;
@@ -3527,12 +3492,11 @@
   //TODO: bindable = true
 
   Exact.defineClass({
-    //TYPE: 'Exact.Component',
     constructor: Component,
 
     extend: Shadow,
 
-    mixins: [Watcher.prototype/*, Context.prototype*/],
+    mixins: [Watcher.prototype],
 
     statics: {
       fullName: 'Component',
@@ -3552,22 +3516,22 @@
         return Shadow_set.call(this, key, val, old, component, descriptors);
       },
 
+      /**
+       * Factory method for creating a component
+       *
+       * @param {Function} ClassRef
+       * @param {Object} props
+       * @returns {Component}
+       */
       create: function create(ClassRef, props) { // TODO: build
         return new ClassRef(props);
       },
 
-      //destroy: function destroy(component) {
-      //  var i, n, child, children = component.children;
-      //
-      //  for (i = 0, n = children.length; i < n; ++i) {
-      //    child = children[i];
-      //    child.constructor.destroy(child);
-      //  }
-      //
-      //  component.off();
-      //  Shadow.clean(component);
-      //},
-
+      /**
+       * Release the component and its children
+       *
+       * @param {Component} component
+       */
       release: function release(component) {
         var i, children = component._children;
         if (children) {
@@ -3578,7 +3542,7 @@
 
         var binding, _bindings = component._bindings; //
         if (_bindings) {
-          for (i = _bindings.length - 1; i >= 0; ++i) {
+          for (i = _bindings.length - 1; i >= 0; --i) {
             binding = _bindings[i];
             binding.constructor.clean(binding); // TODO: Binding.clean()
           }
@@ -3643,7 +3607,6 @@
       base.update.call(this);
 
       if (this.isInvalidated) {
-        //shadow.send('refresh');//TODO: beforeRefresh, refreshing
         this.send('refreshed');//TODO: beforeRefresh, refreshing
       }
     },
@@ -3739,16 +3702,14 @@
 
     ready: function() {
       //this.on('change.items', this.invalidate);
-      //this.on('change.itemAdapter', function() {
+      //this.once('changed.itemAdapter', function() {
       //  console.log('change.itemAdapter');
       //});
       //this.on('refresh', this.refresh.bind(this));
     },
 
-
     refresh: function() {
-
-      var i, n, m, item, items = this.items, itemAdapter, child, children = this.children, contents = [];
+      var i, n, m, item, items = this.items, itemAdapter, child, children = this.children, contents = [], removed = [];
 
       if (!items) { return; }
 
@@ -3763,29 +3724,27 @@
 
       for (i = 0; i < n; ++i) {
         item = items[i];
-        //item._toIndex = i;
         item._fromIndex = -1;
-        //children.push(i, new itemAdapter({item: items[i]}));
       }
 
       for (i = 0; i < m; ++i) {
         item = children[i].item;
         if ('_fromIndex' in item) {
           item._fromIndex = i;
+        } else {
+          removed.push(children[i]);
         }
       }
 
       for (i = 0; i < n; ++i) {
         item = items[i];
+
         if (item._fromIndex >= 0 ) {
           child = children[item._fromIndex];
           contents.push(child);
         } else {
-
           var content = new itemAdapter({item: item});
-
           contents.push(content);
-
           this.send('itemAdded', item, content);
         }
 
@@ -3802,12 +3761,23 @@
 
       if (m > n) {
         children.splice(n);
+        n = removed.length;
+        if (n) {
+          for (i = 0; i < n; ++i) {
+            content = removed[i];
+            item = content.item;
+            delete item._fromIndex;
+            this.send('itemRemoved', item, content);
+          }
+        }
       }
 
     }
   });
 
   Exact.List = List;
+
+  Exact.RES.register('List', List);
 
 })();
 
@@ -3870,7 +3840,6 @@
         var binding = new Binding(scope, target, {
           mode: mode,
           //life: life,
-
           source: source,
           evaluator: evaluator,
 
@@ -3884,33 +3853,15 @@
 
         binding.exec({dispatcher: source});
 
-        //if (mode > 0/* && binding.life*/) {
-        //  if (scopeEvent) {
-        //    scope.on(scopeEvent, binding.exec);
-        //  } else if (scopePaths) {
-        //    eye('on', scopePaths, scope, target, binding);
-        //  }
-//console.log('mode',mode,scopeEvent, scopePaths);
-          if (mode < 1) {
-            //console.log('once', scopeEvent, scopePaths);
-            if (scopeEvent) {
-              scope.once(scopeEvent, binding.exec);
-            } else if (scopePaths) {
+        if (mode < 1) {
+          eye('once', scopePaths, binding.scope, binding.target, binding);
+        } else {
+          eye('on', scopePaths, binding.scope, binding.target, binding);
+        }
 
-              eye('once', scopePaths, scope, target, binding);
-            }
-          } else {
-            if (scopeEvent) {
-              scope.on(scopeEvent, binding.exec);
-            } else if (scopePaths) {
-              eye('on', scopePaths, scope, target, binding);
-            }
-          }
-
-          if (mode === 2) {
-            eye('on', [prop], target, source, binding);
-          }
-        //}
+        if (mode === 2) {
+          eye('on', [prop], target, source, binding);
+        }
 
         return binding;
       },
@@ -3918,11 +3869,7 @@
       clean: function(binding) {
         if (binding.mode <= 0) { return; }
 
-        if (binding.scopeEvent) {
-          binding.scope.off(binding.scopeEvent, binding.exec);
-        } else if (binding.scopePaths) {
-          eye('off', binding.scopePaths, binding.scope, binding.target, binding);
-        }
+        eye('off', binding.scopePaths, binding.scope, binding.target, binding);
 
         if (binding.mode === 2)  {
           eye('off', [binding.targetProp], binding.target, binding.source, binding);
@@ -3945,26 +3892,23 @@
           value = applyConverters(converters, 'exec', scope, event, value);
         }
         assign(target, targetProp, value);
-        //target.set(targetProp, value);
       } else if (event.dispatcher !== target) {
         value = source[sourceProp];
         if (converters) {
           value = applyConverters(converters, 'exec', scope, event, value);
         }
         assign(target, targetProp, value);
-        //target.set(targetProp, value);
       } else {
         value = target[targetProp];
         if (converters) {
           value = applyConverters(converters, 'back', scope, event, value);
         }
         assign(source, sourceProp, value);
-        //source.set(sourceProp, value);
       }
 
-      //if (this.mode > 0 && !(--this.life)) {
-      //  Binding.clean(this);
-      //}
+      if (this.mode === 0) {
+        Binding.clean(this);
+      }
     }
   });
 
@@ -4001,33 +3945,6 @@
     }
   }
 
-  //function normalize(paths, scope) {
-  //  //var descriptors = scope._descriptors_;
-  //
-  //  //if (!descriptors) { return; }
-  //
-  //  var i, j, n, prop, source, descriptors;
-  //
-  //  for (i = 0, n = paths.length; i < n; ++i) {
-  //    var path = paths[i];
-  //
-  //    j = path.lastIndexOf('.');
-  //    if (j < 0) {
-  //      prop = path;
-  //      source = scope;
-  //    } else {
-  //      prop = path.slice(j + 1);
-  //      source = RES.search(path.slice(0, j), scope, true);
-  //    }
-  //
-  //    descriptors = source._descriptors_;
-  //
-  //    if (prop in descriptors && descriptors[prop].depends) {
-  //
-  //    }
-  //  }
-  //}
-
   function dep(i, prop, paths, scope) {
     var descriptors = scope.constructor._descriptors_;
     var desc = descriptors[prop];
@@ -4039,40 +3956,52 @@
     }
   }
 
-  function eye(fn, paths, scope, target, binding) {
-    var i, j, n, path, prop, watcher, exec, cache = {};
-    //TODO: make paths unique
-    for (i = 0/*, n = paths.length*/; i < paths.length; ++i) {
-      path = paths[i];//.name;
+  function eye(method, paths, scope, target, binding) {
+    var flag, event = binding.scopeEvent;
 
-      if (!path || cache[path]) {
-        paths[i] = null;
-        continue;
+    if (event && scope === binding.scope) {
+      if (scope[method]) {
+        scope[method](event, binding.exec);
+        flag = true;
       }
+    } else if (paths && paths.length > 0) {
+      var i, j, path, prop, source, cache = {};
 
-      cache[path] = true;
+      for (i = 0; i < paths.length; ++i) {
+        path = paths[i];
 
-      j = path.lastIndexOf('.');
-      if (j < 0) {
-        prop = path;
-        watcher = scope;
-        if (fn === 'on' && dep(i, prop, paths, scope)) {
+        if (!path || cache[path]) {
+          paths[i] = null;
           continue;
         }
-      } else {
-        prop = path.slice(j + 1);
-        watcher = RES.search(path.slice(0, j), scope, true);
-      }
 
-      if (watcher && watcher[fn]) {
-        //TODO: check scope._descriptors_[prop].depends
-        watcher[fn]('changed.' + prop, binding.exec);// TODO: binding.invalidate
+        cache[path] = true;
 
-        if (fn === 'on') {
-          record(target, binding);
-        } else if (fn === 'off') {
-          remove(target, binding);
+        j = path.lastIndexOf('.');
+
+        if (j < 0) {
+          prop = path;
+          source = scope;
+          if (method === 'on' && dep(i, prop, paths, scope)) {
+            continue;
+          }
+        } else {
+          prop = path.slice(j + 1);
+          source = RES.search(path.slice(0, j), scope, true);
         }
+
+        if (source && source[method]) {
+          source[method]('changed.' + prop, binding.exec);// TODO: binding.invalidate
+          flag = true;
+        }
+      }
+    }
+
+    if (flag) {
+      if (method === 'on') {
+        record(target, binding);
+      } else if (method === 'off') {
+        remove(target, binding);
       }
     }
   }
@@ -4091,7 +4020,7 @@
   function remove(target, binding) {
     var _bindings = target._bindings;
 
-    _bindings.splice(_bindings.indexOf(binding), 1);
+    _bindings.splice(_bindings.lastIndexOf(binding), 1);
   }
 
   Exact.Binding = Binding;
@@ -4213,12 +4142,9 @@
 
         exec();
 
-        if (template.mode > 0) {
-          scope.on('refreshed', exec);
-        }
+        scope.on(pieces.scopeEvent, exec);
 
         fragment.onChange = scope.invalidate;
- 
       }
     }
   });
@@ -4279,6 +4205,7 @@
     this.children = null; //Array like []
     //this.actions = null;  // for refactor
     //this.indices = null;  // for refactor
+    //this.directives = null;
   }
 
   var emptyObject = {}, emptyArray = [];
@@ -4295,8 +4222,8 @@
     } else {
       template.type = type;
     }
-
-    if (params) {
+    
+    if (!Array.isArray(params)) {
       template.uid = params.uid;
       template.attrs = params.attrs;
       template.style = params.style;
@@ -4315,6 +4242,8 @@
       if (flag) {
         template.props = props;
       }
+    } else {
+      children = params;
     }
 
     template.children = children;
@@ -4392,7 +4321,6 @@
     initActions(target, template.actions);
   }
 
-
   function initChildrenOrContents(scope, target, template) {
     var i, n, uid, tag, type, child, content, contents = [], children = template.children;
 
@@ -4405,7 +4333,7 @@
         content = Text.create(child);
       } else if (ExpressionUtil.isExpression(child)) {
         content = Text.create('');
-        scope._todos.push({target: content, expressions: {data: child}});
+        scope._todos.push({target: content, expressions: {data: child}}); // TODO: collectExpressions
       } else if (child instanceof Object) {
         uid = child.uid;
         tag = child.tag;
@@ -4424,6 +4352,12 @@
         if (uid) {
           scope[uid] = content; //TODO: addPart
         }
+
+        if (tag === 'slot' /*&& target !== scope*/) {
+          scope._slots[content.name || '*'] = {
+            target: target, offset: i, collection: []
+          };
+        }
       }
 
       contents.push(content);
@@ -4433,8 +4367,33 @@
       target.children.reset(contents); //TODO: replace, reset
     } else {
       target.set('contents', contents);
-      //target.contents.reset(contents); //TODO: replace, reset
+      initSlots(target);
     }
+  }
+
+  function initSlots(component) {
+    var slots = component._slots, contents = component.contents;
+    var i, n, name, slot, content, children, collection;
+
+    for (i = 0, n = contents.length; i < n; ++i) {
+      content = contents[i];
+      name = content.slot || '*';
+      slot = slots[name];
+      if (slot) {
+        collection = slots[name].collection;
+        collection.push(content);
+      }
+    }
+
+    for (name in slots) {
+      if (slots.hasOwnProperty(name)) {
+        slot = slots[name];
+        children = slot.target.children;
+        children.splice.apply(children, [slot.offset, 1].concat(slot.collection));
+      }
+    }
+
+    delete component._slots;
   }
 
   function initExpressions(component) {
@@ -4452,21 +4411,25 @@
         }
       }
     }
+
+    delete component._todos;
   }
-  
+
   function initSelfAndChildrenOrContents(scope, target, template) {
     initSelf(scope, target, template);
     initChildrenOrContents(scope, target, template);
   }
 
   function compile(template, component) {
-    component._todos = []; //TODO: _todos
+    component._slots = {};
+    component._todos = [];
 
     initSelfAndChildrenOrContents(component, component, template);
 
     initExpressions(component);
 
-    delete component._todos;
+    //delete component._todos;
+    //delete component._slots;
 
     component._template = template;
   }
@@ -4660,6 +4623,10 @@
 
     var template = new HandlerTemplate();
 
+    //if (/^\$\.[\w\$]+(\.[\w\$]+)*$/.test(expr)) {
+    //if (/^\$\.[\w\$]+$/.test(expr)) {
+    //  template.name = expr.slice(2);
+    //}
     if (/^[\w\$]+$/.test(expr)) {
       template.name = expr;
     } else {
@@ -4706,6 +4673,8 @@
   var REGEXP_3 = /\$((\[|\]?\.)[\w\$]+)+(?!\()/g; //$.a[0].b.c(), path on scope
   var REGEXP_4 = /^\$((\[|\]?\.)[\w\$]+)+$/; //
 
+  var EVENT_ANYWAY = 'refreshed';
+
   var BINDING_SYMBOLS = {
     ONE_TIME: '&', ONE_WAY: '@', TWO_WAY: '#'
   };
@@ -4731,14 +4700,14 @@
     for (var i = 0, n = args.length; i < n; ++i) {
       arg = args[i];
 
-      flag = 0; //constant
+      flag = EvaluatorUtil.ARG_FLAG_LITE; //constant
       parsed = undefined;
 
       parsed = LiteralUtil.parse(arg);
 
       if (parsed === undefined) {
         if (REGEXP_1.test(arg)) { //TODO
-          flag = 1; //path
+          flag = EvaluatorUtil.ARG_FLAG_PATH; //path
           parsed = arg.slice(2);
         } else {
           res = RES.search(arg, resources);
@@ -4746,7 +4715,7 @@
           if (res) {
             parsed = res;
           } else {
-            flag = 2; //evaluator
+            flag = EvaluatorUtil.ARG_FLAG_EVAL; //evaluator
             parsed = parseEvaluator(arg, resources);
           }
         }
@@ -4785,9 +4754,9 @@
 
         if (j) {
           res = path;
-          args.flags = [1]; //TODO: EvaluatorUtil.setFlag(args, index, EvaluatorUtil.FLAG_PATH)
+          args.flags = [EvaluatorUtil.ARG_FLAG_PATH]; //TODO: EvaluatorUtil.setFlag(args, index, EvaluatorUtil.FLAG_PATH)
         } else {
-          res = LiteralUtil.parse(path);
+          res = LiteralUtil.parse(path); // TODO:
 
           if (res === undefined) {
             res = RES.search(path, resources);
@@ -4833,7 +4802,7 @@
               args.flags = [2]; //TODO: EvaluatorUtil.setFlag(args, index, EvaluatorUtil.FLAG_EVAL)
               evaluator = makeNotEvaluator(args);
             }
-          } else { // ${ (1, 2, $.title) } will return $.title
+          } else { // @{ (1, 2, $.title) } will return $.title
             evaluator = i ? makeNotEvaluator(args) : makeGetEvaluator(args);
           }
         }
@@ -4909,7 +4878,7 @@
       scopeEvent = tail.trim();
 
       if (!scopeEvent) {
-        scopeEvent = 'refreshed';// TODO: updated, not here
+        scopeEvent = EVENT_ANYWAY;// TODO: updated, not here
       }
     } else {
       expr = expr.slice(2, expr.length-1);
@@ -4960,7 +4929,7 @@
   Exact.BindingParser = {
     BINDING_BRACKETS: BINDING_BRACKETS,
     BINDING_SYMBOLS: BINDING_SYMBOLS,
-    //THIS_SYMBOL: '$',
+    EVENT_ANYWAY: EVENT_ANYWAY,
     parse: parse,
     like: like
   }
@@ -5032,19 +5001,14 @@
         piece = expr.slice(indices[i], indices[i+1]);
 
         if (i % 2) {
-          expression = BindingParser.parse(piece, resources);
-
-          pieces[i] = expression;
-
-          //if (expression.template.mode > 0) {
-          //  pieces.mode = 1;
-          //}
+          pieces[i] = BindingParser.parse(piece, resources);
         } else {
           pieces[i] = piece;
         }
       }
 
-      pieces.mode = 1;
+      //pieces.mode = 1;
+      pieces.scopeEvent = BindingParser.EVENT_ANYWAY;
 
       return ExpressionUtil.makeExpression(TextTemplate, pieces);
     }
@@ -5131,27 +5095,26 @@
   var TextParser = Exact.TextParser;
   var BindingParser = Exact.BindingParser;
   var HandlerParser = Exact.HandlerParser;
-  
   //var ExpressionParser = Exact.ExpressionParser;
-  
 
   var ObjectUtil_defineProp = ObjectUtil.defineProp;
 
+  var PROP_POSTFIX_CODE = '?'.charCodeAt(0);
+
   var BLANK_REGEXP = /[\n\r\t]/g;
 
-  var SPECIAL_KEYS  = { //TODO: x-as="title" => set('title', value), x-ask="insert[1]" => insert(value, 1), x:type, x:style
+  var COMMON_TYPES = {
+    'number': 'number', 'boolean': 'boolean', 'string': 'string', 'json':'json', 'contents': 'contents'
+  };
+
+  var SPECIAL_KEYS  = { //TODO: x-call="insert(1)" => insert(value, 1)
     'x-as': 'as',
     'x-id': 'uid',
     //'x-on': 'actions', //TODO: remove
     'x-type': 'type',
-    //'x-stay': 'stay',
     'x-attrs': 'attrs',
     'x-style': 'style',
     'x-class': 'classes'
-  };
-
-  var COMMON_TYPES = { //TODO: Exact.Constants
-    'number': 'number', 'boolean': 'boolean', 'string': 'string', 'json':'json', 'contents': 'contents'//, contents
   };
 
   function getProps(node) {
@@ -5176,8 +5139,6 @@
       }
     }
 
-    //specials.stay = 'stay' in specials;
-
     return specials;
   }
 
@@ -5185,7 +5146,7 @@
     var i, n , contents = [], $contents = Skin.getChildrenCopy($child);
 
     for (i = 0, n = $contents.length; i < n; ++i) {
-      contents.push(compile($contents[i], resources));
+      contents.push(parse($contents[i], resources));
     }
 
     return contents;
@@ -5195,33 +5156,30 @@
     var specials = getSpecials($template);
 
     if (specials.attrs) {
-      ObjectUtil_defineProp(node, 'attrs', {value: DataParser.parse(specials.attrs, resources, '')}); //TODO: x-style="color: red; width: ${width | px}; height: ${height | %}"
+      ObjectUtil_defineProp(node, 'attrs', {value: DataParser.parse(specials.attrs, resources, '')});
     }
 
     if (specials.style) {
-      ObjectUtil_defineProp(node, 'style', {value: DataParser.parse(specials.style, resources, '')}); //TODO: x-style="color: red; width: ${width | px}; height: ${height | %}"
+      ObjectUtil_defineProp(node, 'style', {value: DataParser.parse(specials.style, resources, '')});
     }
 
     if (specials.classes) {
-      //TODO: Skin.getProp('className') ...
-      ObjectUtil_defineProp(node, 'classes', {value: DataParser.parse(specials.classes, resources, 'boolean')}); //TODO: x-class="ok: true; active: ${active}"
+      ObjectUtil_defineProp(node, 'classes', {value: DataParser.parse(specials.classes, resources, 'boolean')});
     }
 
-    //node.stay = specials.stay;
     if (specials.as) {
-      node.as = specials.as;//Skin.toCamelCase(specials.as);
+      node.as = specials.as;
     }
 
     if (specials.uid) {
-      node.uid = specials.uid;//Skin.toCamelCase(specials.id);
+      node.uid = specials.uid;
 
       node.attrs = node.attrs || {};
       node.attrs['x-id'] = specials.uid;
     }
 
-
     if (specials.type) {
-      var type = specials.type;//.slice(2,specials.type.length-1);
+      var type = specials.type;
 
       if (!(type in COMMON_TYPES)) {
         type = RES.search(type, resources);
@@ -5251,7 +5209,8 @@
   function parsePropFromAttr(node, key, expr, type, resources) {
     var n = key.length- 1, props = getProps(node), literal, expression;
 
-    if (key[n] === '?') { //TODO: charCodeAt
+    //if (key[n] === '?') { //TODO: charCodeAt
+    if (key.charCodeAt(n) === PROP_POSTFIX_CODE) { //TODO: charCodeAt
       key = key.slice(0, n);
       var like = true;
     }
@@ -5271,7 +5230,7 @@
 
       expressions[key] = expression;
     } else {
-      literal = literal || LiteralUtil.parse(expr, type);
+      literal = literal || (node.type ? LiteralUtil.parse(expr, type) : undefined);
       props[key] = (literal !== undefined) ? literal : expr;
     }
 
@@ -5279,10 +5238,7 @@
 
   function parseSelf(node, $template, resources) {
     node.ns = Skin.getNameSpace($template);
-
     node.tag = Skin.getProp($template, 'tagName').toLowerCase(); //TODO: toLowerCase
-
-    //node.props = {};
 
     parseSpecials(node, $template, resources);
 
@@ -5296,7 +5252,7 @@
           parsePropFromAttr(node, Skin.toCamelCase(key), attrs[key], '', resources);
         } else {
           parseEventFromAttr(node, Skin.toCamelCase(key.slice(0, key.length-1)), attrs[key]);
-        }
+        } // TODO: parseDirectiveFromAttr
       }
     }
   }
@@ -5312,13 +5268,9 @@
       if (Skin.isComment($child)) { continue; }
 
       if (Skin.isText($child)) { // TODO: normalize text nodes
-        //var data = Skin.getProp($child, 'data');
-        //if (!/^\s+$/.test(data)) {
-          text += Skin.getProp($child, 'data');
-        //}
+        text += Skin.getProp($child, 'data');
         continue;
       } else if (text) {
-        //text = text.replace(/[\n\r\t]/g, '').replace(/[ ]{2,}/g, ' ');//TODO://
         text = text.replace(BLANK_REGEXP, '').trim();
 
         if (BindingParser.like(text)) {
@@ -5327,8 +5279,8 @@
 
         children.push(expression || text);
 
-        text = '';
         expression = null;
+        text = '';
       }
 
       child = new HTMXTemplate();
@@ -5338,19 +5290,18 @@
       key = child.as;
       tag = child.tag;
       type = child.type;
-      //stay = child.stay;
 
       if (key) { //TODO:
-        //key = Skin.toCamelCase(key);
         if (tag !== 'value') { //TODO: <value x-as="price" x-type="number">123</value>
           props = getProps(node);
           props[key] = child;
-        } else if (type === 'contents') { //TODO: fistChild is not text
+        } /*else if (type === 'contents') { //TODO: fistChild is not text
           props = getProps(node);
           props[key] = getContents($child, resources);
-        } else if (!type || type in COMMON_TYPES) {
+        } */else if (!type || type in COMMON_TYPES) {
           text = Skin.getProp($child, 'textContent');
           parsePropFromAttr(node, key, text, type, resources);
+          text = '';
         }
       }
 
