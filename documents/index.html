@@ -109,10 +109,11 @@
     <h2>Overview</h2>
     <p>Exact是一个事件驱动的JavaScript框架，用于构建Web用户界面。它的核心模块提供了一个Shadow层，是与真实DOM层相对应的。
       每当Shadow层发生变化时，Exact都会以批量更新的模式将变化的内容渲染到DOM层。Exact的其他模块几乎都是为Shadow层的实现做铺垫。</p>
-    <a id="hello-world"></a>
+    <a id="setup"></a>
     <p>特别地，Shadow层的Component可视作一般Element的加强版。在Exact Element已有功能的基础之上，Component还支持模板、数据绑定、属性验证等高级功能，为快速构建可靠的Web用户界面提供了帮助。
     Component可以像Element一样监听DOM事件，又可派发属性更改的事件。</p>
     <h4>Setup</h4>
+    <a id="hello-world"></a>
     <p>在页面中添加这样的&lt;script&gt;即可引入Exact：</p>
     <div class="code-box scroll">
       <div class="CodeMirror cm-s-alice">
@@ -181,11 +182,8 @@
       </div>
     </div>
 
+    <!--<a id="class-diagram"></a>-->
 
-
-    <a id="class-diagram">
-
-    </a>
     <p>显然，使用声明式定义的模板更为简单直观。但是，模板主要用来初始化一个组件，它的结构是相对稳定的。
       如果一个组件的结构是易变的，则可以考虑在简单的初始化过后，过程式地调整组件的结构。</p>
 
