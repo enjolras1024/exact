@@ -4,7 +4,7 @@
 (function(global, module) {
   'use strict';
 
-  var Exact = { version: '0.0.3' };
+  var Exact = { version: '0.0.6' };
 
 //  if (module) {
 //    module.exports = Exact;
@@ -15,6 +15,23 @@
 //  }
 //
 //})(typeof global !== 'undefined' ? global : undefined, typeof module !== 'undefined' ? module : undefined);
+
+//######################################################################################################################
+// src/utils/PathUtil.js
+//######################################################################################################################
+(function() {
+
+  'use strict';
+
+  var PATH_DELIMITER = /\[|\]?\./;
+
+  Exact.PathUtil = {
+    split: function split(path) {
+      return path.split(PATH_DELIMITER);
+    }
+  };
+
+})();
 
 //######################################################################################################################
 // src/utils/ObjectUtil.js
@@ -193,45 +210,51 @@
 
   'use strict';
   //var ObjectUtil = Exact.ObjectUtil;
+  var PathUtil_split = Exact.PathUtil.split;
   var ObjectUtil_defineProp = Exact.ObjectUtil.defineProp;
-  var PATH_DEMILITER = /\[|\]?\./;
+  //var PATH_DEMILITER = /\[|\]?\./;
 
   /**
    * Find the resource in the scope
    *
-   * @param {string} path
+   * @param {Array} path
    * @param {Object} scope
    * @returns {*}
    */
   function find(path, scope) {
-    if (path.indexOf('.') > 0 || path.indexOf('[') > 0) {
-      path = path.split(PATH_DEMILITER);
+    //if (path.indexOf('.') > 0 || path.indexOf('[') > 0) {
+    //  path = path.split(PATH_DEMILITER);
 
-      var i = -1, n = path.length - 1;
+      var i = -1, n = path.length, value = scope;
 
       while (++i < n) {
-        scope = scope[path[i]];
-        if (scope === undefined) {
-          return;
+        value = value[path[i]];
+        if (value === undefined || value === null) {
+          return value;
         }
       }
 
-      path = path[i];
-    }
+      return value;
+      //path = path[i];
+    //}
 
-    return scope[path];
+    //return scope[path];
   }
 
   ObjectUtil_defineProp(Exact, 'RES', {value: {
     /**
      * Find the resource in local scope, then in global if necessary.
      *
-     * @param {string} path
+     * @param {Array|string} path
      * @param {Object} localScope
      * @param {boolean} notInGlobal
      * @returns {*}
      */
     search: function(path, localScope, notInGlobal) {
+      if (typeof path === 'string') {
+        path = PathUtil_split(path);//path.split(PATH_DEMILITER);
+      }
+
       if (localScope) {
         var res = find(path, localScope);
       }
@@ -336,20 +359,47 @@
     return helper;
   };
 
-  //Exact.setImmediate = function(func) {
-  //  setTimeout(func, 0);
-  //};
-
-  Exact.setImmediate = (function(setImmediate, requestAnimationFrame) {
+  Exact.setImmediate = (function(setImmediate, MutationObserver/*, requestAnimationFrame*/) {
     if (!setImmediate) {
-      setImmediate = requestAnimationFrame || function(func) {
+
+      if (MutationObserver) {
+        var cbs = [];
+        var flag = 0;
+        var text = document.createTextNode('');
+        var observer = new MutationObserver(function() {
+          var func;
+
+          while (func = cbs.pop()) {
+            func();
+          }
+
+          flag = flag ? 0 : 1;
+        });
+
+        observer.observe(text, {
+          characterData: true
+        });
+
+        setImmediate = function(func) {
+          if (func) {
+            cbs.unshift(func);
+            text.data = flag;
+          }
+        }
+      } else {
+        setImmediate = function(func) {
           setTimeout(func, 0);
         }
+      }
+
     }
 
     return setImmediate;
-  })(typeof setImmediate !== 'undefined' ? setImmediate : null,
-    typeof requestAnimationFrame !== 'undefined' ? requestAnimationFrame : null);
+  })(
+    typeof setImmediate !== 'undefined' ? setImmediate : null,
+    typeof MutationObserver !== 'undefined' ? MutationObserver : null,
+    typeof requestAnimationFrame !== 'undefined' ? requestAnimationFrame : null
+  );
 
   function defineProps(target, sources) {
     var i, n, source;
@@ -747,17 +797,23 @@
 
   var RES = Exact.RES;
   var emptyArray = [];
-  var THIS_SYMBOL = '$'; //TODO:
-  var EVENT_SYMBOL = 'event'; //TODO:
+  //var THIS_SYMBOL = '$'; //TODO:
+  //var EVENT_SYMBOL = 'event'; //TODO:
   
   var ARG_FLAG_LITE = 0;
   var ARG_FLAG_PATH = 1;
-  var ARG_FLAG_EVAL = 2;
+  var ARG_FLAG_EVAL = -1;
+
+  var ARGUMENT_FLAGS = {
+    INVARIABLE: 0, SCOPE_PATH: 1, LOCAL_PATH: 2, EVENT_PATH: 3, EVALUATOR: -1
+  };
 
   function Evaluator(exec, args, back) {
     this.exec = exec;
     this.back = back;
     this.args = args;
+    //this.flags = flags;
+    //this.params = params;
   }
 
   //function $get(val) { return val; }
@@ -776,100 +832,87 @@
     return new Evaluator($not, args);
   }
 
-  function makeExpressionEvaluator(expr, args, rest) {
-    args = args || [];
-    args.event = true;
+  //function makeExpressionEvaluator(expr/*, args*/) { // TODO: EvaluatorParser.parse
+  //  var args = ['$', 'item', 'event'];
+  //  args.flags = [1, 2, 3];
+  //
+  //  var body = 'return ' + expr + ';';
+  //
+  //  var exec = Function.apply(null, args.concat([body]));
+  //
+  //  return makeEvaluator(exec, args);
+  //}
 
-    var body = 'var ' + THIS_SYMBOL + ' = this; return ' + expr + ';';
+  function evaluateArgs(args, scope, local, event) {
+    var i,  n, arg, flag, flags = args.flags, results = args.slice(0);
 
-    var list = [EVENT_SYMBOL];
-    if (rest && rest.length) {
-      list.push.apply(list, rest);
-    }
-    list.push(body);
+    if (flags && flags.length) {
+      for (i = 0, n = flags.length; i < n; ++i) {
+        flag = flags[i];
 
-    var exec = Function.apply(null, list);
+        if (!flag) { continue;} // arg is invariable
 
-    return new Evaluator(exec, args);
-  }
+        arg = args[i];
 
-  function evaluateArgs(args, flags, scope) {
-    var i,  n, arg, flag;
+        if (flag > 0) { // arg is variable path
+          results[i] = (arg && arg.length) ? RES.search(arg, arguments[flag], true) : arguments[flag];
+          continue;
+        }
 
-    for (i = 0, n = flags.length; i < n; ++i) {
-      flag = flags[i];
-
-      if (!flag) { continue;} // arg is literal
-
-      arg = args[i];
-
-      if (flag === ARG_FLAG_PATH) {       // arg is path
-        args[i] = RES.search(arg, scope, true);
-        continue;
+        if (flag === ARG_FLAG_EVAL) {       // arg is evaluator
+          results[i] = applyEvaluator(arg, scope, local, event, 'exec');
+        }
       }
-
-      if (flag === ARG_FLAG_EVAL) {       // arg is evaluator
-        args[i] = applyEvaluator(arg, 'exec', scope);
-      }
-
     }
+
+    return results;
   }
 
   /**
    *
    * @param {Evaluator} evaluator
-   * @param {string} name - 'exec' or 'back'
-   * @param {object} scope
+   * @param {Object} scope
+   * @param {Object} local
    * @param {Event} event
+   * @param {string} name - 'exec' or 'back'
    * @param {*} value
    * @returns {*}
    */
-  function applyEvaluator(evaluator, name, scope, event, value) {
-    var $ = null, exec, args, flags, need,  hasFirstValue = arguments.length > 4;
+  function applyEvaluator(evaluator, scope, local, event, name, value) {
+    var ctx = null, exec, args;//, hasFirstValue = arguments.length > 5;
 
     exec = evaluator[name];
 
     if (!exec) {
-      $ = scope;
-      name = evaluator.name;
+      var path = evaluator.path;
+      var flag = evaluator.flag;
+      var n_1 = path.length - 1;
 
-      var i = name.lastIndexOf('.');
-
-      if (i > 0) {
-        $ = RES.search(name.slice(0, i), scope, true);
-        name = name.slice(i + 1);
+      if (!n_1) {
+        ctx = arguments[flag];
+      }  else {
+        ctx = RES.search(path.slice(0, n_1), arguments[flag], true);
       }
 
-      exec = $[name];
+      exec = ctx[path[n_1]];
     }
 
-    args = evaluator.args || emptyArray; //TODO: emptyArray
+    args = evaluateArgs(evaluator.args || emptyArray, scope, local, event);
 
-    flags = args.flags;
-    need = args.event;
-
-    args = args.slice(0); //copy
-
-    if (flags && flags.length) {
-      evaluateArgs(args, flags, scope);
-    }
-
-    if (hasFirstValue) {
+    if (arguments.length > 5) {
       args.unshift(value);
-    } else if (need) {
-      args.unshift(event);
-      $ = scope;
     }
 
-    return exec.apply($, args);
+    return exec.apply(ctx, args);
   }
 
   Exact.EvaluatorUtil = {
-    makeExpressionEvaluator: makeExpressionEvaluator,
+    //makeExpressionEvaluator: makeExpressionEvaluator,
     makeGetEvaluator: makeGetEvaluator,
     makeNotEvaluator: makeNotEvaluator,
     makeEvaluator: makeEvaluator,
     applyEvaluator: applyEvaluator,
+    ARGUMENT_FLAGS: ARGUMENT_FLAGS,
     ARG_FLAG_LITE: ARG_FLAG_LITE,
     ARG_FLAG_PATH: ARG_FLAG_PATH,
     ARG_FLAG_EVAL: ARG_FLAG_EVAL
@@ -899,7 +942,7 @@
     applyExpression: function(expression, scope, target, property) {
       var type = expression.type, template = expression.template;
       if (type && type.compile) {
-        type.compile(template, property, target, scope);
+        type.compile(template, property, target, scope); // TODO: local
       }
     }
   };
@@ -976,15 +1019,6 @@
   var cssVendorPrefix = '';
 
   var doc = window.document;
-
-  // In IE 8, text node is not extensible
-  var textIsExtensible = true, text = doc.createTextNode(' ');
-  try {
-    text.hasOwnProperty('nodeValue');
-    text._toIndex = -1;
-  } catch (error) {
-    textIsExtensible = false;
-  }
   
   var
     preventDefault, _preventDefault,
@@ -1072,27 +1106,6 @@
         }
 
         return kebabCaseCache[key];
-      },
-      //
-      //textIsExtensible: function() {
-      //  return textIsExtensible;
-      //},
-
-      /**
-       * @required
-       */
-      canExtend: function canExtend($skin) {
-        if (textIsExtensible) {
-          return true;
-        } else {
-          var ok = true;
-          try {
-            $skin._toIndex = -1;
-          } catch (error) {
-            ok = false;
-          }
-          return ok;
-        }
       },
 
       /**
@@ -1579,39 +1592,71 @@
       renderChildren: function renderChildren($skin, $children) {
         var i, n, m, $child, $existed, $removed;
 
-        m = Skin.getChildrenNum($skin);
         n = $children.length;
 
-        for (i = 0; i < n; ++i) {
-          if (Skin.canExtend($children[i])) {
-            $children[i]._toIndex = i; //
+        if (n) {
+          for (i = 0; i < n; ++i) {
+            $existed = Skin.getChildAt($skin, i);
+            $child = $children[i];
+
+            if (!$existed) {
+              Skin.appendChild($skin, $child);
+            } else if ($child !== $existed) {
+              Skin.insertChild($skin, $child, $existed);
+            }
           }
         }
 
-        $removed = [];
-        for (i = m - 1; i >= 0; --i) {
-          $child = Skin.getChildAt($skin, i);
-          if (Skin.canExtend($skin) && ('_toIndex' in $child)) {
-            //delete $child._toIndex;
-          } else if ($child) {
+        m = Skin.getChildrenNum($skin);
+
+        if (n < m) {
+          $removed = [];
+          for (i = m - 1; i >= n; --i) {
+            $existed = Skin.getChildAt($skin, i);
+            Skin.removeChild($skin, $existed);
+            $removed.push($existed);
+          }
+        }
+
+        return $removed;
+      },
+
+      renderChildren2: function renderChildren($skin, $children) {
+        var i, j = 0, n, m, $child, $removed;
+
+        n = $children.length;
+
+        if (n) {
+          var $frag = Skin.createFragment();
+
+          j = n;
+
+          for (i = 0; i < n; ++i) {
+            $child = $children[i];
+
+            if (j === n && $child !== Skin.getChildAt($skin, i)) {
+              j = i;
+            }
+
+            if (i >= j) {
+              $frag.appendChild($child);
+            }
+          }
+        }
+
+        m = Skin.getChildrenNum($skin);
+
+        if (m > j) {
+          $removed = [];
+          for (i = m - 1; i >= j; --i) {
+            $child = Skin.getChildAt($skin, i);
             Skin.removeChild($skin, $child);
             $removed.push($child);
           }
         }
 
-        for (i = 0; i < n; ++i) { //TODO: fragment
-          $child = $children[i];
-          $existed = Skin.getChildAt($skin, i);
-
-          if ($existed) {
-            if ($child !== $existed) {
-              Skin.insertChild($skin, $child, $existed);
-            }
-          } else {
-            Skin.appendChild($skin, $child);
-          }
-
-          delete $child._toIndex;
+        if ($frag) {
+          Skin.appendChild($skin, $frag);
         }
 
         return $removed;
@@ -2074,7 +2119,7 @@
 
     waiting = false;
     running = false;
-    queue.splice(0);
+    queue.splice(0); //queue.length = 0;
     pool.splice(0); //pool.length = 0;
     cursor = 0;
     //pool.push.apply(pool, pool);
@@ -2909,6 +2954,7 @@
   var Collection = Exact.Collection;
 
   var Updater = Exact.Updater;
+  var Watcher = Exact.Watcher;
   var Accessor = Exact.Accessor;
   var DirtyMarker = Exact.DirtyMarker;
 
@@ -3042,7 +3088,7 @@
       child = children[i];
       $skin = child.$skin;
 
-      if (/*(child instanceof Shadow) && */!child.excluded && $skin) {
+      if ((child instanceof Shadow) && /*!child.excluded &&*/ $skin) {
         $children.push($skin);
       }
     }
@@ -3062,7 +3108,7 @@
   Exact.defineClass({
     constructor: Shadow,
 
-    mixins: [Accessor.prototype, DirtyMarker.prototype],
+    mixins: [Watcher.prototype, Accessor.prototype, DirtyMarker.prototype],
 
     /**
      * Make this shadow invalid and register it to the batchUpdater.
@@ -3087,16 +3133,15 @@
 
       if (this.refresh) {
         this.refresh();
-      } //TODO: shouldRefresh()�� last chance to update shadow and its children
+      } //TODO: last chance to update shadow and its children
+
+      this.send('updated');
 
       Updater.append(this);
       //Shadow.render(this);
       //Shadow.clean(this);
 
-      //if (this.send) {
-      //  //shadow.send('refresh');//TODO: beforeRefresh, refreshing
-      //  this.send('refreshed');//TODO: beforeRefresh, refreshing
-      //}
+
     },
 
     render: function render() {
@@ -3113,12 +3158,12 @@
       if (props && props._dirty) {
         dirty = props._dirty;
         //Shadow.clean(props);
-        if ('excluded' in dirty) {
-          var parent = Shadow.getParent(this);
-          parent.children.invalidated = true;
-          parent.invalidate();
-          delete dirty.excluded;
-        } // TODO: support more directives
+        //if ('excluded' in dirty) {
+        //  var parent = Shadow.getParent(this);
+        //  parent.children.invalidated = true;
+        //  parent.invalidate();
+        //  delete dirty.excluded;
+        //} // TODO: support more directives
 
         Skin.renderProps($skin, props, dirty, this._secrets.final);
       }
@@ -3163,6 +3208,8 @@
           }
           // TODO: It is a little hard for IE 8
         }
+
+        this.send('rendered');//TODO: beforeRefresh, refreshing
       }
     },
 
@@ -3199,7 +3246,7 @@
 
           shadow.invalidate(key, this[key], old);//TODO:
         }
- 
+
         return changed;
       },
 
@@ -3225,7 +3272,7 @@
           defineMembersOf(shadow);
         }
 
-        Accessor.initialize(shadow, props);
+        Accessor.initialize(shadow, props); //TODO: not here
       },
 
       /**
@@ -3238,9 +3285,9 @@
       initSkin: function initSkin(shadow, tag, ns) {
         ObjectUtil_defineProp(shadow, '$skin', {value: tag/* !== 'TEXT'*/ ? Skin.createElement(tag, ns) : Skin.createText('')}); //TODO: $shin._secrets = {$skin: ...}
 //        shadow.$skin._shadow = shadow; //TODO: strict
-        if (Skin.canExtend(shadow.$skin)) {
+//        if (Skin.canExtend(shadow.$skin)) {
           ObjectUtil_defineProp(shadow.$skin, '_shadow', {value: shadow});
-        }
+        //}
       },
 
       clean: function clean(shadow) {
@@ -3603,13 +3650,13 @@
      */
     ready: function ready() {},
 
-    update: function update() { //TODO: enumerable = false
-      base.update.call(this);
-
-      if (this.isInvalidated) {
-        this.send('refreshed');//TODO: beforeRefresh, refreshing
-      }
-    },
+    //update: function update() { //TODO: enumerable = false
+    //  base.update.call(this);
+    //
+    //  if (this.isInvalidated) {
+    //    this.send('refreshed');//TODO: beforeRefresh, refreshing
+    //  }
+    //},
 
     /**
      * @abstract
@@ -3789,26 +3836,31 @@
   'use strict';
 
   var RES = Exact.RES;
+  var PathUtil = Exact.PathUtil;
   var EvaluatorUtil = Exact.EvaluatorUtil;
-  var applyEvaluator = EvaluatorUtil.applyEvaluator;
+  var EvaluatorUtil_applyEvaluator = EvaluatorUtil.applyEvaluator;
+  //var ObjectUtil_assign = Exact.ObjectUtil.assign;
   var ObjectUtil_defineProp = Exact.ObjectUtil.defineProp;
 
-  function Binding(scope, target, options) {
-    this.scope = scope;
-    this.target = target;
+  var MODES = { ONE_TIME: 0, ONE_WAY: 1, TWO_WAY: 2 };
 
-    this.mode = options.mode;
+  function Binding(props) {
+    this.mode = props.mode;
+    this.scope = props.scope;
+    this.local = props.local;
+    this.target = props.target;
     //this.life = options.life;
+    this.source = props.source;
+    
+    this.evaluator = props.evaluator;
+    this.converters = props.converters;
 
-    this.source = options.source;
-    this.evaluator = options.evaluator;
-    //this.assign = options.assign || assign;
-    this.targetProp = options.targetProp;
-    this.sourceProp = options.sourceProp;
-    this.scopePaths = options.scopePaths;
-    this.scopeEvent = options.scopeEvent;
-    //this.targetEvent = options.targetEvent;
-    this.converters = options.converters;
+    this.targetProp = props.targetProp;
+    this.sourceProp = props.sourceProp;
+
+    this.scopeEvent = props.scopeEvent;
+    this.scopePaths = props.scopePaths;
+    this.localPaths = props.localPaths;
 
     this.exec = this.exec.bind(this);
   }
@@ -3818,61 +3870,110 @@
 
     statics: {
 
-      build: function(target, prop, scope, options) {
+      MODES: MODES,
+
+      build: function(targetProp, target, scope, local, options) {
         var mode = options.mode,
-          scopePaths = options.scopePaths, scopeEvent = options.scopeEvent,
-          converters = options.converters, evaluator = options.evaluator;
+          localPaths = options.localPaths, //variables = options.variables,
+          scopePaths = options.scopePaths,
+          scopeEvent = options.scopeEvent,
+          converters = options.converters,
+          evaluator = options.evaluator;
         // TODO:unique scopePaths
-        if (mode === 2) {
-          var i, source, sourceProp, path = scopePaths[0];
+        if (mode === MODES.TWO_WAY) {
+          var i, source, sourceProp, path;
 
-          i = path.lastIndexOf('.');
-
-          if (i < 0) {
-            source = scope;
-            sourceProp = path;
-          } else {
+          if (!options.origin) {
+            path = scopePaths[0];
+            i = path.length - 1;
+            sourceProp = path[i];
             source = RES.search(path.slice(0, i), scope, true);
-            sourceProp = path.slice(i+1);
+          } else {
+            path = localPaths[0];
+            i = path.length - 1;
+            sourceProp = path[i];
+            source = RES.search(path.slice(0, i), local, true);
           }
         }
 
-        var binding = new Binding(scope, target, {
+        var binding = new Binding({
           mode: mode,
           //life: life,
+          scope: scope,
+          local: local,
+          target: target,
           source: source,
-          evaluator: evaluator,
 
-          targetProp: prop,
+          evaluator: evaluator,
+          converters: converters,
+          
+          targetProp: targetProp,
           sourceProp: sourceProp,
-          scopePaths: scopeEvent ? null : scopePaths,
+          
           scopeEvent: scopeEvent,
-          converters: converters
-          //targetEvent: targetEvent
+          scopePaths: scopeEvent ? null : scopePaths,
+          localPaths: scopeEvent ? null : localPaths
         });
 
         binding.exec({dispatcher: source});
+        //console.log(targetProp, target, options);
+        //
+        var flag;
 
-        if (mode < 1) {
-          eye('once', scopePaths, binding.scope, binding.target, binding);
-        } else {
-          eye('on', scopePaths, binding.scope, binding.target, binding);
+        if (mode === MODES.ONE_TIME) {
+          eye('once', scopePaths, scope, binding.exec);
+          eye('once', localPaths, local, binding.exec);
+        } else if (!scopeEvent) {
+          flag = eye('on', scopePaths, scope, binding.exec) | eye('on', localPaths, local, binding.exec);
+        } else if (scope.on) {
+          scope.on(scopeEvent, binding.exec);
+          flag = 1;
         }
 
-        if (mode === 2) {
-          eye('on', [prop], target, source, binding);
+        if (flag) {
+          record(target, binding);
+        }
+
+        if (mode === MODES.TWO_WAY) {
+          //eye('on', [prop], target, source, binding);
+          flag = eye('on', [[targetProp]], target, binding.exec);
+          if (flag) {
+            record(source, binding);
+          }
         }
 
         return binding;
       },
 
       clean: function(binding) {
-        if (binding.mode <= 0) { return; }
+        var flag,
+          mode = binding.mode,
+          scope = binding.scope,
+          local = binding.local,
+          source = binding.source, 
+          target = binding.target,
+          localPaths = binding.localPaths, 
+          scopePaths = binding.scopePaths, 
+          targetProp = binding.targetProp;
 
-        eye('off', binding.scopePaths, binding.scope, binding.target, binding);
+        if (mode === MODES.ONE_TIME) { return; }
 
-        if (binding.mode === 2)  {
-          eye('off', [binding.targetProp], binding.target, binding.source, binding);
+        if (!binding.scopeEvent) {
+          flag = eye('off', scopePaths, scope, binding.exec) | eye('off', localPaths, local, binding.exec);
+        } else if (scope.off) {
+          scope.off(binding.scopeEvent, binding.exec);
+          flag = 1;
+        }
+        
+        if (flag) {
+          remove(target, binding);
+        }
+        
+        if (binding.mode === MODES.TWO_WAY)  {
+          flag = eye('off', [[targetProp]], target, binding.exec);
+          if (flag) {
+            remove(source, binding);
+          }
         }
       }
     },
@@ -3880,50 +3981,49 @@
     exec: function(event) {
       var value,
         scope = this.scope,
-        //assign = this.assign,
+        local = this.local,
         evaluator = this.evaluator,
         converters = this.converters,
+
         source = this.source, target = this.target,
         sourceProp = this.sourceProp, targetProp = this.targetProp;
 
-      if (this.mode !== 2) {
-        value = applyEvaluator(evaluator, 'exec', scope, event);
+      if (this.mode !== MODES.TWO_WAY) {
+        value = EvaluatorUtil_applyEvaluator(evaluator, scope, local, event, 'exec');
         if (converters) {
-          value = applyConverters(converters, 'exec', scope, event, value);
+          value = applyConverters(converters, scope, local, event, 'exec', value);
         }
         assign(target, targetProp, value);
       } else if (event.dispatcher !== target) {
         value = source[sourceProp];
         if (converters) {
-          value = applyConverters(converters, 'exec', scope, event, value);
+          value = applyConverters(converters, scope, local, event, 'exec', value);
         }
         assign(target, targetProp, value);
       } else {
         value = target[targetProp];
         if (converters) {
-          value = applyConverters(converters, 'back', scope, event, value);
+          value = applyConverters(converters, scope, local, event, 'back', value);
         }
         assign(source, sourceProp, value);
       }
 
-      if (this.mode === 0) {
+      if (this.mode === MODES.ONE_TIME) {
         Binding.clean(this);
       }
     }
   });
 
-  function applyConverters(converters, name, scope, event, value) {
+  function applyConverters(converters, scope, local, event, name, value) {
     var i, begin, end, step, evaluator;//, exec, rest, args;
 
     if (!converters.length) { return value; }
 
     if (name === 'exec') {
-      //name = 'exec';
       begin = 0;
       step = +1;
       end = converters.length;
-    } else {
-      //name = 'back';
+    } else { // name = 'back';
       begin = converters.length - 1;
       step = -1;
       end = -1;
@@ -3931,7 +4031,7 @@
 
     for (i = begin; i !== end; i += step) {
       evaluator = converters[i];
-      value = applyEvaluator(evaluator, name, scope, event, value);
+      value = EvaluatorUtil_applyEvaluator(evaluator, scope, local, event, name, value);
     }
 
     return value;
@@ -3945,65 +4045,51 @@
     }
   }
 
-  function dep(i, prop, paths, scope) {
-    var descriptors = scope.constructor._descriptors_;
-    var desc = descriptors[prop];
+  function dep(i, prop, paths, source) {
+    var descriptors = source.constructor._descriptors_;
+    var desc = descriptors && descriptors[prop];
 
     if (desc && desc.depends) {
-      paths.push.apply(paths, desc.depends);
+      var j, n, path, depends = desc.depends;
+
+      for (j = 0, n = depends.length; j < n; ++j) {
+        path = PathUtil.split(depends[j]); //TODO:
+        paths.push(path);
+      }
+
       paths[i] = null;
+
       return true;
     }
   }
 
-  function eye(method, paths, scope, target, binding) {
-    var flag, event = binding.scopeEvent;
+  function eye(method, paths, origin, handler) {
+    if (!origin || !paths || !paths.length) { return 0; }
 
-    if (event && scope === binding.scope) {
-      if (scope[method]) {
-        scope[method](event, binding.exec);
-        flag = true;
+    var i, j, path, prop, flag = 0, source;
+
+    for (i = 0; i < paths.length; ++i) {
+      path = paths[i];
+
+      if (!path) {
+        continue;
       }
-    } else if (paths && paths.length > 0) {
-      var i, j, path, prop, source, cache = {};
 
-      for (i = 0; i < paths.length; ++i) {
-        path = paths[i];
+      j = path.length - 1;
+      prop = path[j];
+      source = j < 1 ? origin : RES.search(path.slice(0, j), origin, true);
 
-        if (!path || cache[path]) {
-          paths[i] = null;
-          continue;
-        }
+      if (method === 'on' && dep(i, prop, paths, source)) {
+        continue;
+      }
 
-        cache[path] = true;
-
-        j = path.lastIndexOf('.');
-
-        if (j < 0) {
-          prop = path;
-          source = scope;
-          if (method === 'on' && dep(i, prop, paths, scope)) {
-            continue;
-          }
-        } else {
-          prop = path.slice(j + 1);
-          source = RES.search(path.slice(0, j), scope, true);
-        }
-
-        if (source && source[method]) {
-          source[method]('changed.' + prop, binding.exec);// TODO: binding.invalidate
-          flag = true;
-        }
+      if (source && source[method]) {
+        source[method]('changed.' + prop, handler);// TODO: binding.invalidate
+        flag = 1;
       }
     }
 
-    if (flag) {
-      if (method === 'on') {
-        record(target, binding);
-      } else if (method === 'off') {
-        remove(target, binding);
-      }
-    }
+    return flag;
   }
 
   function record(target, binding) {
@@ -4038,14 +4124,16 @@
 
   function BindingTemplate() {
     this.mode = 0;
+    this.origin = null;
     this.evaluator = null; //this.expressions = null;
     this.converters = null;
+    this.localPaths = null;
     this.scopePaths = null;
     this.scopeEvent = null;
   }
 
-  BindingTemplate.compile = function(template, property, target, scope) {
-    Binding.build(target, property, scope, template);
+  BindingTemplate.compile = function(template, property, target, scope, local) {
+    Binding.build(property, target, scope, local, template);
   };
 
   Exact.BindingTemplate = BindingTemplate;
@@ -4053,25 +4141,29 @@
 })();
 
 //######################################################################################################################
-// src/core/bindings/EventBinding.js
+// src/core/templates/HandlerTemplate.js
 //######################################################################################################################
 (function() {
 
   'use strict';
 
+  var EvaluatorUtil = Exact.EvaluatorUtil;
+
   function HandlerTemplate() {
-    this.exec = null;
-    this.name = '';
+    this.evaluator = null;
+    this.handler = '';
   }
 
-  HandlerTemplate.compile = function(template, event, target, scope) {
-    var exec = template.exec, name = template.name;
+  HandlerTemplate.compile = function(template, type, target, scope, local) {
+    var handler = template.handler, evaluator = template.evaluator;
 
-    if (!exec) {
-      exec = scope[name];
+    if (handler) {
+      target.on(type, scope[handler]/*.bind(scope)*/);
+    } else {
+      target.on(type, function(event) {
+        EvaluatorUtil.applyEvaluator(evaluator, scope, local, event, 'exec');
+      });
     }
-
-    target.on(event, exec.bind(scope));
   };
 
   Exact.HandlerTemplate = HandlerTemplate;
@@ -4105,14 +4197,16 @@
   });
 
   function TextTemplate() {
-    this.push.apply(this, arguments);
+    this.pieces = null;
+    this.scopeEvent = '';
+    //this.push.apply(this, arguments);
   }
   
   Exact.defineClass({
-    constructor: TextTemplate, extend: Array,
+    constructor: TextTemplate, //extend: Array,
     statics: {
       compile: function(template, property, target, scope) {
-        var i, n, expression, fragment = new Fragment(), pieces = template;
+        var i, n, expression, fragment = new Fragment(), pieces = template.pieces;
         
         for (i = 0, n = pieces.length; i < n; i += 2) {
           fragment[i] = pieces[i];
@@ -4142,9 +4236,9 @@
 
         exec();
 
-        scope.on(pieces.scopeEvent, exec);
+        target.on(template.scopeEvent, exec);
 
-        fragment.onChange = scope.invalidate;
+        fragment.onChange = target.invalidate;
       }
     }
   });
@@ -4154,7 +4248,7 @@
 })();
 
 //######################################################################################################################
-// src/core/templates/StyleTemplate.js
+// src/core/templates/DataTemplate.js
 //######################################################################################################################
 (function() {
 
@@ -4164,10 +4258,10 @@
   var ObjectUtil_defineProp = Exact.ObjectUtil.defineProp;
 
   function DataTemplate(literals, expressions) {
-    ObjectUtil_assign(this, literals);
-    ObjectUtil_defineProp(this, 'expressions', {
-      value: expressions, writable: true, enumerable: false, configurable: true
-    });
+    //ObjectUtil_assign(this, literals);
+    //ObjectUtil_defineProp(this, 'expressions', {
+    //  value: expressions, writable: true, enumerable: false, configurable: true
+    //});
   }
 
   Exact.DataTemplate = DataTemplate;
@@ -4179,7 +4273,7 @@
 //######################################################################################################################
 (function() {
   'use strict';
-
+// TODO: �ϲ�������
   var Text = Exact.Text;
   var Shadow = Exact.Shadow;
   var Element = Exact.Element;
@@ -4203,8 +4297,8 @@
     this.style = null;    //Object like {literals: {color: 'red'}, expressions: {fontSize: {...}}}
     this.classes = null;  //Object like {literals: {highlight: true}, expressions: {active: {...}}}
     this.children = null; //Array like []
-    //this.actions = null;  // for refactor
-    //this.indices = null;  // for refactor
+    //this.actions = null;  // for update
+    //this.indices = null;  // for update
     //this.directives = null;
   }
 
@@ -4222,32 +4316,34 @@
     } else {
       template.type = type;
     }
-    
-    if (!Array.isArray(params)) {
-      template.uid = params.uid;
-      template.attrs = params.attrs;
-      template.style = params.style;
-      template.classes = params.classes;
-      template.actions = params.actions;
 
-      var flag, props = {};
+    if (params) {
+      if (!Array.isArray(params)) {
+        template.uid = params.uid;
+        template.attrs = params.attrs;
+        template.style = params.style;
+        template.classes = params.classes;
+        template.actions = params.actions;
 
-      for (var key in params) {
-        if (params.hasOwnProperty(key) && !specials[key]) {
-          props[key] = params[key];
-          flag = true;
+        var flag, props = {};
+
+        for (var key in params) {
+          if (params.hasOwnProperty(key) && !specials[key]) {
+            props[key] = params[key];
+            flag = true;
+          }
         }
-      }
 
-      if (flag) {
-        template.props = props;
+        if (flag) {
+          template.props = props;
+        }
+      } else {
+        children = params;
       }
-    } else {
-      children = params;
     }
 
-    template.children = children;
-    
+    template.children = children || [];
+
     return template;
   }
 
@@ -4272,7 +4368,6 @@
     var expressions = props.expressions;
 
     if (props) {
-      //target.set(props);
       target.save(props);
     }
 
@@ -4380,7 +4475,7 @@
       name = content.slot || '*';
       slot = slots[name];
       if (slot) {
-        collection = slots[name].collection;
+        collection = slot.collection;
         collection.push(content);
       }
     }
@@ -4393,7 +4488,33 @@
       }
     }
 
-    delete component._slots;
+    var list = [];
+
+    for (name in slots) {
+      if (!slots.hasOwnProperty(name)) {
+        continue;
+      }
+
+      slot = slots[name];
+      //slot.name = name;
+      if (list.length) {
+        for (i = list.length - 1; i >= 0; --i) {
+          if (slot.offset > list[i].offset) {
+            list.splice(i + 1, 0, slot);
+          }
+        }
+      } else {
+        list.push(slot);
+      }
+    }
+
+    for (i = list.length - 1; i >= 0; --i) {
+      slot = list[i];
+      children = slot.target.children;
+      children.splice.apply(children, [slot.offset, 1].concat(slot.collection));
+    }
+
+    //delete component._slots;
   }
 
   function initExpressions(component) {
@@ -4405,8 +4526,13 @@
       expressions = item.expressions;
 
       for (key in expressions) {
-        if (expressions.hasOwnProperty(key)) {
-          expression = expressions[key];
+        if (!expressions.hasOwnProperty(key)) {
+          continue;
+        }
+
+        expression = expressions[key];
+
+        if (expression) {
           ExpressionUtil.applyExpression(expression, component, target, key);
         }
       }
@@ -4421,7 +4547,7 @@
   }
 
   function compile(template, component) {
-    component._slots = {};
+    component._slots = [];
     component._todos = [];
 
     initSelfAndChildrenOrContents(component, component, template);
@@ -4434,16 +4560,16 @@
     component._template = template;
   }
 
-  function resetProps(target, props, prev) {
+  function resetProps(target, props, _props) {
     if (target.defaults) {
       var defaults = target.defaults();
     }
 
     var all = ObjectUtil.assign({}, defaults, props);
 
-    if (prev) {
-      for (var key in prev) {
-        if (prev.hasOwnProperty(key) && !all.hasOwnProperty(key)) {
+    if (_props) {
+      for (var key in _props) {
+        if (_props.hasOwnProperty(key) && !all.hasOwnProperty(key)) {
           all[key] = undefined;
         }
       }
@@ -4453,29 +4579,31 @@
     target.save(all);
   }
 
-  function resetAttrs(target, props, prev) {
-    if (!props && !prev) { return; }
+  function resetAttrs(target, props, _props) {
+    if (!props && !_props) { return; }
 
-    resetProps(target.attrs, props, prev);
+    resetProps(target.attrs, props, _props);
   }
 
-  function resetStyle(target, props, prev) {
-    if (!props && !prev) { return; }
+  function resetStyle(target, props, _props) {
+    if (!props && !_props) { return; }
 
-    resetProps(target.style, props, prev);
+    resetProps(target.style, props, _props);
   }
 
-  function resetClasses(target, props, prev) {
-    if (!props && !prev) { return; }
+  function resetClasses(target, props, _props) {
+    if (!props && !_props) { return; }
 
-    resetProps(target.classes, props, prev);
+    resetProps(target.classes, props, _props);
   }
 
-  function resetActions(target, actions) {
-    if (!actions) { return; }
+  function resetActions(target, actions, _actions) {
+    if (!actions && !_actions) { return; }
 
     if (actions.off) {
       target.off();
+    } else if (_actions) {
+      target.off(_actions);
     }
 
     delete actions.off;
@@ -4491,7 +4619,7 @@
     resetStyle(target, template.style, _template.style);
     resetClasses(target, template.classes, _template.classes);
 
-    resetActions(target, template.actions);
+    resetActions(target, template.actions, _template.actions);
   }
 
   function resetChildrenOrContents(scope, target, template) {
@@ -4499,20 +4627,21 @@
       existed, content, olIndices, newIndices,
       _template = target._template || emptyObject, 
       existeds = _template.children || emptyArray, 
-      contents = template.children;
+      contents = template.children /*|| emptyArray*/;
 
     var oldContents, newContents = [];
     if (!(target instanceof Component) || scope === target) {
       oldContents = target.children || emptyArray;
     } else {
       oldContents = target.contents || emptyArray;
+      existeds = emptyArray;
     }
 
     olIndices = _template.indices || emptyObject;
 
     //m = existeds.length;
     n = contents.length;
-
+//console.log(existeds, contents);
     for (i = 0; i < n; ++i) {
       existed = existeds[i];
       content = contents[i];
@@ -4571,6 +4700,12 @@
         scope[uid] = child;
       }
 
+      if (content.tag === 'slot' /*&& target !== scope*/) {
+        scope._slots[child.name || '*'] = {
+          target: target, offset: i, collection: []
+        };
+      }
+
       newContents.push(child);
     }
 
@@ -4578,6 +4713,8 @@
       target.children.reset(newContents);
     } else {
       target.set('contents', newContents);
+      console.log(target);
+      initSlots(target);
     }
     
     template.indices = newIndices;
@@ -4588,7 +4725,8 @@
     resetChildrenOrContents(scope, target, template);
   }
 
-  function refactor(target, template) {
+  function update(target, template) {
+    target._slots = {};
     //var _template = target._template; //TODO: _secrets
     resetSelfAndChildrenOrContents(target, target, template);
 
@@ -4597,11 +4735,189 @@
     return target;
   }
 
+  HTMXTemplate.update = update;
   HTMXTemplate.create = create;
   HTMXTemplate.compile = compile;
-  HTMXTemplate.refactor = refactor;
 
   Exact.HTMXTemplate = HTMXTemplate; //HTMXTemplate
+
+})();
+
+//######################################################################################################################
+// src/htmx/parsers/EvaluatorParser.js
+//######################################################################################################################
+(function() {
+  'use strict';
+  
+  var RES = Exact.RES;
+
+  var PathUtil = Exact.PathUtil;
+  var ObjectUtil = Exact.ObjectUtil;
+  var StringUtil = Exact.StringUtil;
+  var LiteralUtil = Exact.LiteralUtil;
+  var EvaluatorUtil = Exact.EvaluatorUtil;
+
+  var makeEvaluator = EvaluatorUtil.makeEvaluator;
+  var makeGetEvaluator = EvaluatorUtil.makeGetEvaluator;
+  var makeNotEvaluator = EvaluatorUtil.makeNotEvaluator;
+  var ARGUMENT_FLAGS = EvaluatorUtil.ARGUMENT_FLAGS;
+
+  var PATH_REGEXP = /^[\w\$]+((\[|\]?\.)[\w\$]+)*$/; //a[0].b.c, path
+  var PATH_FUNC_REGEXP = /^!?[\w\$]+((\[|\]?\.)[\w\$]+)*(\(.*\))?$/; //!$.a[0].b.c(), path or func
+
+  var PARAM_FLAGS = {
+    $: ARGUMENT_FLAGS.SCOPE_PATH, 
+    item: ARGUMENT_FLAGS.LOCAL_PATH, 
+    event: ARGUMENT_FLAGS.EVENT_PATH
+  };
+  
+  var PARAM_LIST = ['$', 'item', 'event'];
+
+  function parseArgs(args, resources) { //TODO: 1, $.b, red, exec(), $.f()
+    var arg, flag, flags, res;
+
+    flags = args.flags;
+
+    for (var i = 0, n = args.length; i < n; ++i) {
+      arg = args[i];
+      
+      res = undefined;
+      flag = ARGUMENT_FLAGS.INVARIABLE;
+
+      res = LiteralUtil.parse(arg);
+
+      if (res === undefined) {
+        if (PATH_REGEXP.test(arg)) { //TODO
+          var path = PathUtil.split(arg);
+          if (path[0] in PARAM_FLAGS) {
+            flag = PARAM_FLAGS[path[0]];
+            res = path.length > 1 ? path.slice(1) : null;
+          } else {
+            res = RES.search(path, resources);
+          }
+        } else {
+          flag = ARGUMENT_FLAGS.EVALUATOR;
+          res = parseEvaluator(arg, resources);
+        }
+      }
+
+      args[i] = res;
+
+      if (flag) {
+        if (!flags) {
+          flags = args.flags = [];
+        }
+
+        flags[i] = flag;
+      }
+    }
+
+    return args;
+  }
+
+  function parseEvaluator(expr, resources) {
+    var i, j, k, res, path, args, flags, evaluator;
+
+    if (PATH_FUNC_REGEXP.test(expr)) {
+      i = expr.indexOf('!');
+      j = expr.indexOf('(');
+
+      k = i < 0 ? 0 : 1;
+
+      if (j < 0) { // path, not function
+        args = [];
+        path = expr.slice(k);
+
+        res = LiteralUtil.parse(path); // true or false
+
+        if (res === undefined) {
+          path = PathUtil.split(path);
+          if (path[0] in PARAM_FLAGS) {
+            res = path.length > 1 ? path.slice(1) : null;
+            flags = [PARAM_FLAGS[path[0]]];
+          } else {
+            res = RES.search(path, resources);
+          }
+        }
+
+        args.push(res);
+        args.flags = flags;
+
+        evaluator = i !== 0 ? makeGetEvaluator(args) : makeNotEvaluator(args);
+      } else { // function, possible but maybe illegal
+        //} else if (StringUtil_isClosed(expr, l, expr.length, '()')) { // function, possible but maybe illegal
+        var range = StringUtil.range(expr, j, '', '()');
+
+        if (range && range[1] === expr.length) {
+          path = expr.slice(i < 0 ? 0 : 1, j);
+          args = StringUtil.split(expr.slice(j + 1, expr.length - 1), ',', '()');
+          args = args.length ? parseArgs(args, resources) : null;
+
+          if (path) {
+            path = PathUtil.split(path);
+            if (path.length > 1 && path[0] in PARAM_FLAGS) {
+              evaluator = {
+                path: path.slice(1),
+                flag: PARAM_FLAGS[path[0]],
+                args: args
+              }
+            } else {
+              res = RES.search(path, resources);
+
+              if (!res) {
+                throw new Error('can not find such resource `' + path + '`');
+              } else if (!res.exec) {
+                evaluator = makeEvaluator(res, args);
+              } else {
+                evaluator = makeEvaluator(res.exec, args, res.back);
+              }
+            }
+
+            if (i === 0) {
+              args = [evaluator];
+              args.flags = [ARGUMENT_FLAGS.EVALUATOR]; //TODO: EvaluatorUtil.setFlag(args, index, EvaluatorUtil.FLAG_EVAL)
+              evaluator = makeNotEvaluator(args);
+            }
+          } else { // @{ (1, 2, $.title) } will return $.title
+            evaluator = i !== 0 ? makeGetEvaluator(args) : makeNotEvaluator(args);
+          }
+        }
+
+      }
+    }
+
+    if (!evaluator) {
+      evaluator = makeExpressionEvaluator(expr);
+    }
+
+    return evaluator;
+  }
+
+  function makeExpressionEvaluator(expr) { // TODO: EvaluatorParser.parse
+    var args = [null, null, null];
+    args.flags = [
+      PARAM_FLAGS[PARAM_LIST[0]],
+      PARAM_FLAGS[PARAM_LIST[1]],
+      PARAM_FLAGS[PARAM_LIST[2]]
+    ];
+
+    var body = 'return ' + expr + ';';
+
+    var exec = Function.apply(null, PARAM_LIST.concat([body]));
+
+    return makeEvaluator(exec, args);
+  }
+
+
+  Exact.EvaluatorParser = {
+    PARAM_LIST: PARAM_LIST,
+    /**
+     * @param {string} expr
+     * @param {Object} resources
+     * @returns {Evaluator}
+     */
+    parse: parseEvaluator
+  };
 
 })();
 
@@ -4612,25 +4928,24 @@
 
   'use strict';
 
-  var EvaluatorUtil = Exact.EvaluatorUtil;
+  //var EvaluatorUtil = Exact.EvaluatorUtil;
   var ExpressionUtil = Exact.ExpressionUtil;
+
+  var EvaluatorParser = Exact.EvaluatorParser;
 
   var HandlerTemplate = Exact.HandlerTemplate;
 
+  var HANDLER_REGEXP = /^\$\.[\w\$]+$/;
 
   function parse(expr) {
     expr = expr.trim();
 
     var template = new HandlerTemplate();
 
-    //if (/^\$\.[\w\$]+(\.[\w\$]+)*$/.test(expr)) {
-    //if (/^\$\.[\w\$]+$/.test(expr)) {
-    //  template.name = expr.slice(2);
-    //}
-    if (/^[\w\$]+$/.test(expr)) {
-      template.name = expr;
-    } else {
-      template.exec = EvaluatorUtil.makeExpressionEvaluator(expr/*, []*/).exec;
+    if (HANDLER_REGEXP.test(expr)) {
+      template.handler = expr.slice(2); // TODO:
+    }  else {
+      template.evaluator = EvaluatorParser.parse(expr);
     }
 
     return ExpressionUtil.makeExpression(HandlerTemplate, template);
@@ -4648,290 +4963,152 @@
 (function() {
   'use strict';
 
-  var RES = Exact.RES;
-
+  var PathUtil = Exact.PathUtil;
   var StringUtil = Exact.StringUtil;
-  var LiteralUtil = Exact.LiteralUtil;
-  var EvaluatorUtil = Exact.EvaluatorUtil;
   var ExpressionUtil = Exact.ExpressionUtil;
-
   var BindingTemplate = Exact.BindingTemplate;
+  var EvaluatorParser = Exact.EvaluatorParser;
 
-  //var ExpressionParser = Exact.ExpressionParser;
 
-  var StringUtil_split = StringUtil.split;
-  var StringUtil_range = StringUtil.range;
-  var StringUtil_isClosed = StringUtil.isClosed;
+  var EVENT_ANYWAY = 'updated';
 
-  var makeEvaluator = EvaluatorUtil.makeEvaluator;
-  var makeGetEvaluator = EvaluatorUtil.makeGetEvaluator;
-  var makeNotEvaluator = EvaluatorUtil.makeNotEvaluator;
-  var makeExpressionEvaluator = EvaluatorUtil.makeExpressionEvaluator;
+  var BINDING_MODES = Exact.Binding.MODES;
 
-  var REGEXP_1 = /^[\w\$]+((\[|\]?\.)[\w\$]+)*$/; //a[0].b.c, path
-  var REGEXP_2 = /^!?[\w\$]+((\[|\]?\.)[\w\$]+)*(\(.*\))?$/; //!$.a[0].b.c(), path or func
-  var REGEXP_3 = /\$((\[|\]?\.)[\w\$]+)+(?!\()/g; //$.a[0].b.c(), path on scope
-  var REGEXP_4 = /^\$((\[|\]?\.)[\w\$]+)+$/; //
-
-  var EVENT_ANYWAY = 'refreshed';
-
-  var BINDING_SYMBOLS = {
-    ONE_TIME: '&', ONE_WAY: '@', TWO_WAY: '#'
+  var BINDING_OPERATORS = {
+    ONE_TIME: '&', ONE_WAY: '@', TWO_WAY: '#', HANDLER: '+', TEXT: '?'
   };
-
-  var BINDING_BRACKETS = '{}';
-  var SCOPE_EVENT_SYMBOL = '*';
-  var INLINE_RES_SYMBOL = '_';
-  //var THIS_SYMBOL = '$';
-
-  //var BINDING_LIKE_REGEXP = /([&@#]\{)/;
-  var BINDING_LIKE_REGEXP = new RegExp(
-    '['+ BINDING_SYMBOLS.ONE_TIME + BINDING_SYMBOLS.ONE_WAY + BINDING_SYMBOLS.TWO_WAY +']\\'
-    + BINDING_BRACKETS[0]// + '.+\\' + BINDING_BRACKETS[1]
+  //var BINDING_OPERATORS_REGEXP = /[\&\@\#\+\?]/;
+  var BINDING_OPERATORS_REGEXP = new RegExp(
+    '[\\' + BINDING_OPERATORS.ONE_TIME +
+      '\\' + BINDING_OPERATORS.ONE_WAY +
+      '\\' + BINDING_OPERATORS.TWO_WAY +
+      '\\' + BINDING_OPERATORS.HANDLER +
+      '\\' + BINDING_OPERATORS.TEXT + ']'
   );
 
-  var SCOPE_EVENT_REGEXP = /\*(\w(\.\w+)?)*[ ]*}$/;
+  var SCOPE_EVENT_SYMBOL = '*';
 
-  function parseArgs(args, resources) { //TODO: 1, $.b, red, exec(), $.f()
-    var arg, res, flag, flags, parsed;
+  var SCOPE_EVENT_REGEXP = /\*(\w(\.\w+)?)*[ ]*$/;
 
-    flags = args.flags;
+  var SCOPE_PATH_REGEXP = new RegExp(
+    '\\' + EvaluatorParser.PARAM_LIST[0] + '((\\[|\\]?\\.)[\\w\\$]+)+(?!\\()',
+    'g'
+  );
 
-    for (var i = 0, n = args.length; i < n; ++i) {
-      arg = args[i];
+  var LOCAL_PATH_REGEXP = new RegExp(
+    '\\' + EvaluatorParser.PARAM_LIST[1] + '((\\[|\\]?\\.)[\\w\\$]+)+(?!\\()',
+    'g'
+  );
 
-      flag = EvaluatorUtil.ARG_FLAG_LITE; //constant
-      parsed = undefined;
+  function collectPaths(expr, regexp, paths) {
+    var matches = expr.match(regexp);
 
-      parsed = LiteralUtil.parse(arg);
-
-      if (parsed === undefined) {
-        if (REGEXP_1.test(arg)) { //TODO
-          flag = EvaluatorUtil.ARG_FLAG_PATH; //path
-          parsed = arg.slice(2);
-        } else {
-          res = RES.search(arg, resources);
-
-          if (res) {
-            parsed = res;
-          } else {
-            flag = EvaluatorUtil.ARG_FLAG_EVAL; //evaluator
-            parsed = parseEvaluator(arg, resources);
-          }
-        }
-      }
-
-      args[i] = parsed;
-
-      if (flag) {
-        if (!flags) {
-          flags = args.flags = [];
-        }
-
-        flags[i] = flag;
+    if (matches) {
+      for (var i = 0, n = matches.length; i < n; ++i) {
+        paths.push(PathUtil.split(matches[i]).slice(1));
       }
     }
-
-    return args;
-  }
-
-  function parseEvaluator(expr, resources) {
-    var i, j, k, l, res, path, args, evaluator;
-
-    if (REGEXP_2.test(expr)) {
-      i = expr.indexOf('!');
-      j = expr.indexOf('$.');
-      l = expr.indexOf('(');
-
-      i = i === 0 ? 1 : 0;
-      j = j === i ? 1 : 0;
-
-      k = i + j * 2;
-
-      if (l < 0) { // path, not function
-        args = [];
-        path = expr.slice(k);
-
-        if (j) {
-          res = path;
-          args.flags = [EvaluatorUtil.ARG_FLAG_PATH]; //TODO: EvaluatorUtil.setFlag(args, index, EvaluatorUtil.FLAG_PATH)
-        } else {
-          res = LiteralUtil.parse(path); // TODO:
-
-          if (res === undefined) {
-            res = RES.search(path, resources);
-          }
-        }
-
-        args.push(res);
-
-        evaluator = i ? makeNotEvaluator(args) : makeGetEvaluator(args);
-      } else { // function, possible but maybe illegal
-      //} else if (StringUtil_isClosed(expr, l, expr.length, '()')) { // function, possible but maybe illegal
-        var range = StringUtil_range(expr, l, '', '()');
-
-        if (range && range[1] === expr.length) {
-          path = expr.slice(k, l);
-          args = StringUtil_split(expr.slice(l + 1, expr.length - 1), ',', '()');
-
-          if (args.length) {
-            args = parseArgs(args, resources);
-          } else {
-            args = null;
-          }
-
-          if (path) {
-            if (j) {
-              evaluator = {
-                name: path, args: args
-              }
-            } else {
-              res = RES.search(path, resources);
-
-              if (!res) {
-                throw new Error('no such resource');
-              } else if (!res.exec) {
-                evaluator = makeEvaluator(res, args);
-              } else {
-                evaluator = makeEvaluator(res.exec, args, res.back);
-              }
-            }
-
-            if (i) {
-              args = [evaluator];
-              args.flags = [2]; //TODO: EvaluatorUtil.setFlag(args, index, EvaluatorUtil.FLAG_EVAL)
-              evaluator = makeNotEvaluator(args);
-            }
-          } else { // @{ (1, 2, $.title) } will return $.title
-            evaluator = i ? makeNotEvaluator(args) : makeGetEvaluator(args);
-          }
-        }
-
-      }
-    }
-
-    if (!evaluator) {
-      // TODO: not efficient
-      // args = [];
-      // var rest = [];
-      //for (var key in resources) {
-      //  if (resources.hasOwnProperty(key) && expr.indexOf(key) >= 0) {
-      //    rest.push(key);
-      //    args.push(resources[key]);
-      //  }
-      //}
-
-      args = null;
-      res = resources[INLINE_RES_SYMBOL];
-      if (res && expr.indexOf(INLINE_RES_SYMBOL + '.') >= 0) {
-        args = [res];
-        var rest = [INLINE_RES_SYMBOL];
-      }
-
-      evaluator = makeExpressionEvaluator(expr, args, rest);
-    }
-
-    return evaluator;
-  }
-
-  function extractScopePaths(expr) {
-    var paths = expr.match(REGEXP_3);
-
-    if (paths) {
-      for (var i = 0, n= paths.length; i < n; ++i) {
-        paths[i] = paths[i].slice(2);
-      }
-    }
-
-    return paths;
   }
 
   /**
    *
    * @param {string} expr
+   * @param {string} operator
    * @param {Object} resources
    * @returns {*}
    */
-  function parse(expr, resources) {
-    var symbol = expr[0], mode = -1, tail, scopeEvent, i, j;
+  function parse(expr, operator, resources) { //TODO: parse(operator, expression, resources)
+    var mode = -1, tail = '', scopeEvent, i, j;
 
-    switch (symbol) {
-      case BINDING_SYMBOLS.ONE_TIME:
-        mode = 0;
+    switch (operator) {
+      case BINDING_OPERATORS.ONE_TIME:
+        mode = BINDING_MODES.ONE_TIME;
         break;
-      case BINDING_SYMBOLS.ONE_WAY:
-        mode = 1;
+      case BINDING_OPERATORS.ONE_WAY:
+        mode = BINDING_MODES.ONE_WAY;
         break;
-      case BINDING_SYMBOLS.TWO_WAY:
-        mode = 2;
+      case BINDING_OPERATORS.TWO_WAY:
+        mode = BINDING_MODES.TWO_WAY;
         break;
+      default :
+        return null;
     }
-
-    if (mode < 0 || !StringUtil_isClosed(expr, 1, expr.length, BINDING_BRACKETS)) { return null; }
 
     if (SCOPE_EVENT_REGEXP.test(expr)) {
       i = expr.lastIndexOf(SCOPE_EVENT_SYMBOL);
 
-      tail = expr.slice(i+1, expr.length-1);
-      expr = expr.slice(2, i);
+      tail = expr.slice(i + 1);
+      expr = expr.slice(0, i);
 
       scopeEvent = tail.trim();
 
       if (!scopeEvent) {
         scopeEvent = EVENT_ANYWAY;// TODO: updated, not here
       }
+    }
+
+    var piece, pieces = StringUtil.split(expr, '|', '()'),  converters, evaluator, n;
+
+    piece = pieces[0].trim();
+
+    if (!scopeEvent) {
+      var scopePaths = [];
+      var localPaths = [];
+      //TODO: collect paths from evaluator and converters
+      collectPaths(piece, SCOPE_PATH_REGEXP, scopePaths);
+      collectPaths(piece, LOCAL_PATH_REGEXP, localPaths);
+    }
+
+
+    if (mode < BINDING_MODES.TWO_WAY) {
+      evaluator = EvaluatorParser.parse(piece, resources);
     } else {
-      expr = expr.slice(2, expr.length-1);
-    }
-
-    if (/*mode > 0 && */!scopeEvent) {
-      var scopePaths = extractScopePaths(expr);// TODO: later
-    }
-
-    var piece, pieces = StringUtil_split(expr, '|', '()'),  converters, evaluator, n; //TODO
-
-    piece = pieces[0];
-    if (mode < 2) {
-      evaluator = parseEvaluator(piece, resources);
-    } else if (!REGEXP_4.test(piece)) {
-      throw new Error('Illegal two-way binding expression');
+      if (SCOPE_PATH_REGEXP.test(piece)) {
+        var origin = 0;
+      } else if (LOCAL_PATH_REGEXP.test(piece)) { //TODO:
+        origin = 1;
+      } else {
+        throw new Error('Illegal two-way binding expression `' + expr + '`');
+      }
     }
 
     if (pieces.length > 1) {
       converters = [];
 
       for (i = 1, n = pieces.length; i < n; ++i) {
-        piece = pieces[i];
-        //if (piece.indexOf('(') < 0) {
+        piece = pieces[i].trim();
+
         if (piece[piece.length - 1] !== ')') {
           piece += '()';
         }
 
-        converters.push(parseEvaluator(piece, resources));
+        if (!scopeEvent) {
+          collectPaths(expr, SCOPE_PATH_REGEXP, scopePaths);
+          collectPaths(expr, LOCAL_PATH_REGEXP, localPaths);
+        }
+
+        converters.push(EvaluatorParser.parse(piece, resources));
       }
     }
 
     var template = new BindingTemplate();
 
     template.mode = mode;
+    template.origin = origin;
     template.evaluator = evaluator;
     template.converters = converters;
-    template.scopePaths = scopePaths;
     template.scopeEvent = scopeEvent;
+    template.scopePaths = scopeEvent ? null : scopePaths;
+    template.localPaths = scopeEvent ? null : localPaths;
 
     return ExpressionUtil.makeExpression(BindingTemplate, template);
   }
 
-  function like(expr) {
-    return BINDING_LIKE_REGEXP.test(expr);
-  }
-
   Exact.BindingParser = {
-    BINDING_BRACKETS: BINDING_BRACKETS,
-    BINDING_SYMBOLS: BINDING_SYMBOLS,
+    BINDING_OPERATORS_REGEXP: BINDING_OPERATORS_REGEXP,
+    BINDING_OPERATORS: BINDING_OPERATORS,
     EVENT_ANYWAY: EVENT_ANYWAY,
-    parse: parse,
-    like: like
+    parse: parse
   }
 
 })();
@@ -4943,20 +5120,25 @@
   'use strict';
 
   var TextTemplate = Exact.TextTemplate;
-  //var ExpressionParser = Exact.ExpressionParser;
+
   var BindingParser = Exact.BindingParser;
   var ExpressionUtil = Exact.ExpressionUtil;
 
-  var BINDING_SYMBOLS = BindingParser.BINDING_SYMBOLS;
-  var BINDING_BRACKETS = BindingParser.BINDING_BRACKETS;
+  var BINDING_OPERATORS = BindingParser.BINDING_OPERATORS;
+  var BINDING_BRACKETS = '{}';//BindingParser.BINDING_BRACKETS;
 
   var StringUtil_range = Exact.StringUtil.range;
 
+  var BINDING_LIKE_REGEXP = new RegExp(
+    '['+ BINDING_OPERATORS.ONE_TIME + BINDING_OPERATORS.ONE_WAY + BINDING_OPERATORS.TWO_WAY +']\\'
+    + BINDING_BRACKETS[0]// + '.+\\' + BINDING_BRACKETS[1]
+  );
+
   Exact.TextParser = {
+    like: function like(expr) {
+      return BINDING_LIKE_REGEXP.test(expr);
+    },
     /**
-     * @example
-     *    <div title="`The title is &{$.title}`">`${$.a} + ${$.b} = ${$.a + $.b}`</div>
-     *
      * @param {string} expr
      * @param {Object} resources
      * @returns {*}
@@ -4964,8 +5146,8 @@
     parse: function(expr, resources) { //TODO:
       var i, j, indices = [0], pieces = [], piece, expression;
 
-      var range0 = StringUtil_range(expr, -1, BINDING_SYMBOLS.ONE_TIME, BINDING_BRACKETS);
-      var range1 = StringUtil_range(expr, -1, BINDING_SYMBOLS.ONE_WAY, BINDING_BRACKETS);
+      var range0 = StringUtil_range(expr, -1, BINDING_OPERATORS.ONE_TIME, BINDING_BRACKETS);
+      var range1 = StringUtil_range(expr, -1, BINDING_OPERATORS.ONE_WAY, BINDING_BRACKETS);
 
       if (!range0 && !range1) { return null; }
 
@@ -4974,21 +5156,21 @@
           if (range0 && range0[0] < range1[0]) {
             i = range0[0];
             j = range0[1];
-            range0 = StringUtil_range(expr, j, BINDING_SYMBOLS.ONE_TIME, BINDING_BRACKETS);
+            range0 = StringUtil_range(expr, j, BINDING_OPERATORS.ONE_TIME, BINDING_BRACKETS);
           } else {
             i = range1[0];
             j = range1[1];
-            range1 = StringUtil_range(expr, j, BINDING_SYMBOLS.ONE_WAY, BINDING_BRACKETS);
+            range1 = StringUtil_range(expr, j, BINDING_OPERATORS.ONE_WAY, BINDING_BRACKETS);
           }
         } else {
           if (range1 && range1[0] < range0[0]) {
             i = range1[0];
             j = range1[1];
-            range1 = StringUtil_range(expr, j, BINDING_SYMBOLS.ONE_WAY, BINDING_BRACKETS);
+            range1 = StringUtil_range(expr, j, BINDING_OPERATORS.ONE_WAY, BINDING_BRACKETS);
           } else {
             i = range0[0];
             j = range0[1];
-            range0 = StringUtil_range(expr, j, BINDING_SYMBOLS.ONE_TIME, BINDING_BRACKETS);
+            range0 = StringUtil_range(expr, j, BINDING_OPERATORS.ONE_TIME, BINDING_BRACKETS);
           }
         }
 
@@ -5001,16 +5183,17 @@
         piece = expr.slice(indices[i], indices[i+1]);
 
         if (i % 2) {
-          pieces[i] = BindingParser.parse(piece, resources);
+          pieces[i] = BindingParser.parse(piece.slice(2, piece.length - 1), piece[0], resources);
         } else {
           pieces[i] = piece;
         }
       }
 
-      //pieces.mode = 1;
-      pieces.scopeEvent = BindingParser.EVENT_ANYWAY;
+      var template = new TextTemplate();
+      template.scopeEvent = BindingParser.EVENT_ANYWAY; // TODO:
+      template.pieces = pieces;
 
-      return ExpressionUtil.makeExpression(TextTemplate, pieces);
+      return ExpressionUtil.makeExpression(TextTemplate, template);
     }
   };
 
@@ -5022,7 +5205,8 @@
 (function() {
   'use strict';
 
-  var StringUtil = Exact.StringUtil;
+  //var StringUtil = Exact.StringUtil;
+  var ObjectUtil = Exact.ObjectUtil;
   var LiteralUtil = Exact.LiteralUtil;
 
   var DataTemplate = Exact.DataTemplate;
@@ -5030,49 +5214,82 @@
   var BindingParser = Exact.BindingParser;
   var TextParser = Exact.TextParser;
 
-  var BINDING_BRACKETS = BindingParser.BINDING_BRACKETS;
+  var BINDING_OPERATORS_REGEXP = BindingParser.BINDING_OPERATORS_REGEXP;
+
+  //var Skin = Exact.Skin;
+
+  //var BINDING_BRACKETS = BindingParser.BINDING_BRACKETS;
+
+  function getExpressions(template) {
+    if (!template.expressions) {
+      ObjectUtil.defineProp(template, 'expressions', {value: {}});
+    }
+
+    return template.expressions;
+  }
+
+  function parseBindingFromExpr(template, key, operator, expr, resources) {
+    var expressions = getExpressions(template);
+    expressions[key] = BindingParser.parse(expr, operator, resources);
+  }
+
+  function parseTextFromExpr(template, key, expr, resources) {
+    var expressions = getExpressions(template);
+    expressions[key] = TextParser.parse(expr, resources);
+  }
+
+  function parsePropFromExpr(template, key, expr, type) {
+    if (type && expr) {
+      template[key] = LiteralUtil.parse(expr, type);
+    } else {
+      template[key] = expr;
+    }
+  }
 
   Exact.DataParser = {
     /**
      * @example
-     *    <div x-style="color: red; backgroundColor: &{$.bgColor | hex2rgb}; fontSize: `${$.fontSize}px`">
-     *      <div x-class="btn: true; active: ${$.a > $.b}"></div>
+     *    <div x-style="color: red; backgroundColor&: $.bgColor | hex2rgb; fontSize?: @{$.fontSize}px">
+     *      <div x-class="btn: true; active@: $.a > $.b"></div>
      *    </div>
      *
      * @param {string} expr
      * @param {Object} resources
      * @param {string} type
-     * @returns {StyleXTemplate}
+     * @returns {DataTemplate}
      */
     parse: function(expr, resources, type) {// + target type, target prop
-      var i, j, n, key, piece, literals, expressions, expression;
+      var i, j, n, key, piece, operator;
 
-      var pieces = StringUtil.split(expr, ';', BINDING_BRACKETS);
+      //var pieces = StringUtil.split(expr, ';', BINDING_BRACKETS);
+      var pieces = expr.split(/;/g);
+
+      var template = new DataTemplate();
 
       for (i = 0, n = pieces.length; i < n; ++i) {
         piece = pieces[i];
 
         j = piece.indexOf(':');
-        key = piece.slice(0, j).trim();
 
-        if (!key) {
-          throw new Error('key should not be empty');
-        }
+        if (j < 0 ) { continue; }
 
-        expr = piece.slice(j+1).trim();
+        operator = piece[j - 1];
+        expr = piece.slice(j + 1);
 
-        expression = BindingParser.parse(expr, resources) || TextParser.parse(expr, resources);
-
-        if (expression) {
-          expressions = expressions || {};
-          expressions[key] = expression;
+        if (BINDING_OPERATORS_REGEXP.test(operator)) { // TODO:
+          key = piece.slice(0, j - 1).trim();//Skin.toCamelCase(piece.slice(0, j - 1));
+          if (operator !== '?') {
+            parseBindingFromExpr(template, key, operator, expr, resources);
+          } else {
+            parseTextFromExpr(template, key, expr, resources);
+          }
         } else {
-          literals = literals || {};
-          literals[key] = type ? LiteralUtil.parse(expr, type) : expr;
+          key = piece.slice(0, j).trim();
+          parsePropFromExpr(template, key, expr, type);
         }
       }
 
-      return new DataTemplate(literals, expressions);
+      return template;
     }
   };
 
@@ -5099,8 +5316,9 @@
 
   var ObjectUtil_defineProp = ObjectUtil.defineProp;
 
-  var PROP_POSTFIX_CODE = '?'.charCodeAt(0);
+  //var PROP_POSTFIX_CODE = '?'.charCodeAt(0);
 
+  var BINDING_OPERATORS_REGEXP = BindingParser.BINDING_OPERATORS_REGEXP;
   var BLANK_REGEXP = /[\n\r\t]/g;
 
   var COMMON_TYPES = {
@@ -5123,6 +5341,16 @@
     }
 
     return node.props;
+  }
+
+  function getExpressions(node) {
+    var props = getProps(node);
+
+    if (!props.expressions) {
+      ObjectUtil_defineProp(props, 'expressions', {value: {}});
+    }
+    
+    return props.expressions;
   }
 
   function getSpecials($template) {
@@ -5185,7 +5413,7 @@
         type = RES.search(type, resources);
 
         if (!type) {
-          throw new TypeError('can not find such type');
+          throw new TypeError('can not find such type `' + specials.type + '`');
         }
       }
 
@@ -5195,45 +5423,30 @@
       node.attrs['x-type'] = specials.type;
     }
   }
-
-  function parseEventFromAttr(node, key, expr) {
-    var props = getProps(node);
-
-    if (!props.expressions) {
-      ObjectUtil_defineProp(props, 'expressions', {value: {}});
-    }
-
-    props.expressions[key] = HandlerParser.parse(expr);
+  
+  function parseBindingFromExpr(node, key, operator, expr, resources) {
+    var expressions = getExpressions(node);
+    expressions[key] = BindingParser.parse(expr, operator, resources);
   }
 
-  function parsePropFromAttr(node, key, expr, type, resources) {
-    var n = key.length- 1, props = getProps(node), literal, expression;
+  function parseHandlerFromExpr(node, key, expr, resources) {
+    var expressions = getExpressions(node);
+    expressions[key] = HandlerParser.parse(expr, resources);
+  }
+  
+  function parseTextFromExpr(node, key, expr, resources) {
+    var expressions = getExpressions(node);
+    expressions[key] = TextParser.parse(expr, resources);
+  }
 
-    //if (key[n] === '?') { //TODO: charCodeAt
-    if (key.charCodeAt(n) === PROP_POSTFIX_CODE) { //TODO: charCodeAt
-      key = key.slice(0, n);
-      var like = true;
+  function parsePropFromExpr(node, key, expr, type) {
+    var prop, props = getProps(node);
+
+    if (node.type && expr) {
+      prop = LiteralUtil.parse(expr, type);
     }
 
-    if (!expr) {
-      literal = true;
-    } else if (like || BindingParser.like(expr)) {
-      expression = BindingParser.parse(expr, resources) || TextParser.parse(expr, resources);
-    }
-
-    if (expression) {
-      if (!props.expressions) {
-        ObjectUtil_defineProp(props, 'expressions', {value: {}});
-      }
-
-      var expressions = props.expressions;
-
-      expressions[key] = expression;
-    } else {
-      literal = literal || (node.type ? LiteralUtil.parse(expr, type) : undefined);
-      props[key] = (literal !== undefined) ? literal : expr;
-    }
-
+    props[key] = type ? prop : (prop || expr);
   }
 
   function parseSelf(node, $template, resources) {
@@ -5244,15 +5457,29 @@
 
     if (!Skin.hasAttrs($template)) { return; }
 
-    var attrs = Skin.getAttrs($template);
+    var attrs = Skin.getAttrs($template), operator, expr, name, key, n;
 
-    for (var key in attrs) {
-      if (attrs.hasOwnProperty(key) && !SPECIAL_KEYS.hasOwnProperty(key)) {
-        if (key[key.length-1] !== '+') {
-          parsePropFromAttr(node, Skin.toCamelCase(key), attrs[key], '', resources);
+    for (name in attrs) {
+      if (attrs.hasOwnProperty(name) && !SPECIAL_KEYS.hasOwnProperty(name)) {
+ 
+        n = name.length - 1;
+        operator = name[n];
+        expr = attrs[name];
+        
+        //if (/[\+\?\&\@\#]/.test(operator)) { // TODO:
+        if (BINDING_OPERATORS_REGEXP.test(operator)) { // TODO:
+          key = Skin.toCamelCase(name.slice(0, n));
+          if (operator === '+') {
+            parseHandlerFromExpr(node, key, expr, resources);
+          } else if (operator !== '?') {
+            parseBindingFromExpr(node, key, operator, expr, resources);
+          } else {
+            parseTextFromExpr(node, key, expr, resources);
+          }
         } else {
-          parseEventFromAttr(node, Skin.toCamelCase(key.slice(0, key.length-1)), attrs[key]);
-        } // TODO: parseDirectiveFromAttr
+          parsePropFromExpr(node, Skin.toCamelCase(name), expr)
+        }
+        
       }
     }
   }
@@ -5273,7 +5500,7 @@
       } else if (text) {
         text = text.replace(BLANK_REGEXP, '').trim();
 
-        if (BindingParser.like(text)) {
+        if (TextParser.like(text)) {
           expression = TextParser.parse(text, resources);
         }
 
@@ -5291,7 +5518,7 @@
       tag = child.tag;
       type = child.type;
 
-      if (key) { //TODO:
+      if (node.type && key) { //TODO:
         if (tag !== 'value') { //TODO: <value x-as="price" x-type="number">123</value>
           props = getProps(node);
           props[key] = child;
@@ -5300,8 +5527,16 @@
           props[key] = getContents($child, resources);
         } */else if (!type || type in COMMON_TYPES) {
           text = Skin.getProp($child, 'textContent');
-          parsePropFromAttr(node, key, text, type, resources);
+          parsePropFromExpr(node, key, text, type);
           text = '';
+        } else {
+          /*if (operator === '+') {
+            parseHandlerFromExpr(node, key, expr, resources);
+          } else */if (type !== '?') {
+            parseBindingFromExpr(node, key, type, text, resources);
+          } else {
+            parseTextFromExpr(node, key, text, resources);
+          }
         }
       }
 
@@ -5320,7 +5555,7 @@
     if (text) { //TODO: as function
       text = text.replace(BLANK_REGEXP, '').trim();
 
-      if (BindingParser.like(text)) {
+      if (TextParser.like(text)) { // TODO: TextParser.like(text)
         expression = TextParser.parse(text, resources);
       }
 
@@ -5623,7 +5858,7 @@
 //(function(global, module) {
 //  'use strict';
 //
-//  var Exact = { version: '0.0.3' };
+//  var Exact = { version: '0.0.6' };
 
   if (module) {
     module.exports = Exact;

@@ -39,8 +39,9 @@
     <div class="card">
       <h4>Overview</h4>
       <ul class="list">
+        <li><a href="./index.html#setup" class="link">Setup</a></li>
         <li><a href="./index.html#hello-world" class="link">Hello World</a></li>
-        <li><a href="./index.html#class-diagram" class="link">Class Diagram</a></li>
+        <!--<li><a href="./index.html#class-diagram" class="link">Class Diagram</a></li>-->
       </ul>
     </div>
     <div class="card">
@@ -107,10 +108,24 @@
   <article class="article">
     <h2>Overview</h2>
     <p>Exact是一个事件驱动的JavaScript框架，用于构建Web用户界面。它的核心模块提供了一个Shadow层，是与真实DOM层相对应的。
-      每当Shadow层发生变化时，Exact都会以批量更新的模式将变化的内容渲染到DOM层。Exact的其他模块和类几乎都是为Shadow层的实现做铺垫。</p>
+      每当Shadow层发生变化时，Exact都会以批量更新的模式将变化的内容渲染到DOM层。Exact的其他模块几乎都是为Shadow层的实现做铺垫。</p>
     <a id="hello-world"></a>
     <p>特别地，Shadow层的Component可视作一般Element的加强版。在Exact Element已有功能的基础之上，Component还支持模板、数据绑定、属性验证等高级功能，为快速构建可靠的Web用户界面提供了帮助。
-    Component可以像Element一样监听DOM事件，又可派发自定义事件。</p>
+    Component可以像Element一样监听DOM事件，又可派发属性更改的事件。</p>
+    <h4>Setup</h4>
+    <p>在页面中添加这样的&lt;script&gt;即可引入Exact：</p>
+    <div class="code-box scroll">
+      <div class="CodeMirror cm-s-alice">
+        <div class="CodeMirror-lines">
+          <div style="position: relative; outline: none;">
+            <div class="CodeMirror-code"><pre class=" CodeMirror-line "><span style="padding-right: 0.1px;"><span class="cm-tag cm-bracket">&lt;</span><span class="cm-tag">script</span> <span class="cm-attribute">src</span>=<span class="cm-string">"https://unpkg.com/exact/dist/exact.js"</span><span class="cm-tag cm-bracket">&gt;&lt;/</span><span class="cm-tag">script</span><span class="cm-tag cm-bracket">&gt;</span></span></pre></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+
+
     <h4>Hello World</h4>
     <p>一个简单的例子如下：</p>
     <div class="code-box scroll">
@@ -126,11 +141,19 @@
 
   document.body.appendChild(Component.create(App, {what: 'World'}).$skin);</pre>-->
       <div class="CodeMirror cm-s-alice">
-        <div class="CodeMirror-lines"><div style="position: relative; outline: none;"><div class="CodeMirror-measure"><span><span>​</span>x</span></div><div class="CodeMirror-measure"></div><div style="position: relative; z-index: 1;"></div><div class="CodeMirror-cursors"><div class="CodeMirror-cursor" style="left: 390px; top: 297px; height: 27px;">&nbsp;</div></div><div class="CodeMirror-code"><pre class=" CodeMirror-line "><span style="padding-right: 0.1px;"><span class="cm-keyword">var</span> <span class="cm-def">Component</span> <span class="cm-operator">=</span> <span class="cm-variable">Exact</span>.<span class="cm-property">Component</span>;</span></pre><pre class=" CodeMirror-line "><span style="padding-right: 0.1px;"><span cm-text="">​</span></span></pre><pre class=" CodeMirror-line "><span style="padding-right: 0.1px;"><span class="cm-keyword">var</span> <span class="cm-def">App</span> <span class="cm-operator">=</span> <span class="cm-variable">Exact</span>.<span class="cm-property">defineClass</span>({</span></pre><pre class=" CodeMirror-line "><span style="padding-right: 0.1px;">  <span class="cm-property">extend</span>: <span class="cm-variable">Component</span>,</span></pre><pre class=" CodeMirror-line "><span style="padding-right: 0.1px;">  <span class="cm-property">statics</span>: {</span></pre><pre class=" CodeMirror-line "><span style="padding-right: 0.1px;">    <span class="cm-property">$template</span>: <span class="cm-string">'&lt;div&gt;&lt;h1&gt;Hello @{ $.what }!&lt;/h1&gt;&lt;/div&gt;'</span></span></pre><pre class=" CodeMirror-line "><span style="padding-right: 0.1px;">  }</span></pre><pre class=" CodeMirror-line "><span style="padding-right: 0.1px;">});</span></pre><pre class=" CodeMirror-line "><span style="padding-right: 0.1px;"><span cm-text="">​</span></span></pre><pre class=" CodeMirror-line "><span style="padding-right: 0.1px;"><span class="cm-keyword">var</span> <span class="cm-def">app</span> <span class="cm-operator">=</span> <span class="cm-variable">Component</span>.<span class="cm-property">create</span>(<span class="cm-variable">App</span>, {<span class="cm-property">what</span>: <span class="cm-string">'World'</span>})</span></pre><pre class=" CodeMirror-line "><span style="padding-right: 0.1px;"><span cm-text="">​</span></span></pre><pre class=" CodeMirror-line "><span style="padding-right: 0.1px;"><span class="cm-variable">document</span>.<span class="cm-property">body</span>.<span class="cm-property">appendChild</span>(<span class="cm-variable">app</span>.<span class="cm-property">$skin</span>);</span></pre></div></div></div>
+        <div class="CodeMirror-lines">
+          <div style="position: relative; outline: none;">
+            <div class="CodeMirror-code"><pre class=" CodeMirror-line "><span style="padding-right: 0.1px;"><span class="cm-keyword">var</span> <span class="cm-def">Component</span> <span class="cm-operator">=</span> <span class="cm-variable">Exact</span>.<span class="cm-property">Component</span>;</span></pre><pre class=" CodeMirror-line "><span style="padding-right: 0.1px;"><span cm-text="">​</span></span></pre><pre class=" CodeMirror-line "><span style="padding-right: 0.1px;"><span class="cm-keyword">var</span> <span class="cm-def">App</span> <span class="cm-operator">=</span> <span class="cm-variable">Exact</span>.<span class="cm-property">defineClass</span>({</span></pre><pre class=" CodeMirror-line "><span style="padding-right: 0.1px;">  <span class="cm-property">extend</span>: <span class="cm-variable">Component</span>,</span></pre><pre class=" CodeMirror-line "><span style="padding-right: 0.1px;">  <span class="cm-property">statics</span>: {</span></pre><pre class=" CodeMirror-line "><span style="padding-right: 0.1px;">    <span class="cm-property">descriptors</span>: [<span class="cm-string">'what'</span>],</span></pre><pre class=" CodeMirror-line "><span style="padding-right: 0.1px;">    <span class="cm-property">$template</span>: <span class="cm-string">'&lt;div&gt;&lt;h1&gt;Hello, @{ $.what }!&lt;/h1&gt;&lt;/div&gt;'</span></span></pre><pre class=" CodeMirror-line "><span style="padding-right: 0.1px;">  }</span></pre><pre class=" CodeMirror-line "><span style="padding-right: 0.1px;">});</span></pre><pre class=" CodeMirror-line "><span style="padding-right: 0.1px;"><span cm-text="">​</span></span></pre><pre class=" CodeMirror-line "><span style="padding-right: 0.1px;"><span class="cm-keyword">var</span> <span class="cm-def">app</span> <span class="cm-operator">=</span> <span class="cm-variable">Component</span>.<span class="cm-property">create</span>(<span class="cm-variable">App</span>, {<span class="cm-property">what</span>: <span class="cm-string">'World'</span>});</span></pre><pre class=" CodeMirror-line "><span style="padding-right: 0.1px;"><span cm-text="">​</span></span></pre><pre class=" CodeMirror-line "><span style="padding-right: 0.1px;"><span class="cm-variable">document</span>.<span class="cm-property">getElementById</span>(<span class="cm-string">'app-shell'</span>).<span class="cm-property">appendChild</span>(<span class="cm-variable">app</span>.<span class="cm-property">$skin</span>);</span></pre></div>
+          </div>
+        </div>
       </div>
     </div>
-    <p>我们定义了类App，它继承自Component，使用了一个简单的模板作为静态属性。模板中使用了文本模板（以//包围）和单向绑定表达式（以${ }包围）。
-      实例化App时，给属性who赋了初始值。最后，页面上出现"Hello World!"的字样。</p>
+    <p>我们定义了类App，它继承自Component，使用了一个简单的模板作为静态属性。模板中使用了文本模板和内嵌的单向绑定表达式（以@{ }包围）。
+      实例化App时，给属性`what`赋了初始值。最后，页面上出现"Hello, World!"的字样。</p>
+    <div id="app-shell">
+
+    </div>
+    <p>你可以打开开发者工具，在控制台中修改app.what的值，观察上面文字的变化。</p>
     <p>上面的例子使用了声明式定义的模板，但我们也可以过程式地创建组件和元素，达到相同的效果。</p>
     <div class="code-box scroll">
       <!--<pre class="code-behind js-mode">
@@ -154,20 +177,64 @@
 
   document.body.appendChild(app.$skin);</pre>-->
       <div class="CodeMirror cm-s-alice">
-        <div class="CodeMirror-lines"><div style="position: relative; outline: none;"><div class="CodeMirror-measure"><pre>x</pre></div><div class="CodeMirror-measure"></div><div style="position: relative; z-index: 1;"></div><div class="CodeMirror-cursors" style=""><div class="CodeMirror-cursor" style="left: 337.703px; top: 54px; height: 27px;">&nbsp;</div></div><div class="CodeMirror-code"><pre class=" CodeMirror-line "><span style="padding-right: 0.1px;"><span class="cm-keyword">var</span> <span class="cm-def">Text</span> <span class="cm-operator">=</span> <span class="cm-variable">Exact</span>.<span class="cm-property">Text</span>;</span></pre><pre class=" CodeMirror-line "><span style="padding-right: 0.1px;"><span class="cm-keyword">var</span> <span class="cm-def">Element</span> <span class="cm-operator">=</span> <span class="cm-variable">Exact</span>.<span class="cm-property">Element</span>;</span></pre><pre class=" CodeMirror-line "><span style="padding-right: 0.1px;"><span class="cm-keyword">var</span> <span class="cm-def">Component</span> <span class="cm-operator">=</span> <span class="cm-variable">Exact</span>.<span class="cm-property">Component</span>;</span></pre><pre class=" CodeMirror-line "><span style="padding-right: 0.1px;"><span cm-text="">​</span></span></pre><pre class=" CodeMirror-line "><span style="padding-right: 0.1px;"><span class="cm-keyword">var</span> <span class="cm-def">App</span> <span class="cm-operator">=</span> <span class="cm-variable">Exact</span>.<span class="cm-property">defineClass</span>({<span class="cm-property">extend</span>: <span class="cm-variable">Component</span>});<span class="cm-comment">// 默认的模板为'&lt;div&gt;&lt;/div&gt;'</span></span></pre><pre class=" CodeMirror-line "><span style="padding-right: 0.1px;"><span class="cm-keyword">var</span> <span class="cm-def">app</span> <span class="cm-operator">=</span> <span class="cm-variable">Component</span>.<span class="cm-property">create</span>(<span class="cm-variable">App</span>);</span></pre><pre class=" CodeMirror-line "><span style="padding-right: 0.1px;"><span class="cm-keyword">var</span> <span class="cm-def">h1</span> <span class="cm-operator">=</span> <span class="cm-variable">Element</span>.<span class="cm-property">create</span>(<span class="cm-string">'h1'</span>);</span></pre><pre class=" CodeMirror-line "><span style="padding-right: 0.1px;"><span class="cm-keyword">var</span> <span class="cm-def">text</span> <span class="cm-operator">=</span> <span class="cm-variable">Text</span>.<span class="cm-property">create</span>(<span class="cm-string">''</span>);</span></pre><pre class=" CodeMirror-line "><span style="padding-right: 0.1px;"><span cm-text="">​</span></span></pre><pre class=" CodeMirror-line "><span style="padding-right: 0.1px;"><span class="cm-variable">h1</span>.<span class="cm-property">children</span>.<span class="cm-property">insert</span>(<span class="cm-variable">text</span>);</span></pre><pre class=" CodeMirror-line "><span style="padding-right: 0.1px;"><span class="cm-variable">app</span>.<span class="cm-property">children</span>.<span class="cm-property">insert</span>(<span class="cm-variable">h1</span>);</span></pre><pre class=" CodeMirror-line "><span style="padding-right: 0.1px;"><span cm-text="">​</span></span></pre><pre class=" CodeMirror-line "><span style="padding-right: 0.1px;"><span class="cm-variable">app</span>.<span class="cm-property">on</span>(<span class="cm-string">'changed.what'</span>, <span class="cm-keyword">function</span>() {</span></pre><pre class=" CodeMirror-line "><span style="padding-right: 0.1px;">  <span class="cm-variable">text</span>.<span class="cm-property">set</span>(<span class="cm-string">'data'</span>, <span class="cm-string">'Hello '</span> <span class="cm-operator">+</span> <span class="cm-variable">app</span>.<span class="cm-property">what</span> <span class="cm-operator">+</span> <span class="cm-string">'!'</span>);</span></pre><pre class=" CodeMirror-line "><span style="padding-right: 0.1px;">});</span></pre><pre class=" CodeMirror-line "><span style="padding-right: 0.1px;"><span cm-text="">​</span></span></pre><pre class=" CodeMirror-line "><span style="padding-right: 0.1px;"><span class="cm-variable">app</span>.<span class="cm-property">save</span>({<span class="cm-property">what</span>: <span class="cm-string">'World'</span>}); <span class="cm-comment">// 引发事件changed.what</span></span></pre><pre class=" CodeMirror-line "><span style="padding-right: 0.1px;"><span cm-text="">​</span></span></pre><pre class=" CodeMirror-line "><span style="padding-right: 0.1px;"><span class="cm-variable">document</span>.<span class="cm-property">body</span>.<span class="cm-property">appendChild</span>(<span class="cm-variable">app</span>.<span class="cm-property">$skin</span>);</span></pre></div></div></div>
+        <div class="CodeMirror-code"><pre class=" CodeMirror-line "><span style="padding-right: 0.1px;"><span class="cm-keyword">var</span> <span class="cm-def">Text</span> <span class="cm-operator">=</span> <span class="cm-variable">Exact</span>.<span class="cm-property">Text</span>;</span></pre><pre class=" CodeMirror-line "><span style="padding-right: 0.1px;"><span class="cm-keyword">var</span> <span class="cm-def">Element</span> <span class="cm-operator">=</span> <span class="cm-variable">Exact</span>.<span class="cm-property">Element</span>;</span></pre><pre class=" CodeMirror-line "><span style="padding-right: 0.1px;"><span class="cm-keyword">var</span> <span class="cm-def">Component</span> <span class="cm-operator">=</span> <span class="cm-variable">Exact</span>.<span class="cm-property">Component</span>;</span></pre><pre class=" CodeMirror-line "><span style="padding-right: 0.1px;"><span cm-text="">​</span></span></pre><pre class=" CodeMirror-line "><span style="padding-right: 0.1px;"><span class="cm-keyword">var</span> <span class="cm-def">App</span> <span class="cm-operator">=</span> <span class="cm-variable">Exact</span>.<span class="cm-property">defineClass</span>({<span class="cm-property">extend</span>: <span class="cm-variable">Component</span>});<span class="cm-comment">// 默认的模板为'&lt;div&gt;&lt;/div&gt;'</span></span></pre><pre class=" CodeMirror-line "><span style="padding-right: 0.1px;"><span class="cm-keyword">var</span> <span class="cm-def">app</span> <span class="cm-operator">=</span> <span class="cm-variable">Component</span>.<span class="cm-property">create</span>(<span class="cm-variable">App</span>);</span></pre><pre class=" CodeMirror-line "><span style="padding-right: 0.1px;"><span class="cm-keyword">var</span> <span class="cm-def">h1</span> <span class="cm-operator">=</span> <span class="cm-variable">Element</span>.<span class="cm-property">create</span>(<span class="cm-string">'h1'</span>);</span></pre><pre class=" CodeMirror-line "><span style="padding-right: 0.1px;"><span class="cm-keyword">var</span> <span class="cm-def">text</span> <span class="cm-operator">=</span> <span class="cm-variable">Text</span>.<span class="cm-property">create</span>(<span class="cm-string">''</span>);</span></pre><pre class=" CodeMirror-line "><span style="padding-right: 0.1px;"><span cm-text="">​</span></span></pre><pre class=" CodeMirror-line "><span style="padding-right: 0.1px;"><span class="cm-variable">h1</span>.<span class="cm-property">children</span>.<span class="cm-property">insert</span>(<span class="cm-variable">text</span>);</span></pre><pre class=" CodeMirror-line "><span style="padding-right: 0.1px;"><span class="cm-variable">app</span>.<span class="cm-property">children</span>.<span class="cm-property">insert</span>(<span class="cm-variable">h1</span>);</span></pre><pre class=" CodeMirror-line "><span style="padding-right: 0.1px;"><span cm-text="">​</span></span></pre><pre class=" CodeMirror-line "><span style="padding-right: 0.1px;"><span class="cm-variable">app</span>.<span class="cm-property">on</span>(<span class="cm-string">'changed.what'</span>, <span class="cm-keyword">function</span>() {</span></pre><pre class=" CodeMirror-line "><span style="padding-right: 0.1px;">  <span class="cm-variable">text</span>.<span class="cm-property">set</span>(<span class="cm-string">'data'</span>, <span class="cm-string">'Hello, '</span> <span class="cm-operator">+</span> <span class="cm-variable">app</span>.<span class="cm-property">what</span> <span class="cm-operator">+</span> <span class="cm-string">'!'</span>);</span></pre><pre class=" CodeMirror-line "><span style="padding-right: 0.1px;">});</span></pre><pre class=" CodeMirror-line "><span style="padding-right: 0.1px;"><span cm-text="">​</span></span></pre><pre class=" CodeMirror-line "><span style="padding-right: 0.1px;"><span class="cm-variable">app</span>.<span class="cm-property">save</span>({<span class="cm-property">what</span>: <span class="cm-string">'World'</span>}); <span class="cm-comment">// 引发事件changed.what</span></span></pre><pre class=" CodeMirror-line "><span style="padding-right: 0.1px;"><span cm-text="">​</span></span></pre><pre class=" CodeMirror-line "><span style="padding-right: 0.1px;"><span class="cm-variable">document</span>.<span class="cm-property">getElementById</span>(<span class="cm-string">'app-shell'</span>).<span class="cm-property">appendChild</span>(<span class="cm-variable">app</span>.<span class="cm-property">$skin</span>);</span></pre></div>
       </div>
     </div>
+
+
+
     <a id="class-diagram">
 
     </a>
-    <p>显然，使用声明式定义的模板更为简单直观。但是，模板主要用来初始化一个组件，它的结构和内容是相对稳定的。
-      如果一个组件的结构是易变的，则可以考虑在简单的初始化过后，过程式地调整组件的结构和内容。</p>
+    <p>显然，使用声明式定义的模板更为简单直观。但是，模板主要用来初始化一个组件，它的结构是相对稳定的。
+      如果一个组件的结构是易变的，则可以考虑在简单的初始化过后，过程式地调整组件的结构。</p>
 
-    <h4>Class Diagram</h4>
+    <h4>Composing with Components and Elements</h4>
+    <p>Exact支持组件化的设计与开发。</p>
+    <br>
+    <div class="code-box scroll">
+      <div class="CodeMirror cm-s-alice">
+        <div class="CodeMirror-code">
+          <pre class=" CodeMirror-line "><span style="padding-right: 0.1px;"><span class="cm-tag cm-bracket">&lt;</span><span
+              class="cm-tag">h1</span> <span class="cm-attribute">class</span>=<span
+              class="cm-string">"hello"</span><span class="cm-tag cm-bracket">&gt;</span>Hello @{ $.fullName | capitalize }<span
+              class="cm-tag cm-bracket">&lt;/</span><span class="cm-tag">h1</span><span
+              class="cm-tag cm-bracket">&gt;</span></span></pre>
+          <pre class=" CodeMirror-line "><span style="padding-right: 0.1px;"><span cm-text="">​</span></span></pre>
+          <pre class=" CodeMirror-line "><span style="padding-right: 0.1px;"><span class="cm-tag cm-bracket">&lt;</span><span
+              class="cm-tag">div</span> <span class="cm-attribute">class</span>=<span
+              class="cm-string">"app"</span><span class="cm-tag cm-bracket">&gt;</span></span></pre>
+          <pre class=" CodeMirror-line "><span style="padding-right: 0.1px;">  <span
+              class="cm-tag cm-bracket">&lt;</span><span class="cm-tag">h1</span> <span
+              class="cm-attribute">x-type</span>=<span class="cm-string">"Hello"</span> <span class="cm-attribute">full-name@</span>=<span
+              class="cm-string">"$.what"</span><span class="cm-tag cm-bracket">&gt;&lt;/</span><span
+              class="cm-tag">h1</span><span class="cm-tag cm-bracket">&gt;</span></span></pre>
+          <pre class=" CodeMirror-line "><span style="padding-right: 0.1px;">  <span
+              class="cm-tag cm-bracket">&lt;</span><span class="cm-tag">input</span> <span
+              class="cm-attribute">type</span>=<span class="cm-string">"text"</span> <span
+              class="cm-attribute">input+</span>=<span class="cm-string">"$.onInput(event)"</span><span
+              class="cm-tag cm-bracket">&gt;</span></span></pre>
+          <pre class=" CodeMirror-line "><span style="padding-right: 0.1px;"><span
+              class="cm-tag cm-bracket">&lt;/</span><span class="cm-tag cm-error">div</span><span
+              class="cm-tag cm-bracket cm-error">&gt;</span></span></pre>
+        </div>
+      </div>
+    </div>
+    <br>
+    <div class="code-box scroll">
+      <div class="CodeMirror cm-s-alice">
+        <div class="CodeMirror-code"><pre class=" CodeMirror-line "><span style="padding-right: 0.1px;"><span class="cm-keyword">var</span> <span class="cm-def">Hello</span> <span class="cm-operator">=</span> <span class="cm-variable">Exact</span>.<span class="cm-property">defineClass</span>({</span></pre><pre class=" CodeMirror-line "><span style="padding-right: 0.1px;">  <span class="cm-property">extend</span>: <span class="cm-variable">Exact</span>.<span class="cm-property">Component</span>,</span></pre><pre class=" CodeMirror-line "><span style="padding-right: 0.1px;">  <span class="cm-property">statics</span>: {</span></pre><pre class=" CodeMirror-line "><span style="padding-right: 0.1px;">    <span class="cm-property">resources</span>: {</span></pre><pre class=" CodeMirror-line "><span style="padding-right: 0.1px;">      <span class="cm-property">capitalize</span>: <span class="cm-keyword">function</span>(<span class="cm-def">value</span>) {</span></pre><pre class=" CodeMirror-line "><span style="padding-right: 0.1px;">        <span class="cm-keyword">if</span> (<span class="cm-operator">!</span><span class="cm-variable-2">value</span>) { <span class="cm-keyword">return</span> <span class="cm-string">''</span>; }</span></pre><pre class=" CodeMirror-line "><span style="padding-right: 0.1px;"><span cm-text="">​</span></span></pre><pre class=" CodeMirror-line "><span style="padding-right: 0.1px;">        <span class="cm-keyword">return</span> <span class="cm-variable-2">value</span>.<span class="cm-property">trim</span>().<span class="cm-property">replace</span>(<span class="cm-string-2">/\w+/g</span>, <span class="cm-keyword">function</span>(<span class="cm-def">str</span>) {</span></pre><pre class=" CodeMirror-line "><span style="padding-right: 0.1px;">          <span class="cm-keyword">return</span> <span class="cm-variable-2">str</span>[<span class="cm-number">0</span>].<span class="cm-property">toUpperCase</span>()<span class="cm-operator">+</span><span class="cm-variable-2">str</span>.<span class="cm-property">slice</span>(<span class="cm-number">1</span>);</span></pre><pre class=" CodeMirror-line "><span style="padding-right: 0.1px;">        });</span></pre><pre class=" CodeMirror-line "><span style="padding-right: 0.1px;">      }</span></pre><pre class=" CodeMirror-line "><span style="padding-right: 0.1px;">    },</span></pre><pre class=" CodeMirror-line "><span style="padding-right: 0.1px;">    <span class="cm-property">$template</span>: <span class="cm-variable">Exact</span>.<span class="cm-property">Skin</span>.<span class="cm-property">query</span>(<span class="cm-string">'.hello'</span>);</span></pre><pre class=" CodeMirror-line "><span style="padding-right: 0.1px;">  }</span></pre><pre class=" CodeMirror-line "><span style="padding-right: 0.1px;">});</span></pre><pre class=" CodeMirror-line "><span style="padding-right: 0.1px;"><span cm-text="">​</span></span></pre><pre class=" CodeMirror-line "><span style="padding-right: 0.1px;"><span class="cm-keyword">var</span> <span class="cm-def">App</span> <span class="cm-operator">=</span> <span class="cm-variable">Exact</span>.<span class="cm-property">defineClass</span>({</span></pre><pre class=" CodeMirror-line "><span style="padding-right: 0.1px;">  <span class="cm-property">extend</span>: <span class="cm-variable">Exact</span>.<span class="cm-property">Component</span>,</span></pre><pre class=" CodeMirror-line "><span style="padding-right: 0.1px;">  <span class="cm-property">statics</span>: {</span></pre><pre class=" CodeMirror-line "><span style="padding-right: 0.1px;">    <span class="cm-property">descriptors</span>: [<span class="cm-string">'what'</span>],</span></pre><pre class=" CodeMirror-line "><span style="padding-right: 0.1px;">    <span class="cm-property">resources</span>: {</span></pre><pre class=" CodeMirror-line "><span style="padding-right: 0.1px;">      <span class="cm-property">Hello</span>: <span class="cm-variable">Hello</span></span></pre><pre class=" CodeMirror-line "><span style="padding-right: 0.1px;">    },</span></pre><pre class=" CodeMirror-line "><span style="padding-right: 0.1px;">    <span class="cm-property">$template</span>: <span class="cm-variable">Exact</span>.<span class="cm-property">Skin</span>.<span class="cm-property">query</span>(<span class="cm-string">'.app'</span>);</span></pre><pre class=" CodeMirror-line "><span style="padding-right: 0.1px;">  },</span></pre><pre class=" CodeMirror-line "><span style="padding-right: 0.1px;">  <span class="cm-property">onInput</span>: <span class="cm-keyword">function</span>(<span class="cm-def">event</span>) {</span></pre><pre class=" CodeMirror-line "><span style="padding-right: 0.1px;">    <span class="cm-keyword">this</span>.<span class="cm-property">what</span> <span class="cm-operator">=</span> <span class="cm-variable-2">event</span>.<span class="cm-property">target</span>.<span class="cm-property">value</span>;</span></pre><pre class=" CodeMirror-line "><span style="padding-right: 0.1px;">  }</span></pre><pre class=" CodeMirror-line "><span style="padding-right: 0.1px;">});</span></pre></div>
+      </div>
+    </div>
+
+    <div id="app-panel">
+
+    </div>
+    <!--<h4>Class Diagram</h4>
     <div class="fig">
       <img src="../images/class-diagram.png">
     </div>
-    <!--<img src="../images/class-diagram.png">-->
+    &lt;!&ndash;<img src="../images/class-diagram.png">&ndash;&gt;
     <p>Exact的类图中，RES是用来管理各种资源的，可以在RES中注册常用的组件、转换器以及命名空间等；
       utils模块中的工具提供了一系列工具方法，辅助于其他的模块；
       base模块中定义了几个基类，会在core模块中被继承、被混入或被用到，
@@ -233,7 +300,7 @@
         <td>O</td>
         <td></td>
       </tr>
-    </table>
+    </table>-->
   </article>
 </div>
 <!--<footer class="footer">
@@ -245,5 +312,63 @@
 <!--<script src="../javascripts/xml-mode.js"></script>-->
 <!--<script src="../javascripts/code-format.js"></script>-->
 <script src="../javascripts/site.js"></script>
+<script src="../javascripts/exact.js"></script>
+<script>
+  var Component = Exact.Component;
+
+  var App = Exact.defineClass({
+    extend: Component,
+    statics: {
+      descriptors: ['what'],
+      $template: '<div><h1>Hello, @{ $.what }!</h1></div>'
+    }
+  });
+
+  var app = Component.create(App, {what: 'World'});
+
+  document.getElementById('app-shell').appendChild(app.$skin);
+
+  console.log('do something like:');
+  console.log('app.what = "Earth";');
+  console.log('app.set("what", "Universe");');
+  console.log('app.save({what: "Everything"});');
+
+
+  (function() {
+    var Component = Exact.Component;
+
+    var Hello = Exact.defineClass({
+      extend: Component,
+      statics: {
+        resources: {
+          capitalize: function(value) {
+            if (!value) { return ''; }
+
+            return value.trim().replace(/\w+/g, function(str) {
+              return str[0].toUpperCase()+str.slice(1);
+            });
+          }
+        },
+        $template: '<h1>Hello @{ $.fullName | capitalize}</h1>'
+      }
+    });
+
+    var App = Exact.defineClass({
+      extend: Component,
+      statics: {
+        descriptors: ['what'],
+        resources: {
+          Hello: Hello
+        },
+        $template: '<div><h1 x-type="Hello" full-name@="$.what"></h1><input type="text" input+="$.onInput(event)"></div>'
+      },
+      onInput: function(event) {
+        this.what = event.target.value;
+      }
+    });
+
+    document.getElementById('app-panel').appendChild(Component.create(App).$skin);
+  })();
+</script>
 </body>
 </html>

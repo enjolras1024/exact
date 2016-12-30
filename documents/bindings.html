@@ -109,16 +109,7 @@
       <div class="CodeMirror cm-s-alice">
         <div class="CodeMirror-lines">
           <div style="position: relative; outline: none;">
-            <div class="CodeMirror-code">
-              <div style="position: relative;">
-                <pre class=" CodeMirror-line "><span style="padding-right: 0.1px;"><span
-                    class="cm-tag cm-bracket">&lt;</span><span class="cm-tag">input</span> <span
-                    class="cm-attribute">type</span>=<span class="cm-string">"text"</span> <span
-                    class="cm-attribute">value</span>=<span class="cm-string">"@{ $.message }"</span> <span
-                    class="cm-attribute">readonly</span> <span class="cm-attribute">x-id</span>=<span
-                    class="cm-string">"$msg"</span><span class="cm-tag cm-bracket">&gt;</span></span></pre>
-              </div>
-            </div>
+            <div class="CodeMirror-code"><pre class=" CodeMirror-line "><span style="padding-right: 0.1px;"><span class="cm-operator">&lt;</span><span class="cm-variable">input</span> <span class="cm-variable">type</span><span class="cm-operator">=</span><span class="cm-string">"text"</span> <span class="cm-variable">value</span>@<span class="cm-operator">=</span><span class="cm-string">"$.message"</span> <span class="cm-variable">readonly</span> <span class="cm-variable">x</span><span class="cm-operator">-</span><span class="cm-variable">id</span><span class="cm-operator">=</span><span class="cm-string">"$msg"</span><span class="cm-operator">&gt;</span></span></pre></div>
           </div>
         </div>
       </div>
@@ -141,20 +132,28 @@ this.on('changed.text', function() {
     <h4 >Key Terms</h4>
     <p>在Exact中使用好绑定，需要了解几个关键词。</p>
     <p>（1）绑定模式：基本上有3种绑定模式可选，即单次、单向和双向。其中单次绑定是单向绑定中特殊的一种绑定，它只在绑定建立时立即起效，不关心之后的变化。</p>
-    <p>（2）绑定对象和绑定对象属性：绑定的目的是要将绑定表达式的运算结果赋给一个对象的属性。
+    <p>（2）绑定路径：绑定表达式中出现的属性链即为绑定路径。路径的源头通常是组件本身，但也可以是已知的某个局部变量对象。</p>
+    <p>（3）绑定对象和绑定对象属性：绑定的目的是要将绑定表达式的运算结果赋给一个对象的属性。
       对于单次或单向绑定，这样的对象是任意的，这样的对象属性也是任意的。
       对于双向绑定，则要求绑定对象亦可作为绑定源，绑定对象属性亦可作为绑定源属性。</p>
-    <p>（3）绑定源和绑定源属性：绑定源是数据的直接提供者。绑定源属性的值改变后通常会派发一个属性更改事件，但有时普通属性也可作为绑定源属性，参见（5）。</p>
-    <p>（4）绑定域和绑定路径：绑定表达式依托的上下文就是绑定域，上下文中的属性链即可作为绑定路径。
-      通常这样的上下文会是component、store或其他可派发属性更改事件的对象。如果绑定路径的长度为1，那实际上绑定域即为绑定源，绑定路径即为绑定源属性；
-      否则，需要沿着绑定路径查找到绑定源和绑定源属性。</p>
+    <p>（4）绑定源和绑定源属性：绑定源是绑定路径上数据的直接提供者。绑定源属性的值改变后通常会派发一个属性更改事件，但有时普通属性也可作为绑定源属性，参见（5）。</p>
     <a id="basic-syntax"></a>
-    <p>（5）绑定域事件：没有特别声明的情况下，一个绑定会关心每个绑定路径对应的属性更改事件。但是，你也可以指定一个绑定域上的事件作为绑定域事件。
-      这样，绑定就只关心指定绑定域事件有没有发生，而无需关心多个属性更改事件。</p>
+    <p>（5）绑定域和绑定域事件：绑定表达式依托的上下文就是绑定域，通常这样的上下文就是一个组件。没有特别声明的情况下，一个绑定会关心每个绑定路径对应的属性更改事件。
+      但是，你也可以指定一个绑定域上的事件作为绑定域事件。这样，绑定就只关心指定绑定域事件有没有发生，而无需关心多个属性更改事件。</p>
     <p>（6）求值器和转换器：每个绑定都有一个求值器，负责根据一些常量和绑定域上一个或多个绑定路径来求出结果值。
       转换器是可选和多选的，负责将求值器求得的值转换成其他形式。</p>
     <h4>Basic Syntax</h4>
-    <p>模板中绑定的语法是由Exact的HTMX解析器规定的，可以有不同的实现。默认的基本语法如下：</p>
+    <p>模板中绑定的语法是由Exact的HTMX解析器规定的，文本插值绑定的基本语法如下：</p>
+    <div class="code-box scroll">
+      <div class="CodeMirror cm-s-alice">
+        <div class="CodeMirror-lines">
+          <div style="position: relative; outline: none;">
+            <div class="CodeMirror-code"><pre class=" CodeMirror-line "><span style="padding-right: 0.1px;"><span class="cm-comment">&lt;!--&lt;绑定模式符&gt;{&lt;求值器表达式&gt;[|转换器表达式] [*绑定域事件]}--&gt;</span></span></pre><pre class=" CodeMirror-line "><span style="padding-right: 0.1px;"><span class="cm-comment">&lt;!--单次绑定--&gt;</span></span></pre><pre class=" CodeMirror-line "><span style="padding-right: 0.1px;"><span class="cm-tag cm-bracket">&lt;</span><span class="cm-tag">p</span><span class="cm-tag cm-bracket">&gt;</span>Tip: <span class="cm-error">&amp;</span>{ $.tip }<span class="cm-tag cm-bracket">&lt;/</span><span class="cm-tag">p</span><span class="cm-tag cm-bracket">&gt;</span></span></pre><pre class=" CodeMirror-line "><span style="padding-right: 0.1px;"><span class="cm-comment">&lt;!--单向绑定，无参转换器--&gt;</span></span></pre><pre class=" CodeMirror-line "><span style="padding-right: 0.1px;"><span class="cm-tag cm-bracket">&lt;</span><span class="cm-tag">h1</span><span class="cm-tag cm-bracket">&gt;</span>@{ $.title | upper }<span class="cm-tag cm-bracket">&lt;/</span><span class="cm-tag">h1</span><span class="cm-tag cm-bracket">&gt;</span></span></pre><pre class=" CodeMirror-line "><span style="padding-right: 0.1px;"><span class="cm-comment">&lt;!--单向绑定，带常量参数的转换器--&gt;</span></span></pre><pre class=" CodeMirror-line "><span style="padding-right: 0.1px;"><span class="cm-tag cm-bracket">&lt;</span><span class="cm-tag">span</span><span class="cm-tag cm-bracket">&gt;</span>@{ $.time | format('hh:mm:ss') }<span class="cm-tag cm-bracket">&lt;/</span><span class="cm-tag">span</span><span class="cm-tag cm-bracket">&gt;</span></span></pre><pre class=" CodeMirror-line "><span style="padding-right: 0.1px;"><span class="cm-comment">&lt;!--单向绑定，带变量参数的转换器--&gt;</span></span></pre><pre class=" CodeMirror-line "><span style="padding-right: 0.1px;"><span class="cm-tag cm-bracket">&lt;</span><span class="cm-tag">span</span><span class="cm-tag cm-bracket">&gt;</span>@{ $.text | slice(0, $.length) }...<span class="cm-tag cm-bracket">&lt;/</span><span class="cm-tag">span</span><span class="cm-tag cm-bracket">&gt;</span></span></pre></div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <p>元素或组件属性绑定的语法，看起来就像是运算符重载：</p>
     <a id="optional-converters"></a>
     <div class="code-box scroll">
       <!--<pre class="code-behind js-mode">
@@ -170,13 +169,47 @@ value="#{ $.color | hex2rgb }"                        // 双向绑定，双向�
       <div class="CodeMirror cm-s-alice">
         <div class="CodeMirror-lines">
           <div style="position: relative; outline: none;">
-            <div class="CodeMirror-code"><pre class=" CodeMirror-line "><span style="padding-right: 0.1px;"><span class="cm-comment">// &amp;lt;绑定对象属性名&amp;gt;="&amp;lt;绑定模式符&amp;gt;{&amp;lt;求值器表达式&amp;gt; [|转换器表达式] [@绑定域事件]}"</span></span></pre><pre class=" CodeMirror-line "><span style="padding-right: 0.1px;"><span class="cm-comment">// 求值器表达式可以是单个绑定路径或一段JavaScript表达式</span></span></pre><pre class=" CodeMirror-line "><span style="padding-right: 0.1px;"><span class="cm-comment">// 转换器表达式的参数列表中可包含绑定路径或JavaScript表达式</span></span></pre><pre class=" CodeMirror-line "><span style="padding-right: 0.1px;"><span class="cm-variable">value</span><span class="cm-operator">=</span><span class="cm-string">"&amp;{ $.text }"</span>                                   <span class="cm-comment">// 单次绑定，单个路径</span></span></pre><pre class=" CodeMirror-line "><span style="padding-right: 0.1px;"><span class="cm-variable">value</span><span class="cm-operator">=</span><span class="cm-string">"@{ $.text | upper }"</span>                           <span class="cm-comment">// 单向绑定，单个路径，无参转换器</span></span></pre><pre class=" CodeMirror-line "><span style="padding-right: 0.1px;"><span class="cm-variable">value</span><span class="cm-operator">=</span><span class="cm-string">"@{ $.time | format('HH:MM:SS', $.use24) }"</span>     <span class="cm-comment">// 单向绑定，多个路径，带参数的转换器</span></span></pre><pre class=" CodeMirror-line "><span style="padding-right: 0.1px;"><span class="cm-variable">value</span><span class="cm-operator">=</span><span class="cm-string">"@{ $.getFullName($.firstName, $.lastName) }"</span>   <span class="cm-comment">// 单向绑定，多个路径，绑定域上的函数</span></span></pre><pre class=" CodeMirror-line "><span style="padding-right: 0.1px;"><span class="cm-variable">value</span><span class="cm-operator">=</span><span class="cm-string">"@{ $.firstName + ' ' + $.lastName *changed }"</span>  <span class="cm-comment">// 单向绑定，多个路径，事件为changed</span></span></pre><pre class=" CodeMirror-line "><span style="padding-right: 0.1px;"><span class="cm-variable">value</span><span class="cm-operator">=</span><span class="cm-string">"#{ $.color | hex2rgb }"</span>                        <span class="cm-comment">// 双向绑定，双向转换器，必须是单个路径</span></span></pre></div>
+            <div class="CodeMirror-code"><pre class=" CodeMirror-line "><span style="padding-right: 0.1px;"><span class="cm-comment">&lt;!--&lt;绑定对象属性名&gt;&lt;绑定模式符&gt;="&lt;求值器表达式&gt;[|转换器表达式] [*绑定域事件]"--&gt;</span></span></pre><pre class=" CodeMirror-line "><span style="padding-right: 0.1px;"><span class="cm-comment">&lt;!--单次绑定--&gt;</span></span></pre><pre class=" CodeMirror-line "><span style="padding-right: 0.1px;"><span class="cm-tag cm-bracket">&lt;</span><span class="cm-tag">p</span> <span class="cm-attribute">style&amp;</span>=<span class="cm-string">"$.styleString"</span><span class="cm-tag cm-bracket">&gt;&lt;/</span><span class="cm-tag">p</span><span class="cm-tag cm-bracket">&gt;</span></span></pre><pre class=" CodeMirror-line "><span style="padding-right: 0.1px;"><span class="cm-comment">&lt;!--单向绑定，无参转换器--&gt;</span></span></pre><pre class=" CodeMirror-line "><span style="padding-right: 0.1px;"><span class="cm-tag cm-bracket">&lt;</span><span class="cm-tag">h1</span> <span class="cm-attribute">title@</span>=<span class="cm-string">"$.title | upper"</span><span class="cm-tag cm-bracket">&gt;&lt;/</span><span class="cm-tag">h1</span><span class="cm-tag cm-bracket">&gt;</span></span></pre><pre class=" CodeMirror-line "><span style="padding-right: 0.1px;"><span class="cm-comment">&lt;!--单向绑定，带参转换器--&gt;</span></span></pre><pre class=" CodeMirror-line "><span style="padding-right: 0.1px;"><span class="cm-tag cm-bracket">&lt;</span><span class="cm-tag">input</span> <span class="cm-attribute">type</span>=<span class="cm-string">"text"</span> <span class="cm-attribute">value@</span>=<span class="cm-string">"$.time | format('hh:mm:ss')"</span><span class="cm-tag cm-bracket">&gt;</span></span></pre><pre class=" CodeMirror-line "><span style="padding-right: 0.1px;"><span class="cm-comment">&lt;!--双向绑定，双向转换器--&gt;</span></span></pre><pre class=" CodeMirror-line "><span style="padding-right: 0.1px;"><span class="cm-tag cm-bracket">&lt;</span><span class="cm-tag">input</span> <span class="cm-attribute">type</span>=<span class="cm-string">"text"</span> <span class="cm-attribute">x-type</span>=<span class="cm-string">"TextBox"</span> <span class="cm-attribute">value#</span>=<span class="cm-string">"$.color | hex2rgb"</span><span class="cm-tag cm-bracket">&gt;</span></span></pre></div>
           </div>
         </div>
       </div>
     </div>
-    <p>单次绑定在语法上不需要支持绑定域事件，其他与单向绑定相同。对于双向绑定，则特别要求求值器表达式为单个绑定域路径，以保持对称关系。
-      若在双向绑定使用转换器，转换器也必须是双向的，可参见下文。</p>
+    <p>对于双向绑定，特别要求求值器表达式为单个路径，以保持对称关系。
+      若在双向绑定使用转换器，转换器也必须是双向的。关于求值器和转换器更多的使用细节可参见下文。</p>
+    <p>如果要将文本插值的结果赋给元素或组件的某个属性，则可以这样书写：</p>
+    <div class="code-box scroll">
+      <div class="CodeMirror cm-s-alice">
+        <div class="CodeMirror-lines">
+          <div style="position: relative; outline: none;">
+            <div class="CodeMirror-code">
+              <pre class=" CodeMirror-line "><span style="padding-right: 0.1px;"><span
+                  class="cm-tag cm-bracket">&lt;</span><span class="cm-tag">a</span> <span
+                  class="cm-attribute">href?</span>=<span class="cm-string">"http://www.xxx.com/page/@{$.page}/"</span></span></pre>
+              <pre class=" CodeMirror-line "><span style="padding-right: 0.1px;">   <span
+                  class="cm-attribute">style?</span>=<span class="cm-string">"color: black; font-size: @{ $.fontSize }px;"</span></span></pre>
+              <pre class=" CodeMirror-line "><span style="padding-right: 0.1px;">   <span
+                  class="cm-attribute">class?</span>=<span class="cm-string">"btn-next @{$.page &gt;= $.total ? 'disabled' : ''}"</span><span
+                  class="cm-tag cm-bracket">&gt;</span></span></pre>
+              <pre class=" CodeMirror-line "><span style="padding-right: 0.1px;">  下一页</span></pre>
+              <pre class=" CodeMirror-line "><span style="padding-right: 0.1px;"><span
+                  class="cm-tag cm-bracket">&lt;/</span><span class="cm-tag">a</span><span class="cm-tag cm-bracket">&gt;</span></span></pre>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <p>特别地，对于class和style的绑定，Exact提供一种风格一致的扩展语法：</p>
+    <div class="code-box scroll">
+      <div class="CodeMirror cm-s-alice">
+        <div class="CodeMirror-lines">
+          <div style="position: relative; outline: none;">
+            <div class="CodeMirror-code"><pre class=" CodeMirror-line "><span style="padding-right: 0.1px;"><span class="cm-comment">&lt;!--&lt;绑定对象属性名&gt;&lt;绑定模式符&gt;:&lt;求值器表达式&gt;[|转换器表达式] [*绑定域事件];--&gt;</span></span></pre><pre class=" CodeMirror-line "><span style="padding-right: 0.1px;"><span class="cm-tag cm-bracket">&lt;</span><span class="cm-tag">a</span> <span class="cm-attribute">x-class</span>=<span class="cm-string">"btn-next: true; disabled@: $.page &gt;= $.total;"</span></span></pre><pre class=" CodeMirror-line "><span style="padding-right: 0.1px;">   <span class="cm-attribute">x-style</span>=<span class="cm-string">"color: black; fontSize?: @{ $.fontSize }px;"</span><span class="cm-tag cm-bracket">&gt;</span></span></pre><pre class=" CodeMirror-line "><span style="padding-right: 0.1px;"><span class="cm-tag cm-bracket">&lt;/</span><span class="cm-tag">a</span><span class="cm-tag cm-bracket">&gt;</span>  </span></pre></div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <p>即将class和style视作对象而非字符串，然后独立地为其中某个属性添加绑定。</p>
+
     <h4>Optional Converters</h4>
     <p>一些场景下，在视图上呈现数据时需要有一个格式化的过程，比如标题要大写：</p>
     <div class="code-box scroll">
@@ -223,8 +256,9 @@ Exact.Binding.build(this.header, 'title', this, {
         </div>
       </div>
     </div>
-    <p>可见转换器本质上也是求值器，只是它接受的第一个参数为已求得的值。可以使用多个转换器（建议不超过2个），在声明式绑定表达式中以符号'|'连接。
-    更多示例如下：</p>
+    <p>可见转换器本质上也是求值器，只是它接受的第一个参数为前面已求得的值。
+      可以在全局RES、本地resources或绑定域上注册转换器，可以使用多个转换器（建议不超过2个），在声明式绑定表达式中以符号'|'连接。
+      更多示例如下：</p>
     <a id="javascript-expressions"></a>
     <div class="code-box scroll">
       <!--<pre class="code-behind js-mode">
@@ -246,7 +280,41 @@ Exact.RES.register('num2str', {
       <div class="CodeMirror cm-s-alice">
         <div class="CodeMirror-lines">
           <div style="position: relative; outline: none;">
-            <div class="CodeMirror-code"><pre class=" CodeMirror-line "><span style="padding-right: 0.1px;"><span class="cm-comment">// 本地resources或全局RES中定义了函数（或转换器对象）upper，没有额外参数；</span></span></pre><pre class=" CodeMirror-line "><span style="padding-right: 0.1px;"><span class="cm-comment">// 绑定域上定义了函数（或转换器对象）wrapIn，额外参数为常量。</span></span></pre><pre class=" CodeMirror-line "><span style="padding-right: 0.1px;">@{<span class="cm-variable">$</span>.<span class="cm-property">title</span> <span class="cm-operator">|</span> <span class="cm-variable">upper</span> <span class="cm-operator">|</span> <span class="cm-variable">$</span>.<span class="cm-property">wrapIn</span>(<span class="cm-string">'##'</span>)}</span></pre><pre class=" CodeMirror-line "><span style="padding-right: 0.1px;"><span cm-text="">​</span></span></pre><pre class=" CodeMirror-line "><span style="padding-right: 0.1px;"><span class="cm-comment">// 转换器中可以使用路径，当title、brackets或upperOrNot改变时都有可能触发绑定</span></span></pre><pre class=" CodeMirror-line "><span style="padding-right: 0.1px;">@{<span class="cm-variable">$</span>.<span class="cm-property">title</span> <span class="cm-operator">|</span> <span class="cm-variable">$</span>.<span class="cm-property">format</span>(<span class="cm-variable">$</span>.<span class="cm-property">upperOrNot</span>, <span class="cm-variable">$</span>.<span class="cm-property">brackets</span>)}</span></pre><pre class=" CodeMirror-line "><span style="padding-right: 0.1px;"><span class="cm-comment">// 等价于</span></span></pre><pre class=" CodeMirror-line "><span style="padding-right: 0.1px;">@{<span class="cm-variable">$</span>.<span class="cm-property">format</span>(<span class="cm-variable">$</span>.<span class="cm-property">title</span>, <span class="cm-variable">$</span>.<span class="cm-property">upperOrNot</span>, <span class="cm-variable">$</span>.<span class="cm-property">brackets</span>)}</span></pre><pre class=" CodeMirror-line "><span style="padding-right: 0.1px;"><span cm-text="">​</span></span></pre><pre class=" CodeMirror-line "><span style="padding-right: 0.1px;"><span class="cm-comment">// 双向转换器</span></span></pre><pre class=" CodeMirror-line "><span style="padding-right: 0.1px;"><span class="cm-variable">Exact</span>.<span class="cm-property">RES</span>.<span class="cm-property">register</span>(<span class="cm-string">'num2str'</span>, {</span></pre><pre class=" CodeMirror-line "><span style="padding-right: 0.1px;">  <span class="cm-property">exec</span>: <span class="cm-variable">String</span>, <span class="cm-comment">//正向</span></span></pre><pre class=" CodeMirror-line "><span style="padding-right: 0.1px;">  <span class="cm-property">back</span>: <span class="cm-variable">Number</span>  <span class="cm-comment">//反向</span></span></pre><pre class=" CodeMirror-line "><span style="padding-right: 0.1px;">};</span></pre><pre class=" CodeMirror-line "><span style="padding-right: 0.1px;"><span class="cm-error">#{$.price | num2str}</span></span></pre></div>
+            <div class="CodeMirror-code">
+              <pre class=" CodeMirror-line "><span style="padding-right: 0.1px;"><span class="cm-comment">// 本地resources或全局RES中定义了函数（或转换器对象）upper和wrap；</span></span></pre>
+              <pre class=" CodeMirror-line "><span style="padding-right: 0.1px;">@{<span
+                  class="cm-variable">$</span>.<span class="cm-property">title</span> <span class="cm-operator">|</span> <span
+                  class="cm-variable">upper</span> <span class="cm-operator">|</span> <span
+                  class="cm-variable">wrap</span>(<span class="cm-string">'##'</span>)}</span></pre>
+              <pre class=" CodeMirror-line "><span style="padding-right: 0.1px;"><span cm-text="">​</span></span></pre>
+              <pre class=" CodeMirror-line "><span style="padding-right: 0.1px;"><span class="cm-comment">// 转换器中可以使用路径作为变量，当title或upperOrNot改变时都有可能触发绑定</span></span></pre>
+              <pre class=" CodeMirror-line "><span style="padding-right: 0.1px;">@{<span
+                  class="cm-variable">$</span>.<span class="cm-property">title</span> <span class="cm-operator">|</span> <span
+                  class="cm-variable">$</span>.<span class="cm-property">format</span>(<span
+                  class="cm-variable">$</span>.<span class="cm-property">upperOrNot</span>, <span
+                  class="cm-string">'##'</span>)}</span></pre>
+              <pre class=" CodeMirror-line "><span style="padding-right: 0.1px;"><span class="cm-comment">// 等价于</span></span></pre>
+              <pre class=" CodeMirror-line "><span style="padding-right: 0.1px;">@{<span
+                  class="cm-variable">$</span>.<span class="cm-property">format</span>(<span
+                  class="cm-variable">$</span>.<span class="cm-property">title</span>, <span
+                  class="cm-variable">$</span>.<span class="cm-property">upperOrNot</span>, <span
+                  class="cm-string">'##'</span>)}</span></pre>
+              <pre class=" CodeMirror-line "><span style="padding-right: 0.1px;"><span cm-text="">​</span></span></pre>
+              <pre class=" CodeMirror-line "><span style="padding-right: 0.1px;"><span class="cm-comment">// 全局RES上注册双向转换器</span></span></pre>
+              <pre class=" CodeMirror-line "><span style="padding-right: 0.1px;"><span class="cm-variable">Exact</span>.<span
+                  class="cm-property">RES</span>.<span class="cm-property">register</span>(<span class="cm-string">'num2str'</span>, {</span></pre>
+              <pre class=" CodeMirror-line "><span style="padding-right: 0.1px;">  <span class="cm-property">exec</span>: <span
+                  class="cm-variable">String</span>, <span class="cm-comment">//正向</span></span></pre>
+              <pre class=" CodeMirror-line "><span style="padding-right: 0.1px;">  <span class="cm-property">back</span>: <span
+                  class="cm-variable">Number</span>  <span class="cm-comment">//反向</span></span></pre>
+              <pre class=" CodeMirror-line "><span style="padding-right: 0.1px;">};</span></pre>
+              <pre class=" CodeMirror-line "><span style="padding-right: 0.1px;"><span
+                  class="cm-operator">&lt;</span><span class="cm-variable">input</span> <span
+                  class="cm-variable">type</span><span class="cm-operator">=</span><span class="cm-string">"text"</span> <span
+                  class="cm-variable">x</span><span class="cm-operator">-</span><span
+                  class="cm-variable">type</span><span class="cm-operator">=</span><span
+                  class="cm-string">"TextBox"</span> <span class="cm-variable">value#</span><span class="cm-operator">=</span><span class="cm-string">"$.price | num2str"</span><span class="cm-operator">&gt;</span></span></pre>
+            </div>
           </div>
         </div>
       </div>
@@ -262,13 +330,13 @@ Exact.RES.register('num2str', {
       <div class="CodeMirror cm-s-alice">
         <div class="CodeMirror-lines">
           <div style="position: relative; outline: none;">
-            <div class="CodeMirror-code"><pre class=" CodeMirror-line "><span style="padding-right: 0.1px;">@{ <span class="cm-variable">$</span>.<span class="cm-property">state</span> <span class="cm-operator">===</span> <span class="cm-string">'ok'</span> }</span></pre><pre class=" CodeMirror-line "><span style="padding-right: 0.1px;">@{ <span class="cm-variable">$</span>.<span class="cm-property">firstName</span> <span class="cm-operator">+</span> <span class="cm-string">' '</span> <span class="cm-operator">+</span> <span class="cm-variable">$</span>.<span class="cm-property">lastName</span> }</span></pre><pre class=" CodeMirror-line "><span style="padding-right: 0.1px;">@{ <span class="cm-variable">$</span>.<span class="cm-property">amount</span> <span class="cm-operator">&gt;</span> <span class="cm-number">100</span> <span class="cm-operator">?</span> <span class="cm-string">'large'</span> : <span class="cm-string">'normal'</span> }</span></pre><pre class=" CodeMirror-line "><span style="padding-right: 0.1px;"><span cm-text="">​</span></span></pre><pre class=" CodeMirror-line "><span style="padding-right: 0.1px;"><span class="cm-comment">// 本地resources形如</span></span></pre><pre class=" CodeMirror-line "><span style="padding-right: 0.1px;"><span class="cm-comment">// { _: tooltip:'long long string...', others: ... }</span></span></pre><pre class=" CodeMirror-line "><span style="padding-right: 0.1px;">@{ <span class="cm-variable">Math</span>.<span class="cm-property">floor</span>(<span class="cm-variable">$</span>.<span class="cm-property">num</span>) <span class="cm-operator">&gt;</span> <span class="cm-number">0</span> <span class="cm-operator">?</span> <span class="cm-variable">_</span>.<span class="cm-property">tooltip</span> : <span class="cm-string">''</span> } </span></pre></div>
+            <div class="CodeMirror-code"><pre class=" CodeMirror-line "><span style="padding-right: 0.1px;">@{ <span class="cm-variable">$</span>.<span class="cm-property">state</span> <span class="cm-operator">===</span> <span class="cm-string">'ok'</span> }</span></pre><pre class=" CodeMirror-line "><span style="padding-right: 0.1px;">@{ <span class="cm-variable">$</span>.<span class="cm-property">firstName</span> <span class="cm-operator">+</span> <span class="cm-string">' '</span> <span class="cm-operator">+</span> <span class="cm-variable">$</span>.<span class="cm-property">lastName</span> }</span></pre><pre class=" CodeMirror-line "><span style="padding-right: 0.1px;">@{ <span class="cm-variable">$</span>.<span class="cm-property">amount</span> <span class="cm-operator">&gt;</span> <span class="cm-number">100</span> <span class="cm-operator">?</span> <span class="cm-string">'large'</span> : <span class="cm-string">'normal'</span> }</span></pre></div>
           </div>
         </div>
       </div>
     </div>
     <p>对于上述含有运算符的表达式，Exact使用new Function(...)将JavaScript表达式转化成函数，
-      因而只能访问绑定域上、本地resources._中的变量以及全局对象（如Math），并存在一定的安全问题。
+      存在一定的限制和问题，例如无法访问本地resources和全局RES中的内容。
       我们建议在声明式定义的绑定表达式中尽量使用函数形式的表达式，例如：</p>
     <div class="code-box scroll">
       <!--<pre class="code-behind js-mode">
@@ -281,7 +349,44 @@ Exact.RES.register('num2str', {
       <div class="CodeMirror cm-s-alice">
         <div class="CodeMirror-lines">
           <div style="position: relative; outline: none;">
-            <div class="CodeMirror-code"><pre class=" CodeMirror-line "><span style="padding-right: 0.1px;">{</span></pre><pre class=" CodeMirror-line "><span style="padding-right: 0.1px;">  <span class="cm-variable">resources</span>: {</span></pre><pre class=" CodeMirror-line "><span style="padding-right: 0.1px;">    <span class="cm-variable">equal</span>: <span class="cm-keyword">function</span>(<span class="cm-def">a</span>, <span class="cm-def">b</span>) { <span class="cm-keyword">return</span> <span class="cm-variable-2">a</span> <span class="cm-operator">===</span> <span class="cm-variable-2">b</span>; }</span></pre><pre class=" CodeMirror-line "><span style="padding-right: 0.1px;">  },</span></pre><pre class=" CodeMirror-line "><span style="padding-right: 0.1px;">  <span class="cm-variable">$template</span>: <span class="cm-string">'&amp;lt;a x-class="active: @{equal($.state, \'ok\')}; stay: @{$.check($.state)}"&amp;gt;&amp;lt;/a&amp;gt;'</span></span></pre><pre class=" CodeMirror-line "><span style="padding-right: 0.1px;">}</span></pre></div>
+            <div class="CodeMirror-code"><pre class=" CodeMirror-line "><span style="padding-right: 0.1px;">{</span></pre><pre class=" CodeMirror-line "><span style="padding-right: 0.1px;">  <span class="cm-variable">resources</span>: {</span></pre><pre class=" CodeMirror-line "><span style="padding-right: 0.1px;">    <span class="cm-variable">equal</span>: <span class="cm-keyword">function</span>(<span class="cm-def">a</span>, <span class="cm-def">b</span>) { <span class="cm-keyword">return</span> <span class="cm-variable-2">a</span> <span class="cm-operator">===</span> <span class="cm-variable-2">b</span>; }</span></pre><pre class=" CodeMirror-line "><span style="padding-right: 0.1px;">  },</span></pre><pre class=" CodeMirror-line "><span style="padding-right: 0.1px;">  <span class="cm-variable">$template</span>: <span class="cm-string">'&lt;a x-class="active@: equal($.state, \'ok\');"&gt;&lt;/a&gt;'</span></span></pre><pre class=" CodeMirror-line "><span style="padding-right: 0.1px;">}</span></pre></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <h4>Using Event in Expression</h4>
+    <p>默认地，当监听到绑定表达式中某个属性发生变化后，该绑定会自动重新求值并赋值。
+      但你也可以指定一个事件，只当该事件发生时，该绑定才会重新求值并赋值。</p>
+    <div class="code-box scroll">
+      <div class="CodeMirror cm-s-alice">
+        <div class="CodeMirror-lines">
+          <div style="position: relative; outline: none;">
+            <div class="CodeMirror-code">
+              <pre class=" CodeMirror-line "><span style="padding-right: 0.1px;"><span
+                  class="cm-tag cm-bracket">&lt;</span><span class="cm-tag">div</span> <span
+                  class="cm-attribute">x-type</span>=<span class="cm-string">"Comp"</span> <span class="cm-attribute">total@</span>=<span
+                  class="cm-string">"$.a + $.b + $.c + $.d *changed.d"</span><span
+                  class="cm-tag cm-bracket">&gt;&lt;/</span><span class="cm-tag">div</span><span
+                  class="cm-tag cm-bracket">&gt;</span></span></pre>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <p>如果省略事件类型名，默认会监听`updated`事件。</p>
+    <div class="code-box scroll">
+      <div class="CodeMirror cm-s-alice">
+        <div class="CodeMirror-lines">
+          <div style="position: relative; outline: none;">
+            <div class="CodeMirror-code">
+              <pre class=" CodeMirror-line "><span style="padding-right: 0.1px;"><span
+                  class="cm-tag cm-bracket">&lt;</span><span class="cm-tag">div</span> <span
+                  class="cm-attribute">x-type</span>=<span class="cm-string">"Comp"</span> <span class="cm-attribute">total@</span>=<span
+                  class="cm-string">"$.a + $.b + $.c + $.d *"</span><span
+                  class="cm-tag cm-bracket">&gt;&lt;/</span><span class="cm-tag">div</span><span
+                  class="cm-tag cm-bracket">&gt;</span></span></pre>
+            </div>
           </div>
         </div>
       </div>
@@ -295,7 +400,7 @@ Exact.RES.register('num2str', {
       <div class="CodeMirror cm-s-alice">
         <div class="CodeMirror-lines">
           <div style="position: relative; outline: none;">
-            <div class="CodeMirror-code"><pre class=" CodeMirror-line "><span style="padding-right: 0.1px;">{</span></pre><pre class=" CodeMirror-line "><span style="padding-right: 0.1px;">  <span class="cm-variable">$template</span>: <span class="cm-string">'&lt;h2&gt;@{$.fullName}&lt;/h2&gt;'</span></span></pre><pre class=" CodeMirror-line "><span style="padding-right: 0.1px;">  <span class="cm-variable">descriptors</span>: [{</span></pre><pre class=" CodeMirror-line "><span style="padding-right: 0.1px;">    <span class="cm-property">fullName</span>: {</span></pre><pre class=" CodeMirror-line "><span style="padding-right: 0.1px;">      <span class="cm-property">depends</span>: [<span class="cm-string">'firstName'</span>, <span class="cm-string">'lastName'</span>],</span></pre><pre class=" CodeMirror-line "><span style="padding-right: 0.1px;">      <span class="cm-property">get</span>: <span class="cm-keyword">function</span>(<span class="cm-def">props</span>) {</span></pre><pre class=" CodeMirror-line "><span style="padding-right: 0.1px;">        <span class="cm-keyword">return</span> <span class="cm-keyword">this</span>.<span class="cm-property">firstName</span> <span class="cm-operator">+</span> <span class="cm-string">' '</span> <span class="cm-operator">+</span> <span class="cm-keyword">this</span>.<span class="cm-property">lastName</span>;</span></pre><pre class=" CodeMirror-line "><span style="padding-right: 0.1px;">      }</span></pre><pre class=" CodeMirror-line "><span style="padding-right: 0.1px;">      <span class="cm-comment">//,set: function(value, props) {</span></span></pre><pre class=" CodeMirror-line "><span class="cm-tab-wrap-hack" style="padding-right: 0.1px;">      <span class="cm-comment">//<span class="cm-tab" role="presentation" cm-text="	">    </span>var names = value.split(' ');</span></span></pre><pre class=" CodeMirror-line "><span style="padding-right: 0.1px;">      <span class="cm-comment">//  this.save({firtName: names[0], lastName: names[1]});</span></span></pre><pre class=" CodeMirror-line "><span style="padding-right: 0.1px;">      <span class="cm-comment">//}</span></span></pre><pre class=" CodeMirror-line "><span style="padding-right: 0.1px;">    }</span></pre><pre class=" CodeMirror-line "><span style="padding-right: 0.1px;">  }]</span></pre><pre class=" CodeMirror-line "><span style="padding-right: 0.1px;">}</span></pre></div>
+            <div class="CodeMirror-code"><pre class=" CodeMirror-line "><span style="padding-right: 0.1px;">{</span></pre><pre class=" CodeMirror-line "><span style="padding-right: 0.1px;">  <span class="cm-variable">$template</span>: <span class="cm-string">'&lt;h2&gt;@{ $.fullName }&lt;/h2&gt;'</span></span></pre><pre class=" CodeMirror-line "><span style="padding-right: 0.1px;">  <span class="cm-variable">descriptors</span>: [{</span></pre><pre class=" CodeMirror-line "><span style="padding-right: 0.1px;">    <span class="cm-property">fullName</span>: {</span></pre><pre class=" CodeMirror-line "><span style="padding-right: 0.1px;">      <span class="cm-property">depends</span>: [<span class="cm-string">'firstName'</span>, <span class="cm-string">'lastName'</span>],</span></pre><pre class=" CodeMirror-line "><span style="padding-right: 0.1px;">      <span class="cm-property">get</span>: <span class="cm-keyword">function</span>(<span class="cm-def">props</span>) {</span></pre><pre class=" CodeMirror-line "><span style="padding-right: 0.1px;">        <span class="cm-keyword">return</span> <span class="cm-keyword">this</span>.<span class="cm-property">firstName</span> <span class="cm-operator">+</span> <span class="cm-string">' '</span> <span class="cm-operator">+</span> <span class="cm-keyword">this</span>.<span class="cm-property">lastName</span>;</span></pre><pre class=" CodeMirror-line "><span style="padding-right: 0.1px;">      }</span></pre><pre class=" CodeMirror-line "><span style="padding-right: 0.1px;">      <span class="cm-comment">//,set: function(value, props) {</span></span></pre><pre class=" CodeMirror-line "><span style="padding-right: 0.1px;">      <span class="cm-comment">//    var names = value.split(' ');</span></span></pre><pre class=" CodeMirror-line "><span style="padding-right: 0.1px;">      <span class="cm-comment">//  this.save({firtName: names[0], lastName: names[1]});</span></span></pre><pre class=" CodeMirror-line "><span style="padding-right: 0.1px;">      <span class="cm-comment">//}</span></span></pre><pre class=" CodeMirror-line "><span style="padding-right: 0.1px;">    }</span></pre><pre class=" CodeMirror-line "><span style="padding-right: 0.1px;">  }]</span></pre><pre class=" CodeMirror-line "><span style="padding-right: 0.1px;">}</span></pre></div>
           </div>
         </div>
       </div>

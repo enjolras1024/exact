@@ -28,16 +28,16 @@
 
   <div class="template">
     <g class="text-slider" xmlns="http://www.w3.org/2000/svg">
-      <text transform="translate(0, 10)">&{$.name}</text>
-      <text transform="translate(50, 10)">: @{$.value}</text>
-      <g x-type="Slider" x-id="slider" transform="translate(120, 0)" max="&{$.max}" min="&{$.min}" value="#{$.value}"></g>
+      <text transform="translate(0, 10)">&{ $.name }</text>
+      <text transform="translate(50, 10)">: @{ $.value }</text>
+      <g x-type="Slider" x-id="slider" transform="translate(120, 0)" max&="$.max" min&="$.min" value#="$.value"></g>
     </g>
   </div>
 
   <div class="template">
     <g class="slider" xmlns="http://www.w3.org/2000/svg">
       <rect width="100" height="2" y="5" class="track"></rect>
-      <circle cx="@{$.normalize($.value)}" cy="6" r="6" class="button" x-id="btn" mousedown+="onMouseChange"></circle>
+      <circle cx@="$.normalize($.value)" cy="6" r="6" class="button" x-id="btn" mousedown+="$.onMouseChange"></circle>
     </g>
   </div>
 
