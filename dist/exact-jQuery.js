@@ -1157,7 +1157,8 @@
       handler.useCapture = useCapture;
     }
 
-    handlers.unshift(handler);
+    //handlers.unshift(handler);
+    handlers.push(handler);
 
     //May add DOM event listener.
     if (!('listener' in action)){
@@ -1200,18 +1201,17 @@
     if (all && !keyName) {
       handlers.splice(0);
     } else {
-      for (i = n-1; i >= 0; --i) {
-      //for (i = 0; i < n; ++i) {
+      //for (i = n-1; i >= 0; --i) {
+      for (i = 0; i < n; ++i) {
         handler = handlers[i];
         if ((all || exec === handler.exec) && (!keyName || keyName === handler.keyName)) {
-          handlers.splice(i, 1);
-          //--action.count;
+          handlers.splice(i--, 1);
           break;
         }
       }
     }
 
-    if (handlers.length === 0) { //TODO: detach
+    if (handlers.length === 0) {
       if (action.listener && typeof constructor.removeEventListener === 'function') {
         constructor.removeEventListener(watcher, action, event.type);
       }
@@ -1261,16 +1261,15 @@
 
       n = handlers.length;
       // trigger handlers
-      //for (i = 0; i < n; ++i) {
-      for (i = n-1; i >= 0; --i) {
+      for (i = 0; i < n; ++i) {
+      //for (i = n-1; i >= 0; --i) {
         handler = handlers[i];
 
         if (!handler || (handler.keyName && handler.keyName !== event.keyName)) { continue; }
-
-        if ((event.eventPhase === 1) === !!handler.useCapture) {
+        //if ((event.eventPhase === 1) === !!handler.useCapture) {
           exec = handler.exec;
           exec.apply(null, params);
-        }
+        //}
       }
     }
   }
@@ -3771,6 +3770,7 @@
           }
 
           src.on('changed.' + prop, function(event, dst, old) {
+            if (dst === old) { return; }
             if (old && old instanceof Collection) {
               old.off('changed', handler);
             }
