@@ -76,9 +76,7 @@
         cc = expression.charCodeAt(i);
 
         if (cc === QUOTE_CODE && cb !== SLASH_CODE) {
-          //cb = cc;
           iq = !iq;
-          //continue;
         }
 
         if (iq) {
@@ -290,25 +288,12 @@
     bind: function() {
       var name, method, target = this.target;
 
-      if (typeof arguments[0] !== 'object') { // no extras
-        for (var i = 0, n = arguments.length; i < n; ++i) {
-          name = arguments[i];
-          method = target[name];
+      for (var i = 0, n = arguments.length; i < n; ++i) {
+        name = arguments[i];
+        method = target[name];
 
-          if (typeof method === 'function') {
-            target[name] = method.bind(target);
-          }
-        }
-      } else { // with extra parameters
-        var options = arguments[0];
-        for (name in options) {
-          if (options.hasOwnProperty(name)) {
-            method = target[name];
-
-            if (typeof method === 'function') {
-              target[name] = method.bind.apply(method, [target].concat(options[name]));
-            }
-          }
+        if (typeof method === 'function') {
+          target[name] = method.bind(target);
         }
       }
     }
@@ -320,7 +305,7 @@
   };
 
   Exact.assign = function assign(target/*,..sources*/) { // Object.assign
-    if (target === undefined || target === null) {
+    if (target == null) {
       throw  new TypeError('Cannot convert undefined or null to object');
     }
 
@@ -417,7 +402,7 @@
    * @param {Object} props
    */
   Exact.defineClass = function defineClass(props) {
-    var subClass, superClass, mixins, statics, sources;//, ObjectUtil = Exact.ObjectUtil;
+    var subClass, superClass, mixins, statics, sources;
 
     // superClass
     if (props.hasOwnProperty('extend')) {
@@ -444,7 +429,7 @@
     }
 
     // props
-    subClass.prototype = Object.create(superClass.prototype);//ObjectUtil.create(superClass.prototype);
+    subClass.prototype = Object.create(superClass.prototype);
 
     sources = [subClass.prototype];
 
@@ -1345,7 +1330,8 @@
       handler.useCapture = useCapture;
     }
 
-    handlers.unshift(handler);
+    //handlers.unshift(handler);
+    handlers.push(handler);
 
     //May add DOM event listener.
     if (!('listener' in action)){
@@ -1388,18 +1374,17 @@
     if (all && !keyName) {
       handlers.splice(0);
     } else {
-      for (i = n-1; i >= 0; --i) {
-      //for (i = 0; i < n; ++i) {
+      //for (i = n-1; i >= 0; --i) {
+      for (i = 0; i < n; ++i) {
         handler = handlers[i];
         if ((all || exec === handler.exec) && (!keyName || keyName === handler.keyName)) {
-          handlers.splice(i, 1);
-          //--action.count;
+          handlers.splice(i--, 1);
           break;
         }
       }
     }
 
-    if (handlers.length === 0) { //TODO: detach
+    if (handlers.length === 0) {
       if (action.listener && typeof constructor.removeEventListener === 'function') {
         constructor.removeEventListener(watcher, action, event.type);
       }
@@ -1449,16 +1434,15 @@
 
       n = handlers.length;
       // trigger handlers
-      //for (i = 0; i < n; ++i) {
-      for (i = n-1; i >= 0; --i) {
+      for (i = 0; i < n; ++i) {
+      //for (i = n-1; i >= 0; --i) {
         handler = handlers[i];
 
         if (!handler || (handler.keyName && handler.keyName !== event.keyName)) { continue; }
-
-        if ((event.eventPhase === 1) === !!handler.useCapture) {
+        //if ((event.eventPhase === 1) === !!handler.useCapture) {
           exec = handler.exec;
           exec.apply(null, params);
-        }
+        //}
       }
     }
   }
@@ -3959,6 +3943,7 @@
           }
 
           src.on('changed.' + prop, function(event, dst, old) {
+            if (dst === old) { return; }
             if (old && old instanceof Collection) {
               old.off('changed', handler);
             }
@@ -4369,6 +4354,7 @@
   var EvaluatorParser = Exact.EvaluatorParser;
 
   /* /^\$\.[\w\$]+$/ */
+  var OFFSET = Exact.CONTEXT_SYMBOL.length + 1;
   var HANDLER_REGEXP = new RegExp('^\\' + Exact.CONTEXT_SYMBOL + '\\.[\\w\\$]+$');
 
   function parse(expr, resources, identifiers) {
@@ -4377,7 +4363,7 @@
     var template = {};
 
     if (HANDLER_REGEXP.test(expr)) {
-      template.handler = expr.slice(2); // TODO:
+      template.handler = expr.slice(OFFSET); // TODO:
     }  else {
       template.evaluator = EvaluatorParser.parse(expr, resources, ['event'].concat(identifiers));
     }
@@ -4627,7 +4613,7 @@
   var Skin = Exact.Skin;
   var HTMXTemplate = Exact.HTMXTemplate;
 
-  function parseData(expr) {
+  function parseData(expr, camel) {
     var pieces = expr.split(/;/g), piece, data = {}, name, key, n, i, j;
 
     for (i = 0, n = pieces.length; i < n; ++i) {
@@ -4639,7 +4625,7 @@
         expr = piece.slice(j + 1).trim();
         name = piece.slice(0, j).trim();
 
-        key = Skin.toCamelCase(name);
+        key = camel ? Skin.toCamelCase(name) : name;
 
         data[key] = expr;
       }
@@ -4665,12 +4651,12 @@
     }
 
     if ($attrs['x-style']) {
-      template.style = parseData($attrs['x-style']);
+      template.style = parseData($attrs['x-style'], true);
       delete $attrs['x-style'];
     }
 
     if ($attrs['x-class']) {
-      template.classes = parseData($attrs['x-class']);
+      template.classes = parseData($attrs['x-class'], true);
       delete $attrs['x-class'];
     }
 
@@ -4766,7 +4752,7 @@
     }
 
     if (!Skin.isElement($template)) {
-      throw new TypeError('template must be HTMXTemplate, DOM element or HTML string');
+      throw new TypeError('template must be DOM element or HTML string that contains a root tag');
     }
 
     var template = new HTMXTemplate();
