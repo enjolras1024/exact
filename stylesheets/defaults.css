@@ -155,7 +155,7 @@ ul > li {
   line-height: 1.5em;
 }
 
-.link:hover/*, .link.active*/ {
+.link:hover/*, .link.active*/, .link-live {
 color: #06d;
 }
 
@@ -171,7 +171,7 @@ color: #06d;
   color: #333;
 }
 
-.article p {
+article p {
   line-height: 1.5em;
   font-size: 1.5em;
 }
@@ -324,6 +324,11 @@ color: #06d;
   border: none;
   height: 100%;
   width: 100%;
+}
+
+.expr {
+  color: #1d75b3;
+  background-color: #f8f8f8;
 }
 
 @media screen and (max-width: 900px)  {
@@ -490,5 +495,4 @@ color: #06d;
 
     /*font-size: 1.25em;*/
   }
-
 }

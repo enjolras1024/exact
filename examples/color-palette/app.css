@@ -11,7 +11,7 @@
   outline: solid 1px #ff0000;
 }
 
-.palette [x-id="lump"] {
+.palette [x-ref="lump"] {
   display: inline-block;
   width: 110px;
   height: 18px;
@@ -19,7 +19,7 @@
   border: solid 1px #000000;
 }
 
-.palette [x-id="input"] {
+.palette [x-ref="input"] {
   width: 50px;
   margin-left: 2px;
 }
@@ -27,11 +27,11 @@
 .channel-editor {
   padding: 5px 0;
 }
-.channel-editor [x-id="editor"] {
+.channel-editor [x-ref="editor"] {
   width: 30px;
   margin: 0 5px;
   text-align: right;
 }
-.channel-editor [x-id="slider"] {
+.channel-editor [x-ref="slider"] {
   width: 120px;
 }

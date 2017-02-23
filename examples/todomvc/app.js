@@ -1,10 +1,20 @@
 (function() {
   var Skin = Exact.Skin;
   var Store = Exact.Store;
-  var Collection = Exact.Collection;
   var Component = Exact.Component;
+  var Collection = Exact.Collection;
 
-  var defineClass = Exact.defineClass;
+  var id = 0;
+
+  var STATUS = {
+    ALL: 'all', ACTIVE: 'active', COMPLETED: 'completed'
+  };
+
+  function filter(todos, status) {
+    return todos.filter(function(todo) {
+      return status === STATUS.ALL || (status === STATUS.COMPLETED ? todo.completed : !todo.completed);
+    });
+  }
 
   var ENJ = {
     read: function() {
@@ -19,53 +29,79 @@
     }
   };
 
-  ENJ.Adapter = defineClass({
+  ENJ.TodoAdapter = Exact.defineClass({
     extend: Component,
 
     statics: {
-      $template: Skin.query(document, '.template .adapter')
+      template: Skin.query(document, '.template .todo-adapter'),
+
+      defaults: function() {
+        return {
+          completed: false,
+          editing: false,
+          label: '',
+          text: ''
+        }
+      }
     },
 
     register: function() {
-      Exact.help(this).bind('edit', 'destroy', 'doneEdit', 'cancelEdit');
+      Exact.help(this).bind('onToggle', 'onChange');
     },
 
-    edit: function() {
-      this.set('backup', this.item.title);
-      this.editor.set('value', this.backup);
+    onToggle: function(event) {
+      this.set('completed', event.target.checked);
+    },
+
+    onChange: function(event) {
+      this.set('text', event.target.value.trim());
+    },
+
+    startEditing: function() {
+      this.set('text', this.label);
+      this.set('editing', true);
       this.editor.focus();
     },
 
-    doneEdit: function(event) {
-      this.submit(event.target.value.trim());
+    doneEditing: function() {
+      if (this.editing) {
+        this.submit(this.text);
+      }
+
+      this.cancelEditing();
     },
 
-    cancelEdit: function(event) {
-      this.submit(this.backup);
+    cancelEditing: function() {
+      this.set('editing', false);
     },
 
-    submit: function(title) {
-      if (!this.backup) { return; }
-
-      this.set('backup', '');
-      
-      if (title) {
-        this.item.set("title", title);
+    submit: function(text) {
+      if (text) {
+        this.set('label', text);
       } else {
         this.destroy();
       }
     },
 
     destroy: function() {
-      this.emit('destroy', this.item);
+      this.send('destroy');
     }
   });
 
-  ENJ.TodoApp = defineClass({
+  ENJ.TodoApp = Exact.defineClass({
     extend: Component,
 
     statics: {
-      descriptors: [{
+      defaults: function() {
+        return {
+          todos: Collection.from([]),
+          status: STATUS.ALL,
+          newTodo: '',
+          remainingCount: 0
+        }
+      },
+
+      descriptors: {
         allDone: {
           depends: ['remainingCount'],
           get: function() {
@@ -76,81 +112,60 @@
               todo.set('completed', value);
             });
           }
-        },
-        remainingCount: {
-          get: function() {
-            return this.todos.filter(function(item){
-              return !item.completed;
-            }).length;
-          }
         }
-      }],
+      },
+
       resources: {
-        ENJ: ENJ,
+        filter: filter,
         display: function(visible) {
           return visible ? '' : 'none';
         },
         pluralize: function(num, str) {
-          return ' ' + str + (num > 1 ? 's': '');
-        }
+          return str + (num !== 1 ? 's' : '');
+        },
+        TodoAdapter: ENJ.TodoAdapter
       },
-      $template: Skin.query(document, '.template .todoapp')
-    },
 
-    defaults: function() {
-      return {
-        todos: new Collection(),
-        newTitle: '',
-        remainingCount: 0
-      }
-    },
-
-    filtering: function(todos) {
-      var filter = this.filter || 'all';
-      return todos.filter(function(todo) {
-        return filter === 'all' || (filter === 'completed' ? todo.completed : !todo.completed);
-      });
+      template: Skin.query(document, '.template .todoapp')
     },
 
     register: function() {
-      Exact.help(this).bind('onEnter', 'filtering', 'removeTodo', 'clearCompleted');
+      Exact.help(this).bind('onEnter', 'onChange', 'onToggle');
     },
 
     ready: function() {
-      var invalidate = this.invalidate;
-      var removeTodo = this.removeTodo;
-
-      this.todos.onChange = invalidate;
-
       var records = ENJ.read();
+
       if (records) {
         for (var i = 0, n = records.length; i < n; ++i) {
-          this.addTodo(Store.from(records[i]));
+          this.addTodo(Store.create(records[i]));
         }
       }
-
-      this.list.on('itemAdded', function(event, todo, adapter) {
-        adapter.on('destroy', removeTodo);
-      });
-
-      this.list.on('itemRemoved', function(event, todo, adapter) {
-        adapter.off('destroy', removeTodo);
-      });
     },
 
     refresh: function() {
-      this.send('changed.remainingCount');
+      var remainingCount = this.remainingCount;
+
+      this.set('remainingCount', this.todos.length - filter(this.todos, STATUS.COMPLETED).length);
+
+      if (this.status !== STATUS.ALL && this.remainingCount !== remainingCount ) {
+        this.send('changed.todos');
+      }
+
       ENJ.save(this.todos.slice(0));
     },
 
     addTodo: function(todo) {
-      todo.on('changed', this.invalidate);
-      this.todos.push(todo);
+      todo.on('changed.completed', this.invalidate);
+      todo.id = ++id;
+      this.todos.insert(todo);
+      this.invalidate();
     },
 
     removeTodo: function(todo) {
-      todo.off('changed', this.invalidate);
-      this.todos.splice(this.todos.indexOf(todo), 1);
+      this.todos.remove(todo);
+      this.invalidate();
+      todo.off();
     },
 
     clearCompleted: function() {
@@ -161,38 +176,36 @@
       }
     },
 
-    onEnter: function() {
-      var title = this.newTitle.trim();
+    onToggle: function(event) {
+      this.set('allDone', event.target.checked);
+    },
 
-      this.set('newTitle', '');
+    onChange: function(event) {
+      this.set('newTodo', event.target.value.trim());
+    },
 
-      if (title) {
-        this.addTodo(Store.from({
-          completed: false,
-          title: title
+    onEnter: function(event) {
+      if (this.newTodo) {
+        this.addTodo(Store.create({
+          label: this.newTodo,
+          completed: false
         }));
       }
+
+      this.set('newTodo', '');
     }
   });
 
   var app = Component.create(ENJ.TodoApp);
 
-  var filters = {
-    all: true, active: true, completed: true
-  };
-
   function onHashChange () {
-    var filter = window.location.hash.replace(/#\/?/, '');
-    if (filters[filter]) {
-      app.set('filter', filter);
-    } else {
-      window.location.hash = '';
-      app.set('filter', 'all');
-    }
+    var hash = window.location.hash;
+    var status = STATUS[hash.replace(/#\/?/, '').toUpperCase()];
+    app.set('status', status || STATUS.ALL);
   }
 
   window.addEventListener('hashchange', onHashChange);
   onHashChange();
 
-  document.getElementById('app-shell').appendChild(app.$skin);
+  app.attach(Skin.query(document, '#todoapp'));
 })();

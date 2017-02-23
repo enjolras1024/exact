@@ -7,40 +7,39 @@ function ChannelEditor() {
 
 Exact.defineClass({
   constructor: ChannelEditor, extend: Component,
+
   statics: {
-    $template: Skin.query(document, '.template .channel-editor')
+    descriptors: ['label', 'value'],
+    template: Skin.query(document, '.template .channel-editor')
   },
-  onSlide: function() {
-    this.set('value', Skin.getProp(this.slider.$skin, 'value'));
+
+  register: function() {
+    Exact.help(this).bind('onChange', 'onSlide');
   },
-  onChange: function() {
-    var value = Number(Skin.getProp(this.editor.$skin, 'value'));
+
+  onChange: function(event) {
+    var value = Number(event.target.value);
     if (!isNaN(value)) {
       this.set('value', value);
     }
   },
-  register: function() {
-    Exact.help(this).bind('onChange', 'onSlide');
+
+  onSlide: function(event) {
+    this.set('value', event.target.value);
   }
 });
 
-function cut(key) {
-  return function (value, props) {
-    value = Number(value);
-
-    value = value >= 0 ? value : 0;
-    value = value <= 255 ? value : 255;
-
-    props[key] = value;
-  }
+function clip(value) {
+  value = Number(value);
+  return value < 0 ? 0 : (value > 255 ? 255 : value);
 }
 
-function hex2dec(n) {
+function dec2hex(n) {
   var s = Number(n).toString(16);
   return  s.length > 1 ? s : '0' + s;
 }
 
-function dec2hex(s) {
+function hex2dec(s) {
   return Number('0x' + s);
 }
 
@@ -50,55 +49,59 @@ function Palette() {
 
 Exact.defineClass({
   constructor: Palette, extend: Component,
+
   statics: {
-    $template: Skin.query(document, '.template .palette'),
+    template: Skin.query(document, '.template .palette'),
+
     resources: {
       ChannelEditor: ChannelEditor
     },
-    descriptors: [{
+
+    descriptors: {
       red: {
-        set: cut('red')
+        coerce: clip
       },
       blue: {
-        set: cut('blue')
+        coerce: clip
       },
       green: {
-        set: cut('green')
+        coerce: clip
       },
       color: {
         validator: /^\s*#[0-9a-fA-F]{6}\s*$/,
         depends: ['red', 'green', 'blue'],
-        get: function(props) {
-          return '#' + hex2dec(this.red) + hex2dec(this.green) + hex2dec(this.blue);
+        get: function() {
+          return '#' + dec2hex(this.red) + dec2hex(this.green) + dec2hex(this.blue);
         },
-        set: function(value, props) {
-          value = value.slice(1); // delete '#'
-          this.set('red', dec2hex(value.slice(0, 2)));
-          this.set('green', dec2hex(value.slice(2, 4)));
-          this.set('blue', dec2hex(value.slice(4, 6)));
+        set: function(value) {
+          this.set('red', hex2dec(value.slice(1, 3)));
+          this.set('green', hex2dec(value.slice(3, 5)));
+          this.set('blue', hex2dec(value.slice(5, 7)));
         }
       }
-    }]
-  },
-  defaults: function() {
-    return {
-      red: 0,
-      blue: 0,
-      green: 0
+    },
+
+    defaults: function() {
+      return {
+        red: 0,
+        blue: 0,
+        green: 0,
+        isInvalid: false
+      }
     }
   },
+
   register: function() {
     Exact.help(this).bind('onChange');
+
+    this.on('validated.color', (function(event, error) {
+      this.set('isInvalid', !!error);
+    }).bind(this));
   },
-  ready: function() {
-    var self = this;
-    this.on('validated.color', function(event, error) {
-      self.set('isInvalid', !!error);
-    });
-  },
-  onChange: function() {
-    this.set('color', Skin.getProp(this.input.$skin, 'value'));
+
+  onChange: function(event) {
+    this.set('color', event.target.value);
   }
 });
 
-document.getElementById('app-shell').appendChild(Component.create(Palette).$skin);
+Component.create(Palette).attach(Skin.query(document, '#palette'));

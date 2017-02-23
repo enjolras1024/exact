@@ -1,0 +1,433 @@
+<!DOCTYPE html>
+<html>
+<head lang="en">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+  <title>Exact</title>
+
+  <link href="../stylesheets/codemirror.css" rel="stylesheet">
+  <link href="../stylesheets/alice.css" rel="stylesheet">
+  <link href="../stylesheets/defaults.css" rel="stylesheet">
+  <!--<link href="../stylesheets/index.css" rel="stylesheet">-->
+
+
+</head>
+<body>
+<header class="header">
+  <nav class="nav-bar">
+    <h3 class="brand"><a href="../" class="logo">Exact</a></h3>
+    <a class="menu-btn"></a>
+    <ul class="menu-bar">
+      <li><a href="../examples/color-palette.html" class="menu-item"> Examples </a></li>
+      <li><a href="../downloads/index.html" class="menu-item"> Downloads </a></li>
+      <li><a href="../documents/index.html" class="menu-item  active"> Documents </a></li>
+      <li><a href="../apis/index.html" class="menu-item"> APIs </a></li>
+      <li><a href="https://github.com/enjolras1024/exact" class="menu-item"> GitHub </a></li>
+    </ul>
+  </nav>
+</header>
+<div class="main">
+  <aside class="side-bar">
+    <div class="card">
+      <h4>Overview</h4>
+      <ul class="list">
+        <li><a href="./index.html#setup" class="link">Setup</a></li>
+        <li><a href="./index.html#hello-world" class="link">Hello World</a></li>
+      </ul>
+    </div>
+    <div class="card">
+      <h4>Events</h4>
+      <ul class="list">
+        <li><a href="./event.html#on-off-once" class="link">On / Off / Once</a></li>
+        <li><a href="./event.html#send-emit" class="link">Send / Emit</a></li>
+        <li><a href="./event.html#key-name-of-event" class="link">Key Name of Event</a></li>
+      </ul>
+    </div>
+    <div class="card">
+      <h4>Models</h4>
+      <ul class="list">
+        <li><a href="./models.html#store-for-object" class="link">Store for Object</a></li>
+        <li><a href="./models.html#collection-for-array" class="link">Collection for Array</a></li>
+      </ul>
+    </div>
+    <div class="card">
+      <h4>Components</h4>
+      <ul class="list">
+        <li><a href="./component.html#component-element-and-text" class="link">Component, Element and Text</a></li>
+        <li><a href="./component.html#props-attrs-style-and-classes" class="link">Props, Attrs, Style and Classes</a></li>
+        <li><a href="./component.html#defaults-and-descriptors" class="link">Defaults and Descriptors</a></li>
+        <li><a href="./component.html#property-validtion" class="link">Property Validation</a></li>
+        <li><a href="./component.html#property-interception" class="link">Property Interception</a></li>
+        <li><a href="./component.html#property-denpendcy" class="link">Property Dependency</a></li>
+        <li><a href="./component.html#children-and-contents" class="link">Children and Contents</a></li>
+        <li><a href="./component.html#lifecycle-and-hooks" class="link">Lifecycle and Hooks</a></li>
+      </ul>
+    </div>
+    <div class="card">
+      <h4>Template Syntax</h4>
+      <ul class="list">
+        <li><a href="./template.html#event-handler" class="link">Event Handler</a></li>
+        <li><a href="./template.html#data-binding" class="link">Data Binding</a></li>
+        <li><a href="./template.html#optional-converters" class="link">Optional Converters</a></li>
+        <li><a href="./template.html#javascript-expressions" class="link">JavaScript Expressions</a></li>
+        <li><a href="./template.html#list-rendering" class="link">List Rendering</a></li>
+        <li><a href="./template.html#condition-rendering" class="link">Condition Rendering</a></li>
+        <li><a href="./template.html#child-components" class="link">Child Components</a></li>
+        <li><a href="./template.html#contents-and-slots" class="link">Contents and Slots</a></li>
+        <li><a href="./template.html#refrence-to-part" class="link">Reference to Part</a></li>
+        <li><a href="./template.html#camlecase-vs-kebabcase" class="link">camelCase vs kebab-case</a></li>
+      </ul>
+    </div>
+    <div class="card">
+      <h4>Tips</h4>
+      <ul class="list">
+        <li><a href="./tips.html" class="link">Data Flow</a></li>
+        <li><a href="./tips.html" class="link">Binding Instance Methods</a></li>
+        <li><a href="./tips.html" class="link">Using RES to Manage Resources</a></li>
+      </ul>
+    </div>
+  </aside>
+  <a class="side-btn">&gt;</a>
+  <article class="article">
+    <a id="setting-property"></a>
+    <h2>Templates</h2>
+    <p>在创建一个子组件类时，我们可以为其提供模板。模板中和添加事件处理器、创建数据绑定、访问外部资源和引用其他子组件。</p>
+    <div class="code-box scroll">
+      <div class="CodeMirror cm-s-alice">
+        <div class="CodeMirror-code"><pre class=" CodeMirror-line "><span style="padding-right: 0.1px;"><span class="cm-variable">Exact</span>.<span class="cm-property">defineClass</span>({</span></pre><pre class=" CodeMirror-line "><span style="padding-right: 0.1px;">  <span class="cm-property">constructor</span>: <span class="cm-keyword">function</span> <span class="cm-def">SubComponent</span>() {</span></pre><pre class=" CodeMirror-line "><span style="padding-right: 0.1px;">    <span class="cm-variable">Exact</span>.<span class="cm-property">Component</span>.<span class="cm-property">call</span>(<span class="cm-keyword">this</span>);</span></pre><pre class=" CodeMirror-line "><span style="padding-right: 0.1px;">  },</span></pre><pre class=" CodeMirror-line "><span style="padding-right: 0.1px;">  <span class="cm-property">statics</span>: {</span></pre><pre class=" CodeMirror-line "><span style="padding-right: 0.1px;">    <span class="cm-property">defaults</span>: <span class="cm-keyword">function</span>() {}, <span class="cm-tab" role="presentation" cm-text="	">   </span><span class="cm-comment">// defaults函数返回默认值</span></span></pre><pre class=" CodeMirror-line "><span style="padding-right: 0.1px;">    <span class="cm-property">descriptors</span>: {},<span class="cm-tab" role="presentation" cm-text="	">    </span><span class="cm-tab" role="presentation" cm-text="	">    </span><span class="cm-tab" role="presentation" cm-text="	">    </span><span class="cm-comment">// descriptors添加属性验证等辅助描述符</span></span></pre><pre class=" CodeMirror-line "><span style="padding-right: 0.1px;">    <span class="cm-property">resources</span>: {}, <span class="cm-tab" role="presentation" cm-text="	"> </span><span class="cm-tab" role="presentation" cm-text="	">    </span><span class="cm-tab" role="presentation" cm-text="	">    </span><span class="cm-tab" role="presentation" cm-text="	">    </span><span class="cm-comment">// resources中可注册转换器、子组件类、命名空间等</span></span></pre><pre class=" CodeMirror-line "><span style="padding-right: 0.1px;">    <span class="cm-property">template</span>: <span class="cm-variable">Exact</span>.<span class="cm-property">Skin</span>.<span class="cm-property">query</span>(<span class="cm-variable">documnet</span>, <span class="cm-string">'.subcomp'</span>) <span class="cm-comment">// DOM元素或字符串，且只有一个根元素</span></span></pre><pre class=" CodeMirror-line "><span style="padding-right: 0.1px;">  }</span></pre><pre class=" CodeMirror-line "><span style="padding-right: 0.1px;">});</span></pre></div>
+      </div>
+    </div>
+    <p>这里使用了Exact的工具方法<span class="expr">defineClass</span>。你依然可以用你喜欢的方式定义一个子组件类，例如使用ES6的语法糖。
+      重要的是，在子类构造函数中调用了父类的构造函数。</p>
+    <a id="event-handler"></a>
+    <div class="code-box scroll">
+      <div class="CodeMirror cm-s-alice">
+        <div class="CodeMirror-code"><pre class=" CodeMirror-line "><span style="padding-right: 0.1px;"><span class="cm-comment">// 在ES6中</span></span></pre><pre class=" CodeMirror-line "><span style="padding-right: 0.1px;"><span class="cm-keyword">class</span> <span class="cm-def">SubComponent</span> <span class="cm-keyword">extends</span> <span class="cm-variable">Exact</span>.<span class="cm-property">Component</span> {</span></pre><pre class=" CodeMirror-line "><span style="padding-right: 0.1px;">  <span class="cm-comment">// 默认构造函数会调用父类构造函数</span></span></pre><pre class=" CodeMirror-line "><span style="padding-right: 0.1px;">  <span class="cm-comment">// constructor() {</span></span></pre><pre class=" CodeMirror-line "><span style="padding-right: 0.1px;">  <span class="cm-comment">//   super();</span></span></pre><pre class=" CodeMirror-line "><span style="padding-right: 0.1px;">  <span class="cm-comment">// }</span></span></pre><pre class=" CodeMirror-line "><span style="padding-right: 0.1px;">  <span class="cm-keyword">static</span> <span class="cm-property">defaults</span>() {}</span></pre><pre class=" CodeMirror-line "><span style="padding-right: 0.1px;">}</span></pre><pre class=" CodeMirror-line "><span style="padding-right: 0.1px;"><span class="cm-variable">SubComponent</span>.<span class="cm-property">descriptors</span> <span class="cm-operator">=</span> {};</span></pre><pre class=" CodeMirror-line "><span style="padding-right: 0.1px;"><span class="cm-variable">SubComponent</span>.<span class="cm-property">resources</span> <span class="cm-operator">=</span> {};</span></pre><pre class=" CodeMirror-line "><span style="padding-right: 0.1px;"><span class="cm-variable">SubComponent</span>.<span class="cm-property">template</span> <span class="cm-operator">=</span> <span class="cm-variable">Exact</span>.<span class="cm-property">Skin</span>.<span class="cm-property">query</span>(<span class="cm-variable">documnet</span>, <span class="cm-string">'.subcomp'</span>);</span></pre><pre class=" CodeMirror-line "><span style="padding-right: 0.1px;"><span cm-text="">​</span></span></pre></div>
+      </div>
+    </div>
+
+    <h4>Event Handler</h4>
+    <p>在模板中，可以添加一个函数引用作为事件处理器：</p>
+    <div class="code-box scroll">
+      <div class="CodeMirror cm-s-alice">
+        <div class="CodeMirror-code"><pre class=" CodeMirror-line "><span style="padding-right: 0.1px;"><span class="cm-tag cm-bracket">&lt;</span><span class="cm-tag">a</span> <span class="cm-attribute">x-type</span>=<span class="cm-string">"Button"</span> <span class="cm-attribute">click+</span>=<span class="cm-string">"$.onClick"</span><span class="cm-tag cm-bracket">&gt;</span>Ok<span class="cm-tag cm-bracket">&lt;/</span><span class="cm-tag">a</span><span class="cm-tag cm-bracket">&gt;</span></span></pre><pre class=" CodeMirror-line "><span style="padding-right: 0.1px;"><span class="cm-tag cm-bracket">&lt;</span><span class="cm-tag">div</span> <span class="cm-attribute">x-type</span>=<span class="cm-string">"Ticker"</span> <span class="cm-attribute">tick+</span>=<span class="cm-string">"$.onTick"</span><span class="cm-tag cm-bracket">&gt;&lt;/</span><span class="cm-tag">div</span><span class="cm-tag cm-bracket">&gt;</span></span></pre></div>
+      </div>
+    </div>
+    <p>对于键盘事件和属性更改通知，还可以指定<span class="expr">keyName</span>：</p>
+    <div class="code-box scroll">
+      <div class="CodeMirror cm-s-alice">
+        <div class="CodeMirror-code"><pre class=" CodeMirror-line "><span style="padding-right: 0.1px;"><span class="cm-tag cm-bracket">&lt;</span><span class="cm-tag">input</span> <span class="cm-attribute">type</span>=<span class="cm-string">"text"</span> <span class="cm-attribute">keyup.enter+</span>=<span class="cm-string">"$.onEnter"</span><span class="cm-tag cm-bracket">&gt;</span></span></pre><pre class=" CodeMirror-line "><span style="padding-right: 0.1px;"><span class="cm-tag cm-bracket">&lt;</span><span class="cm-tag">div</span> <span class="cm-attribute">x-type</span>=<span class="cm-string">"Timer"</span> <span class="cm-attribute">changed.time+</span>=<span class="cm-string">"$.onTimeChanged"</span><span class="cm-tag cm-bracket">&gt;&lt;/</span><span class="cm-tag">div</span><span class="cm-tag cm-bracket">&gt;</span></span></pre></div>
+      </div>
+    </div>
+    <a id="data-binding"></a>
+    <p>也可以使用JavaScript语句作为内联的处理器：</p>
+    <div class="code-box scroll">
+      <div class="CodeMirror cm-s-alice">
+        <div class="CodeMirror-code"><pre class=" CodeMirror-line "><span style="padding-right: 0.1px;"><span class="cm-tag cm-bracket">&lt;</span><span class="cm-tag">a</span> <span class="cm-attribute">click+</span>=<span class="cm-string">"$.close()"</span><span class="cm-tag cm-bracket">&gt;</span>Close<span class="cm-tag cm-bracket">&lt;/</span><span class="cm-tag">a</span><span class="cm-tag cm-bracket">&gt;</span></span></pre><pre class=" CodeMirror-line "><span style="padding-right: 0.1px;"><span class="cm-tag cm-bracket">&lt;</span><span class="cm-tag">input</span> <span class="cm-attribute">type</span>=<span class="cm-string">"text"</span> <span class="cm-attribute">change+</span>=<span class="cm-string">"$.onChange(event.target.value)"</span><span class="cm-tag cm-bracket">&gt;</span></span></pre></div>
+      </div>
+    </div>
+
+    <h4>Data Binding</h4>
+    <p>
+      Exact中的绑定是基于事件而实现的。这意味着，即便不使用绑定，你也能完成数据的传递。
+      当然，在模板中使用绑定自有好处，它以简单直观的方式简化了繁琐重复的赋值操作过程。
+    </p>
+    <div class="code-box scroll">
+      <div class="CodeMirror cm-s-alice">
+        <div class="CodeMirror-code"><pre class=" CodeMirror-line "><span style="padding-right: 0.1px;"><span class="cm-tag cm-bracket">&lt;</span><span class="cm-tag">input</span> <span class="cm-attribute">type</span>=<span class="cm-string">"text"</span> <span class="cm-attribute">value@</span>=<span class="cm-string">"$.message"</span> <span class="cm-attribute">x-ref</span>=<span class="cm-string">"msg"</span><span class="cm-tag cm-bracket">&gt;</span></span></pre></div>
+      </div>
+    </div>
+
+    <p>几乎等价于：</p>
+    <div class="code-box scroll">
+      <div class="CodeMirror cm-s-alice">
+        <div class="CodeMirror-code"><pre class=" CodeMirror-line "><span style="padding-right: 0.1px;"><span class="cm-keyword">var</span> <span class="cm-def">$</span> <span class="cm-operator">=</span> <span class="cm-keyword">this</span>;</span></pre><pre class=" CodeMirror-line "><span style="padding-right: 0.1px;"><span class="cm-variable">$</span>.<span class="cm-property">on</span>(<span class="cm-string">'changed.message'</span>, <span class="cm-keyword">function</span>() {</span></pre><pre class=" CodeMirror-line "><span style="padding-right: 0.1px;">  <span class="cm-variable">$</span>.<span class="cm-property">msg</span>.<span class="cm-property">set</span>(<span class="cm-string">'value'</span>, <span class="cm-variable">$</span>.<span class="cm-property">message</span>);</span></pre><pre class=" CodeMirror-line "><span style="padding-right: 0.1px;">});</span></pre></div>
+      </div>
+    </div>
+
+    <p>在Exact中使用好绑定，需要了解下面几个关键词：</p>
+    <p>（1）绑定模式：有3种绑定模式可选，即单次、单向和双向。其中，单次绑定是单向的，在首次触发后即刻被移除，因为它使用<span class="expr">once</span>方法监听事件。</p>
+    <p>（2）绑定路径：绑定表达式中出现的属性链即为绑定路径。路径的源头通常是组件本身，但也可以是列表渲染过程中某个已知的局部变量。</p>
+    <p>（3）绑定对象和绑定对象属性：绑定的目的是要将绑定表达式的运算结果赋给一个对象的属性。
+      对于单次或单向绑定，这样的对象是任意非null类型的，这样的对象属性也是任意的。
+      对于双向绑定，则要求绑定对象亦可作为绑定源，绑定对象属性亦可作为绑定源属性，否则双向绑定只能起到单向绑定的作用。</p>
+    <p>（4）绑定源和绑定源属性：绑定源是绑定路径上数据的直接提供者，通常为Exact中Component或Store的实例对象。绑定源属性的值改变后通常会派发一个属性更改事件，但有时普通属性也可作为绑定源属性，参见（5）。</p>
+    <p>（5）绑定域和绑定域事件：绑定表达式依托的上下文就是绑定域，通常这样的上下文就是一个组件。没有特别声明的情况下，一个绑定会关心每个绑定路径对应的属性更改事件。
+      但是，你也可以指定一个绑定域上的事件作为绑定域事件。这样，绑定就只关心指定绑定域事件有没有发生，而无需关心一个或多个属性更改事件。</p>
+    <p>（6）求值器和转换器：每个绑定都有一个求值器，负责根据一些常量和绑定域上一个或多个绑定路径来求出结果值。
+      转换器是可选和多选的，负责将求值器求得的值转换成其他形式。</p>
+
+    <p>模板中文本插值绑定的基本语法如下：</p>
+    <div class="code-box scroll">
+      <div class="CodeMirror cm-s-alice">
+        <div class="CodeMirror-code"><pre class=" CodeMirror-line "><span style="padding-right: 0.1px;"><span class="cm-comment">&lt;!--&lt;绑定模式符&gt;{&lt;求值器表达式&gt;[|转换器表达式] [^绑定域事件]}--&gt;</span></span></pre><pre class=" CodeMirror-line "><span style="padding-right: 0.1px;"><span class="cm-comment">&lt;!--单次绑定--&gt;</span></span></pre><pre class=" CodeMirror-line "><span style="padding-right: 0.1px;"><span class="cm-tag cm-bracket">&lt;</span><span class="cm-tag">p</span><span class="cm-tag cm-bracket">&gt;</span>Tip: <span class="cm-error">&amp;</span>{ $.tip }<span class="cm-tag cm-bracket">&lt;/</span><span class="cm-tag">p</span><span class="cm-tag cm-bracket">&gt;</span></span></pre><pre class=" CodeMirror-line "><span style="padding-right: 0.1px;"><span class="cm-comment">&lt;!--单向绑定，无参转换器--&gt;</span></span></pre><pre class=" CodeMirror-line "><span style="padding-right: 0.1px;"><span class="cm-tag cm-bracket">&lt;</span><span class="cm-tag">h1</span><span class="cm-tag cm-bracket">&gt;</span>@{ $.title | upper }<span class="cm-tag cm-bracket">&lt;/</span><span class="cm-tag">h1</span><span class="cm-tag cm-bracket">&gt;</span></span></pre><pre class=" CodeMirror-line "><span style="padding-right: 0.1px;"><span class="cm-comment">&lt;!--单向绑定，带常量参数的转换器--&gt;</span></span></pre><pre class=" CodeMirror-line "><span style="padding-right: 0.1px;"><span class="cm-tag cm-bracket">&lt;</span><span class="cm-tag">span</span><span class="cm-tag cm-bracket">&gt;</span>@{ $.time | format('hh:mm:ss') }<span class="cm-tag cm-bracket">&lt;/</span><span class="cm-tag">span</span><span class="cm-tag cm-bracket">&gt;</span></span></pre><pre class=" CodeMirror-line "><span style="padding-right: 0.1px;"><span class="cm-comment">&lt;!--单向绑定，带变量参数的转换器，只当`text`属性改变时才会触发--&gt;</span></span></pre><pre class=" CodeMirror-line "><span style="padding-right: 0.1px;"><span class="cm-tag cm-bracket">&lt;</span><span class="cm-tag">span</span><span class="cm-tag cm-bracket">&gt;</span>@{ $.text | slice(0, $.length) ^changed.text}...<span class="cm-tag cm-bracket">&lt;/</span><span class="cm-tag">span</span><span class="cm-tag cm-bracket">&gt;</span></span></pre></div>
+      </div>
+    </div>
+    <p>元素或组件属性绑定的语法，看起来就像是运算符重载：</p>
+
+    <div class="code-box scroll">
+      <div class="CodeMirror cm-s-alice">
+        <div class="CodeMirror-code"><pre class=" CodeMirror-line "><span style="padding-right: 0.1px;"><span class="cm-comment">&lt;!--&lt;绑定对象属性名&gt;&lt;绑定模式符&gt;="&lt;求值器表达式&gt;[|转换器表达式] [^绑定域事件]"--&gt;</span></span></pre><pre class=" CodeMirror-line "><span style="padding-right: 0.1px;"><span class="cm-comment">&lt;!--单次绑定--&gt;</span></span></pre><pre class=" CodeMirror-line "><span style="padding-right: 0.1px;"><span class="cm-tag cm-bracket">&lt;</span><span class="cm-tag">p</span> <span class="cm-attribute">style&amp;</span>=<span class="cm-string">"$.styleString"</span><span class="cm-tag cm-bracket">&gt;&lt;/</span><span class="cm-tag">p</span><span class="cm-tag cm-bracket">&gt;</span></span></pre><pre class=" CodeMirror-line "><span style="padding-right: 0.1px;"><span class="cm-comment">&lt;!--单向绑定，无参转换器--&gt;</span></span></pre><pre class=" CodeMirror-line "><span style="padding-right: 0.1px;"><span class="cm-tag cm-bracket">&lt;</span><span class="cm-tag">h1</span> <span class="cm-attribute">title@</span>=<span class="cm-string">"$.title | upper"</span><span class="cm-tag cm-bracket">&gt;&lt;/</span><span class="cm-tag">h1</span><span class="cm-tag cm-bracket">&gt;</span></span></pre><pre class=" CodeMirror-line "><span style="padding-right: 0.1px;"><span class="cm-comment">&lt;!--单向绑定，带参转换器--&gt;</span></span></pre><pre class=" CodeMirror-line "><span style="padding-right: 0.1px;"><span class="cm-tag cm-bracket">&lt;</span><span class="cm-tag">input</span> <span class="cm-attribute">type</span>=<span class="cm-string">"text"</span> <span class="cm-attribute">value@</span>=<span class="cm-string">"$.time | format('hh:mm:ss')"</span><span class="cm-tag cm-bracket">&gt;</span></span></pre><pre class=" CodeMirror-line "><span style="padding-right: 0.1px;"><span class="cm-comment">&lt;!--双向绑定，双向转换器--&gt;</span></span></pre><pre class=" CodeMirror-line "><span style="padding-right: 0.1px;"><span class="cm-tag cm-bracket">&lt;</span><span class="cm-tag">input</span> <span class="cm-attribute">type</span>=<span class="cm-string">"text"</span> <span class="cm-attribute">x-type</span>=<span class="cm-string">"TextBox"</span> <span class="cm-attribute">value#</span>=<span class="cm-string">"$.color | hex2rgb"</span><span class="cm-tag cm-bracket">&gt;</span></span></pre></div>
+      </div>
+    </div>
+    <p>对于双向绑定，绑定对象应当是组件，否则双向绑定表现为单向绑定。另外，特别要求求值器表达式为单个路径，以保持对称关系。
+      若在双向绑定使用转换器，转换器也必须是双向的。关于求值器和转换器更多的使用细节可参见下文。</p>
+    <p>如果要将文本插值的结果赋给元素或组件的某个属性，则可以这样书写：</p>
+
+    <div class="code-box scroll">
+      <div class="CodeMirror cm-s-alice">
+        <div class="CodeMirror-code">
+              <pre class=" CodeMirror-line "><span style="padding-right: 0.1px;"><span
+                  class="cm-tag cm-bracket">&lt;</span><span class="cm-tag">a</span> <span
+                  class="cm-attribute">href?</span>=<span class="cm-string">"http://www.xxx.com/page/@{$.page}/"</span></span></pre>
+              <pre class=" CodeMirror-line "><span style="padding-right: 0.1px;">   <span
+                  class="cm-attribute">style?</span>=<span class="cm-string">"color: black; font-size: @{ $.fontSize }px;"</span></span></pre>
+              <pre class=" CodeMirror-line "><span style="padding-right: 0.1px;">   <span
+                  class="cm-attribute">class?</span>=<span class="cm-string">"btn-next @{$.page &gt;= $.total ? 'disabled' : ''}"</span><span
+                  class="cm-tag cm-bracket">&gt;</span></span></pre>
+          <pre class=" CodeMirror-line "><span style="padding-right: 0.1px;">  下一页</span></pre>
+              <pre class=" CodeMirror-line "><span style="padding-right: 0.1px;"><span
+                  class="cm-tag cm-bracket">&lt;/</span><span class="cm-tag">a</span><span class="cm-tag cm-bracket">&gt;</span></span></pre>
+        </div>
+      </div>
+    </div>
+    <a id="optional-converters"></a>
+    <p>特别地，对于<span class="expr">class</span>和<span class="expr">style</span>的绑定，Exact提供一种风格一致的扩展语法：</p>
+    <div class="code-box scroll">
+      <div class="CodeMirror cm-s-alice">
+        <div class="CodeMirror-code"><pre class=" CodeMirror-line "><span style="padding-right: 0.1px;"><span class="cm-comment">&lt;!--&lt;绑定对象属性名&gt;&lt;绑定模式符&gt;:&lt;求值器表达式&gt;[|转换器表达式] [^绑定域事件];--&gt;</span></span></pre><pre class=" CodeMirror-line "><span style="padding-right: 0.1px;"><span class="cm-tag cm-bracket">&lt;</span><span class="cm-tag">a</span> <span class="cm-attribute">x-class</span>=<span class="cm-string">"btn-next: true; disabled@: $.page &gt;= $.total;"</span></span></pre><pre class=" CodeMirror-line "><span style="padding-right: 0.1px;">   <span class="cm-attribute">x-style</span>=<span class="cm-string">"color: black; font-size?: @{ $.fontSize }px;"</span><span class="cm-tag cm-bracket">&gt;</span></span></pre><pre class=" CodeMirror-line "><span style="padding-right: 0.1px;"><span class="cm-tag cm-bracket">&lt;/</span><span class="cm-tag">a</span><span class="cm-tag cm-bracket">&gt;</span>  </span></pre></div>
+      </div>
+    </div>
+    <p>即将<span class="expr">class</span>和<span class="expr">style</span>视作对象而非字符串，然后独立地为其中某个属性添加绑定。</p>
+
+    <h4>Optional Converters</h4>
+    <p>一些场景下，在视图上呈现数据时需要有一个格式化的过程，比如标题要大写：</p>
+    <div class="code-box scroll">
+      <div class="CodeMirror cm-s-alice">
+        <div class="CodeMirror-code"><pre class=" CodeMirror-line "><span style="padding-right: 0.1px;">{</span></pre><pre class=" CodeMirror-line "><span style="padding-right: 0.1px;">  <span class="cm-variable">resources</span>: {</span></pre><pre class=" CodeMirror-line "><span style="padding-right: 0.1px;">    <span class="cm-variable">format</span>: <span class="cm-keyword">function</span>(<span class="cm-def">value</span>, <span class="cm-def">brackets</span>) {</span></pre><pre class=" CodeMirror-line "><span style="padding-right: 0.1px;">     <span class="cm-keyword">return</span> <span class="cm-variable-2">brackets</span>[<span class="cm-number">0</span>] <span class="cm-operator">+</span> <span class="cm-variable-2">value</span>.<span class="cm-property">toUpperCase</span>() <span class="cm-operator">+</span> <span class="cm-variable-2">brackets</span>[<span class="cm-number">1</span>];</span></pre><pre class=" CodeMirror-line "><span style="padding-right: 0.1px;">    }</span></pre><pre class=" CodeMirror-line "><span style="padding-right: 0.1px;">  },</span></pre><pre class=" CodeMirror-line "><span style="padding-right: 0.1px;">  <span class="cm-variable">template</span>: <span class="cm-string">'&lt;h1&gt;@{$.title | format(\'##\')}&lt;/h1&gt;'</span>,</span></pre><pre class=" CodeMirror-line "><span style="padding-right: 0.1px;">  <span class="cm-variable">descriptors</span>: {<span class="cm-variable">title</span>: <span class="cm-atom">null</span>}</span></pre><pre class=" CodeMirror-line "><span style="padding-right: 0.1px;">}</span></pre><pre class=" CodeMirror-line "><span style="padding-right: 0.1px;"><span class="cm-comment">// this.title = 'hello' =&gt; &lt;h1&gt;#HELLO#&lt;/h1&gt;</span></span></pre></div>
+      </div>
+    </div>
+
+    <p>可以在全局<span class="expr">Exact.RES</span>、本地<span class="expr">resources</span>或绑定域上注册转换器，可以使用多个转换器（建议不超过2个），在声明式绑定表达式中以符号<span class="expr"> | </span>连接。
+      更多示例如下：</p>
+    <a id="javascript-expressions"></a>
+    <div class="code-box scroll">
+      <div class="CodeMirror cm-s-alice">
+        <div class="CodeMirror-code">
+          <pre class=" CodeMirror-line "><span style="padding-right: 0.1px;"><span class="cm-comment">// 本地resources或全局Exact.RES中定义了函数（或转换器对象）upper和wrap</span></span></pre>
+              <pre class=" CodeMirror-line "><span style="padding-right: 0.1px;">@{<span
+                  class="cm-variable">$</span>.<span class="cm-property">title</span> <span class="cm-operator">|</span> <span
+                  class="cm-variable">upper</span> <span class="cm-operator">|</span> <span
+                  class="cm-variable">wrap</span>(<span class="cm-string">'##'</span>)}</span></pre>
+          <pre class=" CodeMirror-line "><span style="padding-right: 0.1px;"><span cm-text="">​</span></span></pre>
+          <pre class=" CodeMirror-line "><span style="padding-right: 0.1px;"><span class="cm-comment">// 转换器中可以使用变量，当title或upperOrNot改变时都有可能触发绑定</span></span></pre>
+              <pre class=" CodeMirror-line "><span style="padding-right: 0.1px;">@{<span
+                  class="cm-variable">$</span>.<span class="cm-property">title</span> <span class="cm-operator">|</span> <span
+                  class="cm-variable">$</span>.<span class="cm-property">format</span>(<span
+                  class="cm-variable">$</span>.<span class="cm-property">upperOrNot</span>, <span
+                  class="cm-string">'##'</span>)}</span></pre>
+          <pre class=" CodeMirror-line "><span style="padding-right: 0.1px;"><span class="cm-comment">// 等价于</span></span></pre>
+              <pre class=" CodeMirror-line "><span style="padding-right: 0.1px;">@{<span
+                  class="cm-variable">$</span>.<span class="cm-property">format</span>(<span
+                  class="cm-variable">$</span>.<span class="cm-property">title</span>, <span
+                  class="cm-variable">$</span>.<span class="cm-property">upperOrNot</span>, <span
+                  class="cm-string">'##'</span>)}</span></pre>
+          <pre class=" CodeMirror-line "><span style="padding-right: 0.1px;"><span cm-text="">​</span></span></pre>
+          <pre class=" CodeMirror-line "><span style="padding-right: 0.1px;"><span class="cm-comment">// 全局Exact.RES上注册双向转换器</span></span></pre>
+              <pre class=" CodeMirror-line "><span style="padding-right: 0.1px;"><span class="cm-variable">Exact</span>.<span
+                  class="cm-property">RES</span>.<span class="cm-property">register</span>(<span class="cm-string">'num2str'</span>, {</span></pre>
+              <pre class=" CodeMirror-line "><span style="padding-right: 0.1px;">  <span class="cm-property">exec</span>: <span
+                  class="cm-variable">String</span>, <span class="cm-comment">//正向</span></span></pre>
+              <pre class=" CodeMirror-line "><span style="padding-right: 0.1px;">  <span class="cm-property">back</span>: <span
+                  class="cm-variable">Number</span>  <span class="cm-comment">//反向</span></span></pre>
+          <pre class=" CodeMirror-line "><span style="padding-right: 0.1px;">});</span></pre>
+              <pre class=" CodeMirror-line "><span style="padding-right: 0.1px;"><span
+                  class="cm-operator">&lt;</span><span class="cm-variable">input</span> <span
+                  class="cm-variable">type</span><span class="cm-operator">=</span><span class="cm-string">"text"</span> <span
+                  class="cm-variable">x</span><span class="cm-operator">-</span><span
+                  class="cm-variable">type</span><span class="cm-operator">=</span><span
+                  class="cm-string">"TextBox"</span> <span class="cm-variable">value#</span><span class="cm-operator">=</span><span class="cm-string">"$.price | num2str"</span><span class="cm-operator">&gt;</span></span></pre>
+        </div>
+      </div>
+
+    </div>
+    <h4>JavaScript Expressions</h4>
+    <p>声明式定义绑定表达式时，除了直接书写单个的绑定路径外，你还可以在其中书写简单的JavaScript表达式，例如：</p>
+    <div class="code-box scroll">
+      <!--<pre class="code-behind js-mode">
+@{ $.state === 'ok' }
+@{ $.firstName + ' ' + $.lastName }
+@{ $.amount > 100 ? 'large' : 'normal' }</pre>-->
+      <div class="CodeMirror cm-s-alice">
+        <div class="CodeMirror-code"><pre class=" CodeMirror-line "><span style="padding-right: 0.1px;">@{ <span class="cm-variable">$</span>.<span class="cm-property">state</span> <span class="cm-operator">===</span> <span class="cm-string">'ok'</span> }</span></pre><pre class=" CodeMirror-line "><span style="padding-right: 0.1px;">@{ <span class="cm-variable">$</span>.<span class="cm-property">firstName</span> <span class="cm-operator">+</span> <span class="cm-string">' '</span> <span class="cm-operator">+</span> <span class="cm-variable">$</span>.<span class="cm-property">lastName</span> }</span></pre><pre class=" CodeMirror-line "><span style="padding-right: 0.1px;">@{ <span class="cm-variable">$</span>.<span class="cm-property">amount</span> <span class="cm-operator">&gt;</span> <span class="cm-number">100</span> <span class="cm-operator">?</span> <span class="cm-string">'large'</span> : <span class="cm-string">'normal'</span> }</span></pre></div>
+      </div>
+    </div>
+    <p>对于上述含有运算符的表达式，Exact使用<span class="expr">new Function(...)</span>将JavaScript表达式转化成函数，
+      存在一定的限制和问题，例如无法访问本地<span class="expr">resources</span>和全局<span class="expr">Exact.RES</span>中的内容。
+      我们建议在声明式定义的绑定表达式中尽量使用函数形式的表达式，例如：</p>
+    <a id="list-rendering"></a>
+    <div class="code-box scroll">
+      <div class="CodeMirror cm-s-alice">
+        <div class="CodeMirror-code"><pre class=" CodeMirror-line "><span style="padding-right: 0.1px;">{</span></pre><pre class=" CodeMirror-line "><span style="padding-right: 0.1px;">  <span class="cm-variable">resources</span>: {</span></pre><pre class=" CodeMirror-line "><span style="padding-right: 0.1px;">    <span class="cm-variable">OK</span>: <span class="cm-string">'ok'</span>,</span></pre><pre class=" CodeMirror-line "><span style="padding-right: 0.1px;">    <span class="cm-variable">equal</span>: <span class="cm-keyword">function</span>(<span class="cm-def">a</span>, <span class="cm-def">b</span>) { <span class="cm-keyword">return</span> <span class="cm-variable-2">a</span> <span class="cm-operator">===</span> <span class="cm-variable-2">b</span>; }</span></pre><pre class=" CodeMirror-line "><span style="padding-right: 0.1px;">  },</span></pre><pre class=" CodeMirror-line "><span style="padding-right: 0.1px;">  <span class="cm-variable">template</span>: <span class="cm-string">'&lt;a x-class="active@: equal($.state, OK);"&gt;&lt;/a&gt;'</span></span></pre><pre class=" CodeMirror-line "><span style="padding-right: 0.1px;">}</span></pre></div>
+      </div>
+    </div>
+
+    <!--<h4>Property Dependency</h4>
+    <p>虽然Exact支持的绑定表达式是丰富的，但是Exact建议不要书写冗长而难以阅读的绑定表达式。
+      如果一个绑定表达式含有多个绑定路径或者逻辑过于复杂，你可以考虑在<span class="expr">descriptors</span>中定义一个依赖于其他绑定路径的属性，像这样：</p>
+
+    <div class="code-box scroll">
+      <div class="CodeMirror cm-s-alice">
+        <div class="CodeMirror-code"><pre class=" CodeMirror-line "><span style="padding-right: 0.1px;">{</span></pre><pre class=" CodeMirror-line "><span style="padding-right: 0.1px;">  <span class="cm-variable">template</span>: <span class="cm-string">'&lt;h2&gt;@{ $.fullName }&lt;/h2&gt;'</span>,</span></pre><pre class=" CodeMirror-line "><span style="padding-right: 0.1px;">  <span class="cm-variable">descriptors</span>: [{</span></pre><pre class=" CodeMirror-line "><span style="padding-right: 0.1px;">    <span class="cm-property">fullName</span>: {</span></pre><pre class=" CodeMirror-line "><span style="padding-right: 0.1px;">      <span class="cm-property">depends</span>: [<span class="cm-string">'firstName'</span>, <span class="cm-string">'lastName'</span>],</span></pre><pre class=" CodeMirror-line "><span style="padding-right: 0.1px;">      <span class="cm-property">get</span>: <span class="cm-keyword">function</span>(<span class="cm-def">props</span>) {</span></pre><pre class=" CodeMirror-line "><span style="padding-right: 0.1px;">        <span class="cm-keyword">return</span> <span class="cm-keyword">this</span>.<span class="cm-property">firstName</span> <span class="cm-operator">+</span> <span class="cm-string">' '</span> <span class="cm-operator">+</span> <span class="cm-keyword">this</span>.<span class="cm-property">lastName</span>;</span></pre><pre class=" CodeMirror-line "><span style="padding-right: 0.1px;">      }</span></pre><pre class=" CodeMirror-line "><span style="padding-right: 0.1px;">      <span class="cm-comment">//,set: function(value, props) {</span></span></pre><pre class=" CodeMirror-line "><span style="padding-right: 0.1px;">      <span class="cm-comment">//   var names = value.split(' ');</span></span></pre><pre class=" CodeMirror-line "><span style="padding-right: 0.1px;">      <span class="cm-comment">//   this.save({firtName: names[0], lastName: names[1]});</span></span></pre><pre class=" CodeMirror-line "><span style="padding-right: 0.1px;">      <span class="cm-comment">//}</span></span></pre><pre class=" CodeMirror-line "><span style="padding-right: 0.1px;">    }</span></pre><pre class=" CodeMirror-line "><span style="padding-right: 0.1px;">  }]</span></pre><pre class=" CodeMirror-line "><span style="padding-right: 0.1px;">}</span></pre></div>
+      </div>
+    </div>-->
+
+
+    <h4>List Rendering</h4>
+    <p>在模板中，使用<span class="expr">x-for</span>指令完成列表渲染。</p>
+    <div class="code-box scroll">
+      <div class="CodeMirror cm-s-alice">
+        <div class="CodeMirror-code"><pre class=" CodeMirror-line "><span style="padding-right: 0.1px;"><span class="cm-comment">&lt;!--x-for="迭代标识符 of &lt;求值器表达式&gt; [|转换器表达式] [^绑定域事件]"--&gt;</span></span></pre><pre class=" CodeMirror-line "><span style="padding-right: 0.1px;"><span class="cm-tag cm-bracket">&lt;</span><span class="cm-tag">ul</span> <span class="cm-attribute">class</span>=<span class="cm-string">"menu-bar"</span><span class="cm-tag cm-bracket">&gt;</span></span></pre><pre class=" CodeMirror-line "><span style="padding-right: 0.1px;">  <span class="cm-tag cm-bracket">&lt;</span><span class="cm-tag">li</span> <span class="cm-attribute">x-for</span>=<span class="cm-string">"menu of $.menus"</span><span class="cm-tag cm-bracket">&gt;</span></span></pre><pre class=" CodeMirror-line "><span style="padding-right: 0.1px;">    <span class="cm-tag cm-bracket">&lt;</span><span class="cm-tag">a</span> <span class="cm-attribute">href@</span>=<span class="cm-string">"menu.url"</span><span class="cm-tag cm-bracket">&gt;</span><span class="cm-error">@</span>{ menu.label }<span class="cm-tag cm-bracket">&lt;/</span><span class="cm-tag">a</span><span class="cm-tag cm-bracket">&gt;</span></span></pre><pre class=" CodeMirror-line "><span style="padding-right: 0.1px;">  <span class="cm-tag cm-bracket">&lt;/</span><span class="cm-tag">li</span><span class="cm-tag cm-bracket">&gt;</span></span></pre><pre class=" CodeMirror-line "><span style="padding-right: 0.1px;"><span class="cm-tag cm-bracket">&lt;/</span><span class="cm-tag">ul</span><span class="cm-tag cm-bracket">&gt;</span></span></pre></div>
+      </div>
+    </div>
+    <br>
+    <div class="code-box scroll">
+      <div class="CodeMirror cm-s-alice">
+        <div class="CodeMirror-code"><pre class=" CodeMirror-line "><span style="padding-right: 0.1px;"><span class="cm-keyword">var</span> <span class="cm-def">MenuBar</span> <span class="cm-operator">=</span> <span class="cm-variable">Exact</span>.<span class="cm-property">defineClass</span>({</span></pre><pre class=" CodeMirror-line "><span style="padding-right: 0.1px;">  <span class="cm-property">extend</span>: <span class="cm-variable">Exact</span>.<span class="cm-property">Component</span>,</span></pre><pre class=" CodeMirror-line "><span style="padding-right: 0.1px;">  <span class="cm-property">statics</span>: {</span></pre><pre class=" CodeMirror-line "><span style="padding-right: 0.1px;">    <span class="cm-property">template</span>: <span class="cm-variable">Exact</span>.<span class="cm-property">Skin</span>.<span class="cm-property">query</span>(<span class="cm-variable">document</span>, <span class="cm-string">'.menu-bar'</span>),</span></pre><pre class=" CodeMirror-line "><span style="padding-right: 0.1px;">    <span class="cm-property">defaults</span>: <span class="cm-keyword">function</span>() {</span></pre><pre class=" CodeMirror-line "><span style="padding-right: 0.1px;">      <span class="cm-keyword">return</span> {</span></pre><pre class=" CodeMirror-line "><span style="padding-right: 0.1px;">        <span class="cm-property">menus</span>: [</span></pre><pre class=" CodeMirror-line "><span style="padding-right: 0.1px;">          { <span class="cm-property">label</span>: <span class="cm-string">'Examples'</span>, <span class="cm-property">url</span>: <span class="cm-string">'./examples/'</span>},</span></pre><pre class=" CodeMirror-line "><span style="padding-right: 0.1px;">          { <span class="cm-property">label</span>: <span class="cm-string">'Downloads'</span>, <span class="cm-property">url</span>: <span class="cm-string">'./downloads/'</span>},</span></pre><pre class=" CodeMirror-line "><span style="padding-right: 0.1px;">          { <span class="cm-property">label</span>: <span class="cm-string">'Documents'</span>, <span class="cm-property">url</span>: <span class="cm-string">'./documents/'</span>},</span></pre><pre class=" CodeMirror-line "><span style="padding-right: 0.1px;">        ]</span></pre><pre class=" CodeMirror-line "><span style="padding-right: 0.1px;">      };</span></pre><pre class=" CodeMirror-line "><span style="padding-right: 0.1px;">    }</span></pre><pre class=" CodeMirror-line "><span style="padding-right: 0.1px;">  }</span></pre><pre class=" CodeMirror-line "><span style="padding-right: 0.1px;">});</span></pre></div>
+      </div>
+    </div>
+    <p><span class="expr">x-for</span>指令的表达式中，<span class="expr">of</span> 的左边指定了迭代标识符，右边与普通的数据绑定表达式是一样的。求值器部分一般就是一个可迭代的对象。
+      可以使用转换器对求值器返回的结果进行再加工，甚至返回一个新的数组：</p>
+    <div class="code-box scroll">
+      <div class="CodeMirror cm-s-alice">
+        <div class="CodeMirror-code"><pre class=" CodeMirror-line "><span style="padding-right: 0.1px;"><span class="cm-tag cm-bracket">&lt;</span><span class="cm-tag">div</span> <span class="cm-attribute">class</span>=<span class="cm-string">"page"</span><span class="cm-tag cm-bracket">&gt;</span></span></pre><pre class=" CodeMirror-line "><span style="padding-right: 0.1px;">  <span class="cm-tag cm-bracket">&lt;</span><span class="cm-tag">ul</span> <span class="cm-attribute">class</span>=<span class="cm-string">"article-list"</span><span class="cm-tag cm-bracket">&gt;</span></span></pre><pre class=" CodeMirror-line "><span style="padding-right: 0.1px;">    <span class="cm-tag cm-bracket">&lt;</span><span class="cm-tag">li</span> <span class="cm-attribute">x-for</span>=<span class="cm-string">"article of $.articels | limit(10)"</span> <span class="cm-attribute">x-key</span>=<span class="cm-string">"aritcle.id"</span><span class="cm-tag cm-bracket">&gt;</span></span></pre><pre class=" CodeMirror-line "><span style="padding-right: 0.1px;">      <span class="cm-tag cm-bracket">&lt;</span><span class="cm-tag">a</span> <span class="cm-attribute">href@</span>=<span class="cm-string">"article.url"</span><span class="cm-tag cm-bracket">&gt;</span><span class="cm-error">@</span>{ article.title }<span class="cm-tag cm-bracket">&lt;/</span><span class="cm-tag">a</span><span class="cm-tag cm-bracket">&gt;</span></span></pre><pre class=" CodeMirror-line "><span style="padding-right: 0.1px;">    <span class="cm-tag cm-bracket">&lt;/</span><span class="cm-tag">li</span><span class="cm-tag cm-bracket">&gt;</span></span></pre><pre class=" CodeMirror-line "><span style="padding-right: 0.1px;">  <span class="cm-tag cm-bracket">&lt;/</span><span class="cm-tag">ul</span><span class="cm-tag cm-bracket">&gt;</span></span></pre><pre class=" CodeMirror-line "><span style="padding-right: 0.1px;"><span class="cm-tag cm-bracket">&lt;/</span><span class="cm-tag">div</span><span class="cm-tag cm-bracket">&gt;</span></span></pre></div>
+      </div>
+    </div>
+    <br>
+    <div class="code-box scroll">
+      <div class="CodeMirror cm-s-alice">
+        <div class="CodeMirror-code"><pre class=" CodeMirror-line "><span style="padding-right: 0.1px;"><span class="cm-keyword">var</span> <span class="cm-def">Page</span> <span class="cm-operator">=</span> <span class="cm-variable">Exact</span>.<span class="cm-property">defineClass</span>({</span></pre><pre class=" CodeMirror-line "><span style="padding-right: 0.1px;">  <span class="cm-property">extend</span>: <span class="cm-variable">Exact</span>.<span class="cm-property">Component</span>,</span></pre><pre class=" CodeMirror-line "><span style="padding-right: 0.1px;">  <span class="cm-property">statics</span>: {</span></pre><pre class=" CodeMirror-line "><span style="padding-right: 0.1px;">    <span class="cm-property">template</span>: <span class="cm-variable">Exact</span>.<span class="cm-property">Skin</span>.<span class="cm-property">query</span>(<span class="cm-variable">document</span>, <span class="cm-string">'.page'</span>),</span></pre><pre class=" CodeMirror-line "><span style="padding-right: 0.1px;">    <span class="cm-property">resources</span>: { <span class="cm-comment">// 可在本地resources或全局Exact.RES对象上注册转换器</span></span></pre><pre class=" CodeMirror-line "><span style="padding-right: 0.1px;">      <span class="cm-property">limit</span>: <span class="cm-keyword">function</span>(<span class="cm-def">items</span>, <span class="cm-def">n</span>) {</span></pre><pre class=" CodeMirror-line "><span style="padding-right: 0.1px;">        <span class="cm-keyword">return</span> <span class="cm-variable-2">items</span>.<span class="cm-property">slice</span>(<span class="cm-number">0</span>, <span class="cm-variable-2">n</span>);</span></pre><pre class=" CodeMirror-line "><span style="padding-right: 0.1px;">      }</span></pre><pre class=" CodeMirror-line "><span style="padding-right: 0.1px;">    },</span></pre><pre class=" CodeMirror-line "><span style="padding-right: 0.1px;">    <span class="cm-property">defaults</span>: <span class="cm-keyword">function</span>() {</span></pre><pre class=" CodeMirror-line "><span style="padding-right: 0.1px;">      <span class="cm-keyword">return</span> {</span></pre><pre class=" CodeMirror-line "><span style="padding-right: 0.1px;">        <span class="cm-property">articles</span>: <span class="cm-variable">Exact</span>.<span class="cm-property">Collection</span>.<span class="cm-property">from</span>([])</span></pre><pre class=" CodeMirror-line "><span style="padding-right: 0.1px;">      };</span></pre><pre class=" CodeMirror-line "><span style="padding-right: 0.1px;">    }</span></pre><pre class=" CodeMirror-line "><span style="padding-right: 0.1px;">  }</span></pre><pre class=" CodeMirror-line "><span style="padding-right: 0.1px;">});</span></pre></div>
+      </div>
+    </div>
+    <a id="condition-rendering"></a>
+    <p>菜单栏一次渲染完成即可，而文章列表可能会刷新，所以这里使用Collection对象存放文章。
+      有更新的文章出炉时，文章列表就会重新渲染。为了不浪费之前已经渲染过的条目，指定一个<span class="expr">x-key</span>可以复用已有的元素。</p>
+    <h4>Condition Rendering</h4>
+    <p>在模板中，使用<span class="expr">x-if</span> 指令完成条件渲染。</p>
+    <div class="code-box scroll">
+      <div class="CodeMirror cm-s-alice">
+        <div class="CodeMirror-code"><pre class=" CodeMirror-line "><span style="padding-right: 0.1px;"><span class="cm-comment">&lt;!--x-if="&lt;求值器表达式&gt; [|转换器表达式] [^绑定域事件]"--&gt;</span></span></pre><pre class=" CodeMirror-line "><span style="padding-right: 0.1px;"><span class="cm-tag cm-bracket">&lt;</span><span class="cm-tag">div</span> <span class="cm-attribute">class</span>=<span class="cm-string">"button-bar"</span><span class="cm-tag cm-bracket">&gt;</span></span></pre><pre class=" CodeMirror-line "><span style="padding-right: 0.1px;">  <span class="cm-tag cm-bracket">&lt;</span><span class="cm-tag">a</span><span class="cm-tag cm-bracket">&gt;</span>Ok<span class="cm-tag cm-bracket">&lt;/</span><span class="cm-tag">a</span><span class="cm-tag cm-bracket">&gt;</span></span></pre><pre class=" CodeMirror-line "><span style="padding-right: 0.1px;">  <span class="cm-tag cm-bracket">&lt;</span><span class="cm-tag">a</span> <span class="cm-attribute">x-if</span>=<span class="cm-string">"$.canCancel"</span><span class="cm-tag cm-bracket">&gt;</span>Cancel<span class="cm-tag cm-bracket">&lt;/</span><span class="cm-tag">a</span><span class="cm-tag cm-bracket">&gt;</span></span></pre><pre class=" CodeMirror-line "><span style="padding-right: 0.1px;"><span class="cm-tag cm-bracket">&lt;/</span><span class="cm-tag">div</span><span class="cm-tag cm-bracket">&gt;</span></span></pre></div>
+      </div>
+    </div>
+    <p>当<span class="expr">$.canCancel</span>为<span class="expr">true</span>时才会添加Cancel按钮，为<span class="expr">false</span>又会删除它。如果只想显示或隐藏这个按钮，可以这样：</p>
+    <div class="code-box scroll">
+      <div class="CodeMirror cm-s-alice">
+        <div class="CodeMirror-code"><pre class=" CodeMirror-line "><span style="padding-right: 0.1px;"><span class="cm-tag cm-bracket">&lt;</span><span class="cm-tag">div</span> <span class="cm-attribute">class</span>=<span class="cm-string">"button-bar"</span><span class="cm-tag cm-bracket">&gt;</span></span></pre><pre class=" CodeMirror-line "><span style="padding-right: 0.1px;">  <span class="cm-tag cm-bracket">&lt;</span><span class="cm-tag">a</span><span class="cm-tag cm-bracket">&gt;</span>Ok<span class="cm-tag cm-bracket">&lt;/</span><span class="cm-tag">a</span><span class="cm-tag cm-bracket">&gt;</span></span></pre><pre class=" CodeMirror-line "><span style="padding-right: 0.1px;">  <span class="cm-tag cm-bracket">&lt;</span><span class="cm-tag">a</span> <span class="cm-attribute">x-style</span>=<span class="cm-string">"display@: $.canCancel ? 'inline-block' : ''"</span><span class="cm-tag cm-bracket">&gt;</span>Cancel<span class="cm-tag cm-bracket">&lt;/</span><span class="cm-tag">a</span><span class="cm-tag cm-bracket">&gt;</span></span></pre><pre class=" CodeMirror-line "><span style="padding-right: 0.1px;"><span class="cm-tag cm-bracket">&lt;/</span><span class="cm-tag">div</span><span class="cm-tag cm-bracket">&gt;</span></span></pre></div>
+      </div>
+    </div>
+    <p><span class="expr">x-if</span>可以配合<span class="expr">x-for</span>命令使用，提供更多的选择：</p>
+    <a id="child-components"></a>
+    <div class="code-box scroll">
+      <div class="CodeMirror cm-s-alice">
+        <div class="CodeMirror-code"><pre class=" CodeMirror-line "><span style="padding-right: 0.1px;"><span class="cm-tag cm-bracket">&lt;</span><span class="cm-tag">ul</span><span class="cm-tag cm-bracket">&gt;</span></span></pre><pre class=" CodeMirror-line "><span style="padding-right: 0.1px;">  <span class="cm-tag cm-bracket">&lt;</span><span class="cm-tag">li</span> <span class="cm-attribute">x-if</span>=<span class="cm-string">"$.isLoaded"</span> <span class="cm-attribute">x-for</span>=<span class="cm-string">"item of $.items"</span><span class="cm-tag cm-bracket">&gt;</span></span></pre><pre class=" CodeMirror-line "><span style="padding-right: 0.1px;">    <span class="cm-tag cm-bracket">&lt;</span><span class="cm-tag">img</span> <span class="cm-attribute">x-if</span>=<span class="cm-string">"item.type === 'image'"</span> <span class="cm-attribute">src@</span>=<span class="cm-string">"item.image"</span><span class="cm-tag cm-bracket">&gt;</span></span></pre><pre class=" CodeMirror-line "><span style="padding-right: 0.1px;">    <span class="cm-tag cm-bracket">&lt;</span><span class="cm-tag">span</span> <span class="cm-attribute">x-if</span>=<span class="cm-string">"item.type === 'text'"</span><span class="cm-tag cm-bracket">&gt;</span><span class="cm-error">@</span>{ item.text }<span class="cm-tag cm-bracket">&lt;</span><span class="cm-tag">span</span><span class="cm-tag cm-bracket">&gt;</span></span></pre><pre class=" CodeMirror-line "><span style="padding-right: 0.1px;">  <span class="cm-tag cm-bracket">&lt;/</span><span class="cm-tag cm-error">li</span><span class="cm-tag cm-bracket cm-error">&gt;</span></span></pre><pre class=" CodeMirror-line "><span style="padding-right: 0.1px;"><span class="cm-tag cm-bracket">&lt;/</span><span class="cm-tag cm-error">ul</span><span class="cm-tag cm-bracket cm-error">&gt;</span></span></pre></div>
+      </div>
+    </div>
+    <p>注意，上面的模板中，第一个<span class="expr">x-if</span>命令优先于<span class="expr">x-for</span>执行，因而无法访问到<span class="expr">item</span>。如果希望选择性地渲染<span class="expr">$.items</span>中的内容，请在<span class="expr">x-for</span>指令中添加必要的转换器。</p>
+
+    <h4>Child Components</h4>
+    <p>在模板中，使用子组件的方法是，在已有HTML标签中添加<span class="expr">x-type</span>特性，或使用自定义标签，并在本地resources或全局Exact.RES中注册子组件类或所在命名空间。</p>
+    <div class="code-box scroll">
+      <div class="CodeMirror cm-s-alice">
+        <div class="CodeMirror-code"><pre class=" CodeMirror-line "><span style="padding-right: 0.1px;"><span class="cm-tag cm-bracket">&lt;</span><span class="cm-tag">div</span> <span class="cm-attribute">class</span>=<span class="cm-string">"panel"</span><span class="cm-tag cm-bracket">&gt;</span></span></pre><pre class=" CodeMirror-line "><span style="padding-right: 0.1px;">  <span class="cm-tag cm-bracket">&lt;</span><span class="cm-tag">button</span><span class="cm-tag cm-bracket">&gt;</span>Ok<span class="cm-tag cm-bracket">&lt;/</span><span class="cm-tag">button</span><span class="cm-tag cm-bracket">&gt;</span></span></pre><pre class=" CodeMirror-line "><span style="padding-right: 0.1px;">  <span class="cm-tag cm-bracket">&lt;</span><span class="cm-tag">a</span> <span class="cm-attribute">x-type</span>=<span class="cm-string">"Button"</span><span class="cm-tag cm-bracket">&gt;</span>Ok<span class="cm-tag cm-bracket">&lt;/</span><span class="cm-tag">a</span><span class="cm-tag cm-bracket">&gt;</span> </span></pre><pre class=" CodeMirror-line "><span style="padding-right: 0.1px;">  <span class="cm-tag cm-bracket">&lt;</span><span class="cm-tag">a</span> <span class="cm-attribute">x-type</span>=<span class="cm-string">"EUI.Button"</span><span class="cm-tag cm-bracket">&gt;</span>Ok<span class="cm-tag cm-bracket">&lt;/</span><span class="cm-tag">a</span><span class="cm-tag cm-bracket">&gt;</span></span></pre><pre class=" CodeMirror-line "><span style="padding-right: 0.1px;"><span class="cm-tag cm-bracket">&lt;/</span><span class="cm-tag">div</span><span class="cm-tag cm-bracket">&gt;</span></span></pre></div>
+      </div>
+    </div>
+    <br>
+    <!--<div class="code-box scroll">
+      <div class="CodeMirror cm-s-alice">
+        <div class="CodeMirror-code"><pre class=" CodeMirror-line "><span style="padding-right: 0.1px;"><span class="cm-tag">button</span>, [<span class="cm-tag">x-type</span>=<span class="cm-string">"Button"</span>] {</span></pre><pre class=" CodeMirror-line "><span style="padding-right: 0.1px;">  <span class="cm-property">background-color</span>: <span class="cm-atom">#ccc</span>;</span></pre><pre class=" CodeMirror-line "><span style="padding-right: 0.1px;">}</span></pre></div>
+      </div>
+    </div>
+    <br>-->
+    <a id="contents-and-slots"></a>
+    <div class="code-box scroll">
+      <div class="CodeMirror cm-s-alice">
+        <div class="CodeMirror-code"><pre class=" CodeMirror-line "><span style="padding-right: 0.1px;"><span class="cm-keyword">var</span> <span class="cm-def">Button</span> <span class="cm-operator">=</span> <span class="cm-variable">Exact</span>.<span class="cm-property">defineClass</span>(</span></pre><pre class=" CodeMirror-line "><span style="padding-right: 0.1px;">  <span class="cm-variable">extend</span>: <span class="cm-variable">Exact</span>.<span class="cm-variable">Component</span>,</span></pre><pre class=" CodeMirror-line "><span style="padding-right: 0.1px;">  <span class="cm-variable">statics</span>: {</span></pre><pre class=" CodeMirror-line "><span style="padding-right: 0.1px;">    <span class="cm-variable">template</span>: <span class="cm-string">'&lt;a class="btn"&gt;&lt;slot&gt;&lt;/slot&gt;&lt;/a&gt;'</span></span></pre><pre class=" CodeMirror-line "><span style="padding-right: 0.1px;">  }</span></pre><pre class=" CodeMirror-line "><span style="padding-right: 0.1px;">);</span></pre><pre class=" CodeMirror-line "><span style="padding-right: 0.1px;"><span cm-text="">​</span></span></pre><pre class=" CodeMirror-line "><span style="padding-right: 0.1px;"><span class="cm-keyword">var</span> <span class="cm-def">Panel</span> <span class="cm-operator">=</span> <span class="cm-variable">Exact</span>.<span class="cm-property">defineClass</span>({</span></pre><pre class=" CodeMirror-line "><span style="padding-right: 0.1px;">  <span class="cm-property">extend</span>: <span class="cm-variable">Exact</span>.<span class="cm-property">Component</span>,</span></pre><pre class=" CodeMirror-line "><span style="padding-right: 0.1px;">  <span class="cm-property">statics</span>: {</span></pre><pre class=" CodeMirror-line "><span style="padding-right: 0.1px;">    <span class="cm-property">template</span>: <span class="cm-variable">Exact</span>.<span class="cm-property">Skin</span>.<span class="cm-property">query</span>(<span class="cm-variable">document</span>, <span class="cm-string">'.panel'</span>),</span></pre><pre class=" CodeMirror-line "><span style="padding-right: 0.1px;">    <span class="cm-property">resources</span>: {</span></pre><pre class=" CodeMirror-line "><span style="padding-right: 0.1px;">      <span class="cm-property">Button</span>: <span class="cm-variable">Button</span></span></pre><pre class=" CodeMirror-line "><span style="padding-right: 0.1px;">      <span class="cm-variable">EUI</span>: <span class="cm-variable">EUI</span> <span class="cm-comment">// vender namespace</span></span></pre><pre class=" CodeMirror-line "><span style="padding-right: 0.1px;">    }</span></pre><pre class=" CodeMirror-line "><span style="padding-right: 0.1px;">  }</span></pre><pre class=" CodeMirror-line "><span style="padding-right: 0.1px;">});</span></pre></div>
+      </div>
+    </div>
+
+    <h4>Contents and Slots</h4>
+    <p>组件在内部管理自己的children，在外部接受contents。在模板中，你可以使用slot标签来自动收集匹配的contents。
+      上面展示的代码中，组件Button的模板就使用了一个简单的slot。这个slot是无名的，外部接受到的所有无名contents都会插入到这里。</p>
+    <div class="code-box scroll">
+      <div class="CodeMirror cm-s-alice">
+        <div class="CodeMirror-code"><pre class=" CodeMirror-line "><span style="padding-right: 0.1px;"><span class="cm-tag cm-bracket">&lt;</span><span class="cm-tag">div</span> <span class="cm-attribute">class</span>=<span class="cm-string">"panel"</span><span class="cm-tag cm-bracket">&gt;</span></span></pre><pre class=" CodeMirror-line "><span style="padding-right: 0.1px;">  <span class="cm-tag cm-bracket">&lt;</span><span class="cm-tag">a</span> <span class="cm-attribute">x-type</span>=<span class="cm-string">"Button"</span><span class="cm-tag cm-bracket">&gt;</span>Ok<span class="cm-tag cm-bracket">&lt;/</span><span class="cm-tag">a</span><span class="cm-tag cm-bracket">&gt;</span></span></pre><pre class=" CodeMirror-line "><span style="padding-right: 0.1px;">  <span class="cm-tag cm-bracket">&lt;</span><span class="cm-tag">a</span> <span class="cm-attribute">x-type</span>=<span class="cm-string">"Button"</span><span class="cm-tag cm-bracket">&gt;</span></span></pre><pre class=" CodeMirror-line "><span style="padding-right: 0.1px;">    <span class="cm-tag cm-bracket">&lt;</span><span class="cm-tag">img</span> <span class="cm-attribute">src</span>=<span class="cm-string">"./icons/ok-btn.png"</span><span class="cm-tag cm-bracket">&gt;</span></span></pre><pre class=" CodeMirror-line "><span style="padding-right: 0.1px;">  <span class="cm-tag cm-bracket">&lt;/</span><span class="cm-tag cm-error">a</span><span class="cm-tag cm-bracket cm-error">&gt;</span></span></pre><pre class=" CodeMirror-line "><span style="padding-right: 0.1px;">  <span class="cm-tag cm-bracket">&lt;</span><span class="cm-tag">a</span> <span class="cm-attribute">x-type</span>=<span class="cm-string">"Button"</span><span class="cm-tag cm-bracket">&gt;</span></span></pre><pre class=" CodeMirror-line "><span style="padding-right: 0.1px;">    <span class="cm-tag cm-bracket">&lt;</span><span class="cm-tag">img</span> <span class="cm-attribute">src</span>=<span class="cm-string">"./icons/ok-btn.png"</span><span class="cm-tag cm-bracket">&gt;</span></span></pre><pre class=" CodeMirror-line "><span style="padding-right: 0.1px;">    <span class="cm-tag cm-bracket">&lt;</span><span class="cm-tag">span</span><span class="cm-tag cm-bracket">&gt;</span>Ok<span class="cm-tag cm-bracket">&lt;/</span><span class="cm-tag">span</span><span class="cm-tag cm-bracket">&gt;</span></span></pre><pre class=" CodeMirror-line "><span style="padding-right: 0.1px;">  <span class="cm-tag cm-bracket">&lt;/</span><span class="cm-tag cm-error">a</span><span class="cm-tag cm-bracket cm-error">&gt;</span></span></pre><pre class=" CodeMirror-line "><span style="padding-right: 0.1px;"><span class="cm-tag cm-bracket">&lt;/</span><span class="cm-tag cm-error">div</span><span class="cm-tag cm-bracket cm-error">&gt;</span></span></pre></div>
+      </div>
+    </div>
+    <p>上面用到的3个Button分别呈现文字、图标和图文组合。如果需要在模板中的不同位置插入不同的内容，你就可以使用具名slot，同时在父模板中为那些contents指定相应的slot属性。</p>
+    <div class="code-box scroll">
+      <div class="CodeMirror cm-s-alice">
+        <div class="CodeMirror-code"><pre class=" CodeMirror-line "><span style="padding-right: 0.1px;"><span class="cm-comment">&lt;!--父组件模板--&gt;</span></span></pre><pre class=" CodeMirror-line "><span style="padding-right: 0.1px;"><span class="cm-tag cm-bracket">&lt;</span><span class="cm-tag">div</span> <span class="cm-attribute">class</span>=<span class="cm-string">"app"</span><span class="cm-tag cm-bracket">&gt;</span></span></pre><pre class=" CodeMirror-line "><span style="padding-right: 0.1px;">  ...</span></pre><pre class=" CodeMirror-line "><span style="padding-right: 0.1px;">  <span class="cm-tag cm-bracket">&lt;</span><span class="cm-tag">section</span> <span class="cm-attribute">x-type</span>=<span class="cm-string">"Panel"</span><span class="cm-tag cm-bracket">&gt;</span></span></pre><pre class=" CodeMirror-line "><span style="padding-right: 0.1px;">    <span class="cm-tag cm-bracket">&lt;</span><span class="cm-tag">h2</span> <span class="cm-attribute">slot</span>=<span class="cm-string">"header"</span><span class="cm-tag cm-bracket">&gt;</span>title<span class="cm-tag cm-bracket">&lt;/</span><span class="cm-tag">h2</span><span class="cm-tag cm-bracket">&gt;</span></span></pre><pre class=" CodeMirror-line "><span style="padding-right: 0.1px;">    <span class="cm-tag cm-bracket">&lt;</span><span class="cm-tag">p</span><span class="cm-tag cm-bracket">&gt;</span>(1) ...<span class="cm-tag cm-bracket">&lt;/</span><span class="cm-tag">p</span><span class="cm-tag cm-bracket">&gt;</span></span></pre><pre class=" CodeMirror-line "><span style="padding-right: 0.1px;">    <span class="cm-tag cm-bracket">&lt;</span><span class="cm-tag">p</span><span class="cm-tag cm-bracket">&gt;</span>(2) ...<span class="cm-tag cm-bracket">&lt;/</span><span class="cm-tag">p</span><span class="cm-tag cm-bracket">&gt;</span></span></pre><pre class=" CodeMirror-line "><span style="padding-right: 0.1px;">    <span class="cm-tag cm-bracket">&lt;</span><span class="cm-tag">span</span> <span class="cm-attribute">slot</span>=<span class="cm-string">"footer"</span><span class="cm-tag cm-bracket">&gt;</span>tips<span class="cm-tag cm-bracket">&lt;/</span><span class="cm-tag">span</span><span class="cm-tag cm-bracket">&gt;</span></span></pre><pre class=" CodeMirror-line "><span style="padding-right: 0.1px;">    <span class="cm-tag cm-bracket">&lt;</span><span class="cm-tag">span</span> <span class="cm-attribute">slot</span>=<span class="cm-string">"footer"</span><span class="cm-tag cm-bracket">&gt;</span>time<span class="cm-tag cm-bracket">&lt;/</span><span class="cm-tag">span</span><span class="cm-tag cm-bracket">&gt;</span></span></pre><pre class=" CodeMirror-line "><span style="padding-right: 0.1px;">  <span class="cm-tag cm-bracket">&lt;/</span><span class="cm-tag">section</span><span class="cm-tag cm-bracket">&gt;</span></span></pre><pre class=" CodeMirror-line "><span style="padding-right: 0.1px;">  ...</span></pre><pre class=" CodeMirror-line "><span style="padding-right: 0.1px;"><span class="cm-tag cm-bracket">&lt;/</span><span class="cm-tag">div</span><span class="cm-tag cm-bracket">&gt;</span></span></pre></div>
+      </div>
+    </div>
+    <br>
+    <div class="code-box scroll">
+      <div class="CodeMirror cm-s-alice">
+        <div class="CodeMirror-code"><pre class=" CodeMirror-line "><span style="padding-right: 0.1px;"><span class="cm-comment">&lt;!--父组件模板--&gt;</span></span></pre><pre class=" CodeMirror-line "><span style="padding-right: 0.1px;"><span class="cm-tag cm-bracket">&lt;</span><span class="cm-tag">div</span> <span class="cm-attribute">class</span>=<span class="cm-string">"app"</span><span class="cm-tag cm-bracket">&gt;</span></span></pre><pre class=" CodeMirror-line "><span style="padding-right: 0.1px;">  ...</span></pre><pre class=" CodeMirror-line "><span style="padding-right: 0.1px;">  <span class="cm-tag cm-bracket">&lt;</span><span class="cm-tag">section</span> <span class="cm-attribute">class</span>=<span class="cm-string">"panel"</span> <span class="cm-attribute">x-type</span>=<span class="cm-string">"Panel"</span><span class="cm-tag cm-bracket">&gt;</span></span></pre><pre class=" CodeMirror-line "><span style="padding-right: 0.1px;">    <span class="cm-tag cm-bracket">&lt;</span><span class="cm-tag">h2</span> <span class="cm-attribute">slot</span>=<span class="cm-string">"header"</span><span class="cm-tag cm-bracket">&gt;</span>title<span class="cm-tag cm-bracket">&lt;/</span><span class="cm-tag">h2</span><span class="cm-tag cm-bracket">&gt;</span></span></pre><pre class=" CodeMirror-line "><span style="padding-right: 0.1px;">    <span class="cm-tag cm-bracket">&lt;</span><span class="cm-tag">p</span><span class="cm-tag cm-bracket">&gt;</span>(1) ...<span class="cm-tag cm-bracket">&lt;/</span><span class="cm-tag">p</span><span class="cm-tag cm-bracket">&gt;</span></span></pre><pre class=" CodeMirror-line "><span style="padding-right: 0.1px;">    <span class="cm-tag cm-bracket">&lt;</span><span class="cm-tag">p</span><span class="cm-tag cm-bracket">&gt;</span>(2) ...<span class="cm-tag cm-bracket">&lt;/</span><span class="cm-tag">p</span><span class="cm-tag cm-bracket">&gt;</span></span></pre><pre class=" CodeMirror-line "><span style="padding-right: 0.1px;">    <span class="cm-tag cm-bracket">&lt;</span><span class="cm-tag">span</span> <span class="cm-attribute">slot</span>=<span class="cm-string">"footer"</span><span class="cm-tag cm-bracket">&gt;</span>tips<span class="cm-tag cm-bracket">&lt;/</span><span class="cm-tag">span</span><span class="cm-tag cm-bracket">&gt;</span></span></pre><pre class=" CodeMirror-line "><span style="padding-right: 0.1px;">    <span class="cm-tag cm-bracket">&lt;</span><span class="cm-tag">span</span> <span class="cm-attribute">slot</span>=<span class="cm-string">"footer"</span><span class="cm-tag cm-bracket">&gt;</span>time<span class="cm-tag cm-bracket">&lt;/</span><span class="cm-tag">span</span><span class="cm-tag cm-bracket">&gt;</span></span></pre><pre class=" CodeMirror-line "><span style="padding-right: 0.1px;">  <span class="cm-tag cm-bracket">&lt;/</span><span class="cm-tag">section</span><span class="cm-tag cm-bracket">&gt;</span></span></pre><pre class=" CodeMirror-line "><span style="padding-right: 0.1px;">  ...</span></pre><pre class=" CodeMirror-line "><span style="padding-right: 0.1px;"><span class="cm-tag cm-bracket">&lt;/</span><span class="cm-tag">div</span><span class="cm-tag cm-bracket">&gt;</span></span></pre></div>
+      </div>
+    </div>
+    <p>由此渲染得到的将是：</p>
+    <a id="refrence-to-part"></a>
+    <div class="code-box scroll">
+      <div class="CodeMirror cm-s-alice">
+        <div class="CodeMirror-code"><pre class=" CodeMirror-line "><span style="padding-right: 0.1px;"><span class="cm-tag cm-bracket">&lt;</span><span class="cm-tag">div</span> <span class="cm-attribute">class</span>=<span class="cm-string">"app"</span><span class="cm-tag cm-bracket">&gt;</span></span></pre><pre class=" CodeMirror-line "><span style="padding-right: 0.1px;">  ...</span></pre><pre class=" CodeMirror-line "><span style="padding-right: 0.1px;">  <span class="cm-tag cm-bracket">&lt;</span><span class="cm-tag">section</span> <span class="cm-attribute">class</span>=<span class="cm-string">"panel"</span> <span class="cm-attribute">x-type</span>=<span class="cm-string">"Panel"</span><span class="cm-tag cm-bracket">&gt;</span></span></pre><pre class=" CodeMirror-line "><span style="padding-right: 0.1px;">    <span class="cm-tag cm-bracket">&lt;</span><span class="cm-tag">header</span><span class="cm-tag cm-bracket">&gt;</span></span></pre><pre class=" CodeMirror-line "><span style="padding-right: 0.1px;">      <span class="cm-tag cm-bracket">&lt;</span><span class="cm-tag">h2</span> <span class="cm-attribute">slot</span>=<span class="cm-string">"header"</span><span class="cm-tag cm-bracket">&gt;</span>title<span class="cm-tag cm-bracket">&lt;/</span><span class="cm-tag">h2</span><span class="cm-tag cm-bracket">&gt;</span></span></pre><pre class=" CodeMirror-line "><span style="padding-right: 0.1px;">    <span class="cm-tag cm-bracket">&lt;/</span><span class="cm-tag">header</span><span class="cm-tag cm-bracket">&gt;</span></span></pre><pre class=" CodeMirror-line "><span style="padding-right: 0.1px;">    <span class="cm-tag cm-bracket">&lt;</span><span class="cm-tag">div</span> <span class="cm-attribute">class</span>=<span class="cm-string">"body"</span><span class="cm-tag cm-bracket">&gt;</span></span></pre><pre class=" CodeMirror-line "><span style="padding-right: 0.1px;">      <span class="cm-tag cm-bracket">&lt;</span><span class="cm-tag">p</span><span class="cm-tag cm-bracket">&gt;</span>(1) ...<span class="cm-tag cm-bracket">&lt;/</span><span class="cm-tag">p</span><span class="cm-tag cm-bracket">&gt;</span></span></pre><pre class=" CodeMirror-line "><span style="padding-right: 0.1px;">      <span class="cm-tag cm-bracket">&lt;</span><span class="cm-tag">p</span><span class="cm-tag cm-bracket">&gt;</span>(2) ...<span class="cm-tag cm-bracket">&lt;/</span><span class="cm-tag">p</span><span class="cm-tag cm-bracket">&gt;</span></span></pre><pre class=" CodeMirror-line "><span style="padding-right: 0.1px;">    <span class="cm-tag cm-bracket">&lt;/</span><span class="cm-tag">div</span><span class="cm-tag cm-bracket">&gt;</span></span></pre><pre class=" CodeMirror-line "><span style="padding-right: 0.1px;">    <span class="cm-tag cm-bracket">&lt;</span><span class="cm-tag">footer</span><span class="cm-tag cm-bracket">&gt;</span></span></pre><pre class=" CodeMirror-line "><span style="padding-right: 0.1px;">      <span class="cm-tag cm-bracket">&lt;</span><span class="cm-tag">span</span> <span class="cm-attribute">slot</span>=<span class="cm-string">"footer"</span><span class="cm-tag cm-bracket">&gt;</span>tips<span class="cm-tag cm-bracket">&lt;/</span><span class="cm-tag">span</span><span class="cm-tag cm-bracket">&gt;</span></span></pre><pre class=" CodeMirror-line "><span style="padding-right: 0.1px;">      <span class="cm-tag cm-bracket">&lt;</span><span class="cm-tag">span</span> <span class="cm-attribute">slot</span>=<span class="cm-string">"footer"</span><span class="cm-tag cm-bracket">&gt;</span>time<span class="cm-tag cm-bracket">&lt;/</span><span class="cm-tag">span</span><span class="cm-tag cm-bracket">&gt;</span></span></pre><pre class=" CodeMirror-line "><span style="padding-right: 0.1px;">    <span class="cm-tag cm-bracket">&lt;/</span><span class="cm-tag">footer</span><span class="cm-tag cm-bracket">&gt;</span></span></pre><pre class=" CodeMirror-line "><span style="padding-right: 0.1px;">  <span class="cm-tag cm-bracket">&lt;/</span><span class="cm-tag">section</span><span class="cm-tag cm-bracket">&gt;</span></span></pre><pre class=" CodeMirror-line "><span style="padding-right: 0.1px;">  ...</span></pre><pre class=" CodeMirror-line "><span style="padding-right: 0.1px;"><span class="cm-tag cm-bracket">&lt;/</span><span class="cm-tag">div</span><span class="cm-tag cm-bracket">&gt;</span></span></pre></div>
+      </div>
+    </div>
+
+    <h4>Reference to Part</h4>
+    <p>在模板中，可添加<span class="expr">x-ref</span>特性，以便引用对应的部件。一般来说，模板中使用了数据绑定或事件绑定后，就不必添加<span class="expr">x-ref</span>了。</p>
+    <div class="code-box scroll">
+      <div class="CodeMirror cm-s-alice">
+        <div class="CodeMirror-code"><pre class=" CodeMirror-line "><span style="padding-right: 0.1px;"><span class="cm-tag cm-bracket">&lt;</span><span class="cm-tag">div</span> <span class="cm-attribute">class</span>=<span class="cm-string">"demo"</span><span class="cm-tag cm-bracket">&gt;</span></span></pre><pre class=" CodeMirror-line "><span style="padding-right: 0.1px;">  <span class="cm-tag cm-bracket">&lt;</span><span class="cm-tag">input</span> <span class="cm-attribute">x-ref</span>=<span class="cm-string">"input"</span><span class="cm-tag cm-bracket">&gt;</span></span></pre><pre class=" CodeMirror-line "><span style="padding-right: 0.1px;"><span class="cm-tag cm-bracket">&lt;/</span><span class="cm-tag cm-error">div</span><span class="cm-tag cm-bracket cm-error">&gt;</span></span></pre></div>
+      </div>
+    </div>
+    <a id="camlecase-vs-kebabcase"></a>
+    <p>这样，在JavaScript代码中，你就可以用<span class="expr">this.input</span>方便地访问到对应的部件，并根据需要手动地添加事件处理器等。并且，可方便地为该部件添加CSS：</p>
+    <div class="code-box scroll">
+      <div class="CodeMirror cm-s-alice">
+        <div class="CodeMirror-code"><pre class=" CodeMirror-line "><span style="padding-right: 0.1px;"><span class="cm-qualifier">.demo</span> [<span class="cm-tag">x-ref</span>=<span class="cm-string">"input"</span>] {</span></pre><pre class=" CodeMirror-line "><span style="padding-right: 0.1px;">  <span class="cm-property">color</span>: <span class="cm-atom">#222</span>;</span></pre><pre class=" CodeMirror-line "><span style="padding-right: 0.1px;">}</span></pre></div>
+      </div>
+    </div>
+
+    <h4>camelCase vs kebab-case</h4>
+    <p>HTML特性不区分大小写，在模板中书写组件的属性名时，应由camelCase转变为kebab-case。</p>
+    <div class="code-box scroll">
+      <div class="CodeMirror cm-s-alice">
+        <div class="CodeMirror-code"><pre class=" CodeMirror-line "><span style="padding-right: 0.1px;"><span class="cm-keyword">var</span> <span class="cm-def">Demo</span> <span class="cm-operator">=</span> <span class="cm-variable">Exact</span>.<span class="cm-property">defineClass</span>(</span></pre><pre class=" CodeMirror-line "><span style="padding-right: 0.1px;">  <span class="cm-variable">extend</span>: <span class="cm-variable">Exact</span>.<span class="cm-variable">Component</span>,</span></pre><pre class=" CodeMirror-line "><span style="padding-right: 0.1px;">  <span class="cm-variable">statics</span>: {</span></pre><pre class=" CodeMirror-line "><span style="padding-right: 0.1px;">    <span class="cm-variable">descriptors</span>: { <span class="cm-variable">imgUrl</span>: <span class="cm-atom">null</span> },</span></pre><pre class=" CodeMirror-line "><span style="padding-right: 0.1px;">    <span class="cm-variable">template</span>: <span class="cm-string">'&lt;div&gt;&lt;img src@="$.imgUrl"&gt;&lt;/div&gt;'</span></span></pre><pre class=" CodeMirror-line "><span style="padding-right: 0.1px;">  }</span></pre><pre class=" CodeMirror-line "><span style="padding-right: 0.1px;">);</span></pre></div>
+      </div>
+    </div>
+    <br>
+    <div class="code-box scroll">
+      <div class="CodeMirror cm-s-alice">
+        <div class="CodeMirror-code"><pre class=" CodeMirror-line "><span style="padding-right: 0.1px;"><span class="cm-comment">&lt;!--父组件模板--&gt;</span></span></pre><pre class=" CodeMirror-line "><span style="padding-right: 0.1px;"><span class="cm-tag cm-bracket">&lt;</span><span class="cm-tag">div</span><span class="cm-tag cm-bracket">&gt;</span></span></pre><pre class=" CodeMirror-line "><span style="padding-right: 0.1px;">  ...</span></pre><pre class=" CodeMirror-line "><span style="padding-right: 0.1px;">  <span class="cm-tag cm-bracket">&lt;</span><span class="cm-tag">div</span> <span class="cm-attribute">x-type</span>=<span class="cm-string">"Demo"</span> <span class="cm-attribute">img-url</span>=<span class="cm-string">"./demo.png"</span><span class="cm-tag cm-bracket">&gt;&lt;/</span><span class="cm-tag">div</span><span class="cm-tag cm-bracket">&gt;</span></span></pre><pre class=" CodeMirror-line "><span style="padding-right: 0.1px;">  ...</span></pre><pre class=" CodeMirror-line "><span style="padding-right: 0.1px;"><span class="cm-tag cm-bracket">&lt;/</span><span class="cm-tag">div</span><span class="cm-tag cm-bracket">&gt;</span></span></pre></div>
+      </div>
+    </div>
+    <p>有一些DOM元素原生的属性，它们的属性名在JS与HTML之间，存在特别的转换关系，如：</p>
+    <div class="code-box scroll">
+      <div class="CodeMirror cm-s-alice">
+        <div class="CodeMirror-code"><pre class=" CodeMirror-line "><span style="padding-right: 0.1px;"><span class="cm-string">'for'</span> <span class="cm-operator">&lt;=&gt;</span> <span class="cm-string">'htmlFor'</span></span></pre><pre class=" CodeMirror-line "><span style="padding-right: 0.1px;"><span class="cm-string">'float'</span> <span class="cm-operator">&lt;=&gt;</span> <span class="cm-string">'cssFloat'</span></span></pre><pre class=" CodeMirror-line "><span style="padding-right: 0.1px;"><span class="cm-string">'class'</span> <span class="cm-operator">&lt;=&gt;</span> <span class="cm-string">'className'</span></span></pre><pre class=" CodeMirror-line "><span style="padding-right: 0.1px;"><span class="cm-string">'readonly'</span> <span class="cm-operator">&lt;=&gt;</span> <span class="cm-string">'readOnly'</span></span></pre><pre class=" CodeMirror-line "><span style="padding-right: 0.1px;"><span class="cm-string">'inner-html'</span> <span class="cm-operator">=&gt;</span> <span class="cm-string">'innerHTML'</span></span></pre></div>
+      </div>
+    </div>
+  </article>
+</div>
+
+<!--<footer class="footer">
+  <p>Released under the MIT license<br>
+    © 2015 Chen Junyong. All rights reserved.</p>
+</footer>-->
+
+<!--<script src="../javascripts/codemirror.js"></script>-->
+<!--<script src="../javascripts/javascript-mode.js"></script>-->
+<!--<script src="../javascripts/code-format.js"></script>-->
+<script src="../javascripts/site.js"></script>
+</body>
+</html>

@@ -8,17 +8,26 @@ function Slider() {
 Exact.defineClass({
   constructor: Slider, extend: Component,
   statics: {
-    $template: Skin.query(document, '.template .slider')
+    defaults: function() {
+      return {
+        min: 0,
+        max: 10,
+        value: 0
+      };
+    },
+    template: Skin.query(document, '.template .slider')
   },
   onMouseChange: function(event) {
     switch (event.type) {
       case 'mousemove':
         if (this.pressed) {
+          var max = Number(this.max);
+          var min = Number(this.min);
           //var cx = event.clientX - this.$skin.getBoundingClientRect().left;
           var cx = event.clientX - Skin.call(this.$skin, 'getBoundingClientRect').left;
           cx = cx < 0 ? 0 : cx;
           cx = cx > 100 ? 100 : cx;
-          this.set('value', (cx * 0.01 * (this.max-this.min) + this.min).toFixed(1));
+          this.set('value', (cx * 0.01 * (max - min) + min).toFixed(1));
         }
         break;
       case 'mousedown':
@@ -29,13 +38,7 @@ Exact.defineClass({
         break;
     }
   },
-  defaults: function() {
-    return {
-      min: 0,
-      max: 10,
-      value: 0
-    };
-  },
+
   register: function() {
     Exact.help(this).bind('onMouseChange');
   },
@@ -67,18 +70,20 @@ function TextSlider() {
 Exact.defineClass({
   constructor: TextSlider, extend: Component,
   statics: {
-    $template: Skin.query(document, '.template .text-slider'),
+    template: Skin.query(document, '.template .text-slider'),
     resources: {
       Slider: Slider
+    },
+    defaults: function() {
+      return {
+        min: 0,
+        max: 10,
+        value: 0,
+        label: ''
+      };
     }
-  },
-  defaults: function() {
-    return {
-      min: 0,
-      max: 10,
-      value: 0
-    };
   }
+
 });
 
 function App() {
@@ -88,11 +93,11 @@ function App() {
 Exact.defineClass({
   constructor: App, extend: Component,
   statics: {
-    $template: Skin.query(document, '.template .app'),
+    template: Skin.query(document, '.template .app'),
     resources: {
       TextSlider: TextSlider
     }
   }
 });
 
-document.getElementById('app-shell').appendChild(Component.create(App).$skin);
+Component.create(App).attach(Skin.query(document, '#app'));

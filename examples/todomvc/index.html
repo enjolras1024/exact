@@ -8,51 +8,52 @@
   <link rel="stylesheet" href="app.css">
 </head>
 <body>
-  <div id="app-shell"></div>
+  <section id="todoapp"></section>
 
   <div class="template">
     <section class="todoapp">
       <header class="header">
         <h1>todos</h1>
-        <input class="new-todo" placeholder="What needs to be done?" autofocus x-type="Input" value#="$.newTitle" keyup.enter+="$.onEnter">
+        <input class="new-todo" placeholder="What needs to be done?" keyup.enter+="$.onEnter" change+="$.onChange" value@="$.newTodo" autofocus>
       </header>
       <section class="main" >
-        <input class="toggle-all" id="toggle-all" checked#="$.allDone" x-type="CheckBox">
+        <input type="checkbox" class="toggle-all" id="toggle-all" checked@="$.allDone" change+="$.onToggle">
         <label for="toggle-all">Mark all as complete</label>
-        <ul class="todo-list" x-id="list" x-type="List" item-adapter&="ENJ.Adapter" items@="$.todos | $.filtering *">
-          <!--<li x-each="$.items | filter($.status)">@{item.title}</li>-->
+        <ul class="todo-list" x-ref="list">
+          <li x-type="TodoAdapter" x-for="todo of $.todos | filter($.status)" x-key="todo.id"
+              label#="todo.label" completed#="todo.completed" destroy+="$.removeTodo(todo)"></li>
         </ul>
       </section>
       <footer class="footer" x-style="display@: $.todos.length | display;">
         <span class="todo-count">
-          <strong x-id="strong">@{$.remainingCount}</strong>@{$.remainingCount | pluralize('item')} left
+          <strong x-ref="strong">@{ $.remainingCount }</strong> @{ $.remainingCount | pluralize('item') } left
         </span>
         <ul class="filters">
           <li>
-            <a x-class="selected@: $.filter === 'all'" href="#/">All</a>
+            <a x-class="selected@: $.status === 'all'" href="#/">All</a>
           </li>
           <li>
-            <a x-class="selected@: $.filter === 'active'" href="#/active">Active</a>
+            <a x-class="selected@: $.status === 'active'" href="#/active">Active</a>
           </li>
           <li>
-            <a x-class="selected@: $.filter === 'completed'" href="#/completed">Completed</a>
+            <a x-class="selected@: $.status === 'completed'" href="#/completed">Completed</a>
           </li>
         </ul>
-        <button class="clear-completed" click+="$.clearCompleted"
+        <button class="clear-completed" click+="$.clearCompleted()"
                 x-style="display@: $.todos.length > $.remainingCount | display;" >Clear completed</button>
       </footer>
     </section>
   </div>
 
   <ul class="template">
-    <li class="adapter" x-class="todo: true; completed@: $.item.completed; editing@: $.backup;">
+    <li class="todo-adapter" x-class="completed@: $.completed; editing@: $.editing;">
       <div class="view">
-        <input class="toggle" x-type="CheckBox" checked#="$.item.completed">
-        <label dblclick+="$.edit">@{$.item.title}</label>
-        <button class="destroy" click+="$.destroy"></button>
+        <input type="checkbox" class="toggle" checked@="$.completed" change+="$.onToggle">
+        <label dblclick+="$.startEditing()">@{ $.label }</label>
+        <button class="destroy" click+="$.destroy()"></button>
       </div>
-      <input class="edit" x-id="editor" x-type="TextBox" value@="$.item.title"
-             keyup.escape+="$.cancelEdit" keyup.enter+="$.doneEdit" blur+="$.doneEdit">
+      <input class="edit" x-ref="editor" value@="$.text" change+="$.onChange"
+             keyup.escape+="$.cancelEditing()" keyup.enter+="$.doneEditing()" blur+="$.doneEditing()">
     </li>
   </ul>
 

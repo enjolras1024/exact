@@ -4,512 +4,32 @@
 (function(global, module) {
   'use strict';
 
-  var Exact = { version: '0.0.6' };
-
+  var Exact = { version: '0.0.8' };
+//
+//  global = global || window || {};
+//
 //  if (module) {
 //    module.exports = Exact;
 //  } else {
-//    global = global || window || {};
 //    global.Exact = Exact;
-//    Exact.global = global;
 //  }
 //
-//})(typeof global !== 'undefined' ? global : undefined, typeof module !== 'undefined' ? module : undefined);
+//  Exact.global = global;
+//
+//})(typeof global !== 'undefined' ? global : null, typeof module !== 'undefined' ? module : null);
 
 //######################################################################################################################
 // src/utils/PathUtil.js
 //######################################################################################################################
 (function() {
 
-  'use strict';
-
   var PATH_DELIMITER = /\[|\]?\./;
 
   Exact.PathUtil = {
-    split: function split(path) {
-      return path.split(PATH_DELIMITER);
+    parse: function parse(path) {
+      return path ? path.split(PATH_DELIMITER) : null;
     }
   };
-
-})();
-
-//######################################################################################################################
-// src/utils/ObjectUtil.js
-//######################################################################################################################
-(function() {
-  'use strict';
-
-  var features = {};
-
-  features.seal = 'seal' in Object;
-  features.freeze = 'freeze' in Object;
-
-  try {
-    Object.defineProperty({}, 'x', {get: function() {}, set: function() {}});
-    features.accessor = true;
-  } catch (error) {
-    features.accessor = false;
-  }
-  //features.accessor = false;
-
-  function getDescriptor(object, key) {
-    return {value: object[key]};
-  }
-
-  function defineProp(object, key, desc) {
-    if (!desc || typeof desc !== 'object') {
-      throw new Error('');
-    }
-
-    object[key] = desc.value;
-  }
-
-  function assign(target/*,..sources*/) {
-      if (target === undefined || target === null) {
-        throw  new TypeError('Cannot convert undefined or null to object');
-      }
-
-      if (!(target instanceof Object)) {
-        var type = typeof target;
-
-        if (type === 'number') {
-          target = new Number(target);
-        } else if (type === 'string') {
-          target = new String(target);
-        } else if (type === 'boolean') {
-          target = new Boolean(target);
-        }
-      }
-
-      var source, key, i, n = arguments.length;
-
-      for (i = 1; i < n; ++i) {
-        source = arguments[i];
-
-        if (!(source instanceof Object)) {
-          continue;
-        }
-
-        for (key in source) {
-          if (source.hasOwnProperty(key)) {
-            defineProp(target, key, getDescriptor(source, key));
-          }
-        }
-      }
-
-      return target;
-    }
-
-  /**
-   * Clone a object.
-   *
-   * @param {Object} source
-   * @param {number} depth
-   * @returns {Object}
-   */
-  function clone(source, depth) {
-    if (depth === undefined) {
-      depth = -1; // clone completely
-    }
-
-    var key, target, constructor;
-
-    if (!(source instanceof Object) || !source || !depth) {
-      return source;
-    }
-
-    if (typeof source === 'function') {
-      target = function() { return source.apply(this, arguments); };
-    } else {
-      constructor = source.constructor;
-
-      target = new constructor();
-
-      for (key in source) {
-        if (source.hasOwnProperty(key)) {
-          target[key] = clone(source[key], depth - 1);
-        }
-      }
-    }
-
-    return target;
-  }
-
-  var Array$push = Array.prototype.push;
-  var Array$splice = Array.prototype.splice;
-  var Array$unshift = Array.prototype.unshift;
-
-  var UPDATE_COMMANDS = { //TODO: as outer const
-    '$set': true, '$push': true, '$unshift': true, '$splice': true, '$apply': true, '$assign': true
-  };
-
-  /**
-   * Update some parts of a object.
-   *
-   * @example update({items: [1,2,3]}, {items: {$push: [4]}})
-   *
-   * @param {Object} source
-   * @param {Object} specs
-   * @returns {Object}
-   */
-  function update(source, specs) {
-//      if (!(source instanceof Object) || !source) {
-//        return source;
-//      }
-    if (typeof specs !== 'object' || !specs) { return; }
-
-    if (specs.hasOwnProperty('$set')) { //$equal
-      return specs['$set'];
-    }
-
-    var key, target = clone(source, 1);
-
-    if (specs.hasOwnProperty('$assign')) {
-      assign(target, specs['$assign']);
-    } else if (specs.hasOwnProperty('$push')) {
-      Array$push.apply(target, specs['$push']); //TODO: push as outer func
-    } else if (specs.hasOwnProperty('$unshift')) {
-      Array$unshift.apply(target, specs['$unshift']); //TODO: unshift as outer func
-    } else if (specs.hasOwnProperty('$splice')) {
-      Array$splice.apply(target, specs['$splice']); //TODO: unshift as outer func
-    } else if (specs.hasOwnProperty('$apply')) {
-      target = specs['$apply'](target);
-    }
-
-    for (key in specs) {
-      if (specs.hasOwnProperty(key) && !UPDATE_COMMANDS.hasOwnProperty(key)) {
-        target[key] = update(source[key], specs[key]);
-      }
-    }
-
-    return target;
-  }
-
-  Exact.ObjectUtil = {
-    assign: Object.assign || assign,
-
-    defineProp: features.accessor ? Object.defineProperty : defineProp,
-
-    getDescriptor: Object.getOwnPropertyDescriptor || getDescriptor,
-
-    update: update,
-
-    clone: clone,
-
-    support: function support(name) {
-      return features[name];
-    }
-  };
-
-})();
-
-//######################################################################################################################
-// src/share/constants.js
-//######################################################################################################################
-(function() {
-
-  'use strict';
-  //var ObjectUtil = Exact.ObjectUtil;
-  var PathUtil_split = Exact.PathUtil.split;
-  var ObjectUtil_defineProp = Exact.ObjectUtil.defineProp;
-  //var PATH_DEMILITER = /\[|\]?\./;
-
-  /**
-   * Find the resource in the scope
-   *
-   * @param {Array} path
-   * @param {Object} scope
-   * @returns {*}
-   */
-  function find(path, scope) {
-    //if (path.indexOf('.') > 0 || path.indexOf('[') > 0) {
-    //  path = path.split(PATH_DEMILITER);
-
-      var i = -1, n = path.length, value = scope;
-
-      while (++i < n) {
-        value = value[path[i]];
-        if (value === undefined || value === null) {
-          return value;
-        }
-      }
-
-      return value;
-      //path = path[i];
-    //}
-
-    //return scope[path];
-  }
-
-  ObjectUtil_defineProp(Exact, 'RES', {value: {
-    /**
-     * Find the resource in local scope, then in global if necessary.
-     *
-     * @param {Array|string} path
-     * @param {Object} localScope
-     * @param {boolean} notInGlobal
-     * @returns {*}
-     */
-    search: function(path, localScope, notInGlobal) {
-      if (typeof path === 'string') {
-        path = PathUtil_split(path);//path.split(PATH_DEMILITER);
-      }
-
-      if (localScope) {
-        var res = find(path, localScope);
-      }
-
-      if (!res && !notInGlobal) {
-        res = find(path, this);
-      }
-
-      if (!res && !notInGlobal && Exact.global) {
-        res = find(path, Exact.global);
-      }
-
-      //TODO: continue to find(path, window);
-
-      return res;
-    },
-
-    /**
-     *
-     * @param {string} path
-     * @param {*} value
-     * @param {boolean} override
-     * @returns {boolean}
-     */
-    register: function(path, value, override) {
-      var temp, target = this;
-
-      if (path.indexOf('.') > 0 || path.indexOf('[') > 0) {
-        path = path.split(PATH_DEMILITER);
-
-        var i = -1, n = path.length - 1;
-
-        while (++i < n) {
-          temp = target[path[i]];
-
-          if (temp === undefined) {
-            temp = target[path[i]] = {};
-          } else if (typeof temp !== 'object') {
-            throw new TypeError('You can not register resource to ' + typeof temp);
-          }
-
-          target = temp;
-        }
-
-        path = path[i];
-      }
-
-      if (!override && target.hasOwnProperty(path)) {
-        //console.warn('already exists');
-        return false;
-      }
-
-      ObjectUtil_defineProp(target, path, {value: value});
-
-      return true;
-    }
-  }});
-
-})();
-
-//######################################################################################################################
-// src/share/functions.js
-//######################################################################################################################
-(function() {
-
-  'use strict';
-
-  var ObjectUtil_assign = Exact.ObjectUtil.assign;
-  var ObjectUtil_defineProp = Exact.ObjectUtil.defineProp;
-  var ObjectUtil_getDescriptor = Exact.ObjectUtil.getDescriptor;
-
-  var helper = {
-    bind: function() {
-      var name, method, target = this.target;
-
-      if (typeof arguments[0] !== 'object') { // no extras
-        for (var i = 0, n = arguments.length; i < n; ++i) {
-          name = arguments[i];
-          method = target[name];
-
-          if (typeof method === 'function') {
-            target[name] = method.bind(target);
-          }
-        }
-      } else { // with extra parameters
-        var options = arguments[0];
-        for (name in options) {
-          if (options.hasOwnProperty(name)) {
-            method = target[name];
-
-            if (typeof method === 'function') {
-              target[name] = method.bind.apply(method, [target].concat(options[name]));
-            }
-          }
-        }
-      }
-    }
-  };
-
-  Exact.help = function help(target) {
-    helper.target = target;
-    return helper;
-  };
-
-  Exact.setImmediate = (function(setImmediate, MutationObserver/*, requestAnimationFrame*/) {
-    if (!setImmediate) {
-
-      if (MutationObserver) {
-        var cbs = [];
-        var flag = 0;
-        var text = document.createTextNode('');
-        var observer = new MutationObserver(function() {
-          var func;
-
-          while (func = cbs.pop()) {
-            func();
-          }
-
-          flag = flag ? 0 : 1;
-        });
-
-        observer.observe(text, {
-          characterData: true
-        });
-
-        setImmediate = function(func) {
-          if (func) {
-            cbs.unshift(func);
-            text.data = flag;
-          }
-        }
-      } else {
-        setImmediate = function(func) {
-          setTimeout(func, 0);
-        }
-      }
-
-    }
-
-    return setImmediate;
-  })(
-    typeof setImmediate !== 'undefined' ? setImmediate : null,
-    typeof MutationObserver !== 'undefined' ? MutationObserver : null,
-    typeof requestAnimationFrame !== 'undefined' ? requestAnimationFrame : null
-  );
-
-  function defineProps(target, sources) {
-    var i, n, source;
-    for (i = 0, n = sources.length; i < n; ++i) {
-      source = sources[i];
-      for (var key in source) {
-        if (source.hasOwnProperty(key)) {
-          ObjectUtil_defineProp(target, key, ObjectUtil_getDescriptor(source, key));
-        }
-      }
-    }
-  }
-
-  /**
-   * Define new class, supporting extends and mixins.
-   *
-   * @static
-   * @method defineClass
-   * @param {Object} props
-   */
-  Exact.defineClass = function defineClass(props) {
-    var subClass, superClass, mixins, statics, sources;//, ObjectUtil = Exact.ObjectUtil;
-
-    // superClass
-    if (props.hasOwnProperty('extend')) {
-      superClass = props.extend;
-
-      if (typeof superClass !== 'function') {
-        throw new TypeError('superClass must be a function');
-      }
-    } else {
-      superClass = Object;
-    }
-
-    // subClass
-    if (props.hasOwnProperty('constructor')) {
-      subClass = props.constructor;
-      //delete props.constructor;
-      if (typeof subClass !== 'function') {
-        throw new TypeError('subClass must be a function');
-      }
-    } else {
-      subClass = function() {
-        superClass.apply(this, arguments);
-      };
-    }
-
-    // props
-    subClass.prototype = Object.create(superClass.prototype);//ObjectUtil.create(superClass.prototype);
-
-    sources = [subClass.prototype];
-
-    mixins = props.mixins;
-    if (Array.isArray(mixins)) {
-      //delete props.mixins;
-      sources.push.apply(sources, mixins);
-    }
-
-    sources.push(props);
-
-    defineProps(subClass.prototype, sources);
-
-    ObjectUtil_defineProp(subClass.prototype, 'constructor', {
-      value: subClass, enumerable: false, writable: true, configurable: true
-    });
-
-    // static
-    sources = [subClass, superClass];
-
-    statics = props.statics;
-
-    if (statics) {
-      mixins = statics.mixins;
-      if (Array.isArray(mixins)) {
-        //delete statics.mixins;
-        sources.push.apply(sources, mixins);
-      }
-
-      sources.push(statics);
-    }
-
-    defineProps(subClass, sources);
-
-    delete subClass.prototype.statics;
-    delete subClass.prototype.entend;
-    delete subClass.prototype.mixins;
-    delete subClass.mixins;
-
-    return subClass;
-  };
-
-  Exact.mergeDescriptors =  function(source, target) {
-    var m = source.length, n = target.length, options = {}, descriptors = [];
-
-    if (typeof source[m - 1] === 'object') {
-      ObjectUtil_assign(options, source[m - 1]);
-      --m;
-    }
-
-    if (typeof target[n - 1] === 'object') {
-      ObjectUtil_assign(options, target[n - 1]);
-      --n;
-    }
-
-    descriptors.push.apply(descriptors, source.slice(0, m));
-    descriptors.push.apply(descriptors, target.slice(0, n));
-    descriptors.push(options);
-
-    return descriptors;
-  }
 
 })();
 
@@ -518,11 +38,9 @@
 //######################################################################################################################
 (function() {
 
-  'use strict';
-
   var QUOTE_CODE = "'".charCodeAt(0);
-  //var SPACE_CODE = ' '.charCodeAt(0);
   var SLASH_CODE = '\\'.charCodeAt(0);
+  //var SPACE_CODE = ' '.charCodeAt(0);
   
   Exact.StringUtil = {
     /**
@@ -587,9 +105,9 @@
 
         if (/*!iq && */!ct && cc === delimiter) {
           piece = expression.slice(l, i).trim();
-          if (!piece) {
-            throw new Error('Illegal argument list');
-          }
+          //if (!piece) {
+          //  throw new Error('Illegal argument list'); // TODO: ???
+          //}
           pieces.push(piece);
           l = i+1;
         }
@@ -639,40 +157,6 @@
       }
 
       return null;//[-1, -1];
-    },
-
-    isClosed: function(expr, i, j, brackets) {
-      var ct, cc, cb, iq;
-
-      if (expr[i] === brackets[0] && expr[j-1] === brackets[1]) {
-
-        ct = 1;
-        brackets = [brackets.charCodeAt(0), brackets.charCodeAt(1)];
-
-        while (++i < j) {
-          cc = expr.charCodeAt(i);
-
-          if (cc === QUOTE_CODE && cb !== SLASH_CODE) {
-            cb = cc;
-            iq = !iq;
-          }
-
-          if (iq) {
-            continue;
-          }
-
-          if (cc === brackets[1]) {
-            --ct;
-            if (!ct) {
-              return i === j-1;
-            }
-          } else if (cc === brackets[0]) {
-            ++ct;
-          }
-        }
-      }
-
-      return false;
     }
   };
 
@@ -682,8 +166,6 @@
 // src/utils/LiteralUtil.js
 //######################################################################################################################
 (function() {
-
-  'use strict';
 
   /**
    * @constant
@@ -720,10 +202,6 @@
 
   //string in single quotes
   function toStrISQ(expr) {
-    //var i = expr.indexOf("'");
-    //var j = expr.lastIndexOf("'");
-
-    //return expr.slice(i+1, j);
     return expr.slice(1, expr.length - 1);
   }
 
@@ -739,8 +217,6 @@
   };
 
   var STRING_IN_SINGLE_QUOTES_REGEXP = /^'.*'$/;
-  //var JSON_LIKE_REGEXP = /(^\[.*\]$)|(^\{.*\}$)/;
-  //var JSON_LIKE_REGEXP = /(^\[(\s*"\S+"\s*:)+.*\]$)|(^\{("\S+":)+.*\}$)/;
 
   /**
    * Parse possible value from expression.
@@ -750,13 +226,15 @@
    * @returns {*}
    */
   function parse(expr, type) {
-    if (typeof expr !== 'string') {
+    /*if (typeof expr !== 'string') {
       throw new TypeError('expr must be string');
-    }
+    }*/
 
     expr = expr.trim();
 
-    if (type && typeof type === 'string') {
+    if (!expr) { return; }
+
+    if (type/* && type !== '*'*/) {
       if (!(type in typedParsers)) {
         throw new Error('no such type of literal parser, try on json');
       }
@@ -789,165 +267,328 @@
 })();
 
 //######################################################################################################################
-// src/utils/EvaluatorUtil.js
+// src/share/constants.js
 //######################################################################################################################
 (function() {
 
-  'use strict';
-
-  var RES = Exact.RES;
-  var emptyArray = [];
-  //var THIS_SYMBOL = '$'; //TODO:
-  //var EVENT_SYMBOL = 'event'; //TODO:
-  
-  var ARG_FLAG_LITE = 0;
-  var ARG_FLAG_PATH = 1;
-  var ARG_FLAG_EVAL = -1;
-
-  var ARGUMENT_FLAGS = {
-    INVARIABLE: 0, SCOPE_PATH: 1, LOCAL_PATH: 2, EVENT_PATH: 3, EVALUATOR: -1
+  Exact.EVENT_SYMBOL = 'event';
+  Exact.EVENT_OPERATOR = '^';
+  Exact.CONTEXT_SYMBOL = '$';
+  Exact.DATA_BINDING_BRACKETS = '{}';
+  Exact.BINDING_OPERATORS = {
+    ONE_TIME: '&', ONE_WAY: '@', TWO_WAY: '#', EVENT: '+', TEXT: '?'
   };
 
-  function Evaluator(exec, args, back) {
-    this.exec = exec;
-    this.back = back;
-    this.args = args;
-    //this.flags = flags;
-    //this.params = params;
-  }
-
-  //function $get(val) { return val; }
-  function $get(val) { return arguments[arguments.length - 1]; }
-  function $not(val) { return !val; }
-
-  function makeEvaluator(exec, args, back) {
-    return new Evaluator(exec, args, back);
-  }
-
-  function makeGetEvaluator(args) {
-    return new Evaluator($get, args);
-  }
-
-  function makeNotEvaluator(args) {
-    return new Evaluator($not, args);
-  }
-
-  //function makeExpressionEvaluator(expr/*, args*/) { // TODO: EvaluatorParser.parse
-  //  var args = ['$', 'item', 'event'];
-  //  args.flags = [1, 2, 3];
-  //
-  //  var body = 'return ' + expr + ';';
-  //
-  //  var exec = Function.apply(null, args.concat([body]));
-  //
-  //  return makeEvaluator(exec, args);
-  //}
-
-  function evaluateArgs(args, scope, local, event) {
-    var i,  n, arg, flag, flags = args.flags, results = args.slice(0);
-
-    if (flags && flags.length) {
-      for (i = 0, n = flags.length; i < n; ++i) {
-        flag = flags[i];
-
-        if (!flag) { continue;} // arg is invariable
-
-        arg = args[i];
-
-        if (flag > 0) { // arg is variable path
-          results[i] = (arg && arg.length) ? RES.search(arg, arguments[flag], true) : arguments[flag];
-          continue;
-        }
-
-        if (flag === ARG_FLAG_EVAL) {       // arg is evaluator
-          results[i] = applyEvaluator(arg, scope, local, event, 'exec');
-        }
-      }
-    }
-
-    return results;
-  }
-
-  /**
-   *
-   * @param {Evaluator} evaluator
-   * @param {Object} scope
-   * @param {Object} local
-   * @param {Event} event
-   * @param {string} name - 'exec' or 'back'
-   * @param {*} value
-   * @returns {*}
-   */
-  function applyEvaluator(evaluator, scope, local, event, name, value) {
-    var ctx = null, exec, args;//, hasFirstValue = arguments.length > 5;
-
-    exec = evaluator[name];
-
-    if (!exec) {
-      var path = evaluator.path;
-      var flag = evaluator.flag;
-      var n_1 = path.length - 1;
-
-      if (!n_1) {
-        ctx = arguments[flag];
-      }  else {
-        ctx = RES.search(path.slice(0, n_1), arguments[flag], true);
-      }
-
-      exec = ctx[path[n_1]];
-    }
-
-    args = evaluateArgs(evaluator.args || emptyArray, scope, local, event);
-
-    if (arguments.length > 5) {
-      args.unshift(value);
-    }
-
-    return exec.apply(ctx, args);
-  }
-
-  Exact.EvaluatorUtil = {
-    //makeExpressionEvaluator: makeExpressionEvaluator,
-    makeGetEvaluator: makeGetEvaluator,
-    makeNotEvaluator: makeNotEvaluator,
-    makeEvaluator: makeEvaluator,
-    applyEvaluator: applyEvaluator,
-    ARGUMENT_FLAGS: ARGUMENT_FLAGS,
-    ARG_FLAG_LITE: ARG_FLAG_LITE,
-    ARG_FLAG_PATH: ARG_FLAG_PATH,
-    ARG_FLAG_EVAL: ARG_FLAG_EVAL
-  }
 })();
 
 //######################################################################################################################
-// src/utils/ExpressionUtil.js
+// src/share/functions.js
 //######################################################################################################################
 (function() {
-  'use strict';
 
-  function Expression(type, template) {
-    this.type = type; // indicate the type of the expression template
-    this.template = template;
-  }
+  var helper = {
+    bind: function() {
+      var name, method, target = this.target;
 
-  var ExpressionUtil = {
-    isExpression: function(value) {
-      return value instanceof Expression;
-    },
+      if (typeof arguments[0] !== 'object') { // no extras
+        for (var i = 0, n = arguments.length; i < n; ++i) {
+          name = arguments[i];
+          method = target[name];
 
-    makeExpression: function(type, template) {
-      return new Expression(type, template);
-    },
+          if (typeof method === 'function') {
+            target[name] = method.bind(target);
+          }
+        }
+      } else { // with extra parameters
+        var options = arguments[0];
+        for (name in options) {
+          if (options.hasOwnProperty(name)) {
+            method = target[name];
 
-    applyExpression: function(expression, scope, target, property) {
-      var type = expression.type, template = expression.template;
-      if (type && type.compile) {
-        type.compile(template, property, target, scope); // TODO: local
+            if (typeof method === 'function') {
+              target[name] = method.bind.apply(method, [target].concat(options[name]));
+            }
+          }
+        }
       }
     }
   };
 
-  Exact.ExpressionUtil = ExpressionUtil;
+  Exact.help = function help(target) {
+    helper.target = target;
+    return helper;
+  };
+
+  Exact.assign = function assign(target/*,..sources*/) { // Object.assign
+    if (target === undefined || target === null) {
+      throw  new TypeError('Cannot convert undefined or null to object');
+    }
+
+    if (!(target instanceof Object)) {
+      var type = typeof target;
+
+      if (type === 'number') {
+        target = new Number(target);
+      } else if (type === 'string') {
+        target = new String(target);
+      } else if (type === 'boolean') {
+        target = new Boolean(target);
+      }
+    }
+
+    var source, key, i, n = arguments.length;
+
+    for (i = 1; i < n; ++i) {
+      source = arguments[i];
+
+      if (!(source instanceof Object)) {
+        continue;
+      }
+
+      for (key in source) {
+        if (source.hasOwnProperty(key)) {
+          Object.defineProperty(target, key, Object.getOwnPropertyDescriptor(source, key));
+        }
+      }
+    }
+
+    return target;
+  };
+
+  Exact.setImmediate = (function(setImmediate, MutationObserver/*, requestAnimationFrame*/) {
+    if (!setImmediate) {
+
+      if (MutationObserver) {
+        var cbs = [];
+        var flag = 0;
+        var text = document.createTextNode('');
+        var observer = new MutationObserver(function() {
+          var func;
+
+          while (func = cbs.pop()) {
+            func();
+          }
+
+          flag = flag ? 0 : 1;
+        });
+
+        observer.observe(text, {
+          characterData: true
+        });
+
+        setImmediate = function(func) {
+          if (func) {
+            cbs.unshift(func);
+            text.data = flag;
+          }
+        }
+      } else {
+        setImmediate = function(func) {
+          setTimeout(func, 0);
+        }
+      }
+
+    }
+
+    return setImmediate;
+  })(
+    typeof setImmediate !== 'undefined' ? setImmediate : null,
+    typeof MutationObserver !== 'undefined' ? MutationObserver : null,
+    typeof requestAnimationFrame !== 'undefined' ? requestAnimationFrame : null
+  );
+
+  function defineProps(target, sources) {
+    var i, n, source;
+    for (i = 0, n = sources.length; i < n; ++i) {
+      source = sources[i];
+      for (var key in source) {
+        if (source.hasOwnProperty(key)) {
+          Object.defineProperty(target, key, Object.getOwnPropertyDescriptor(source, key));
+        }
+      }
+    }
+  }
+
+  /**
+   * Define new class, supporting extends and mixins.
+   *
+   * @static
+   * @method defineClass
+   * @param {Object} props
+   */
+  Exact.defineClass = function defineClass(props) {
+    var subClass, superClass, mixins, statics, sources;//, ObjectUtil = Exact.ObjectUtil;
+
+    // superClass
+    if (props.hasOwnProperty('extend')) {
+      superClass = props.extend;
+
+      if (typeof superClass !== 'function') {
+        throw new TypeError('superClass must be a function');
+      }
+    } else {
+      superClass = Object;
+    }
+
+    // subClass
+    if (props.hasOwnProperty('constructor')) {
+      subClass = props.constructor;
+      //delete props.constructor;
+      if (typeof subClass !== 'function') {
+        throw new TypeError('subClass must be a function');
+      }
+    } else {
+      subClass = function() {
+        superClass.apply(this, arguments);
+      };
+    }
+
+    // props
+    subClass.prototype = Object.create(superClass.prototype);//ObjectUtil.create(superClass.prototype);
+
+    sources = [subClass.prototype];
+
+    mixins = props.mixins;
+    if (Array.isArray(mixins)) {
+      //delete props.mixins;
+      sources.push.apply(sources, mixins);
+    }
+
+    sources.push(props);
+
+    defineProps(subClass.prototype, sources);
+
+    Object.defineProperty(subClass.prototype, 'constructor', {
+      value: subClass, enumerable: false, writable: true, configurable: true
+    });
+
+    // static
+    sources = [subClass, superClass];
+
+    statics = props.statics;
+
+    if (statics) {
+      mixins = statics.mixins;
+      if (Array.isArray(mixins)) {
+        //delete statics.mixins;
+        sources.push.apply(sources, mixins);
+      }
+
+      sources.push(statics);
+    }
+
+    defineProps(subClass, sources);
+
+    delete subClass.prototype.statics;
+    delete subClass.prototype.entend;
+    delete subClass.prototype.mixins;
+    delete subClass.mixins;
+
+    return subClass;
+  };
+
+})();
+
+//######################################################################################################################
+// src/share/RES.js
+//######################################################################################################################
+(function() {
+
+  var PathUtil = Exact.PathUtil;
+
+  /**
+   * Find the resource in the scope
+   *
+   * @param {Array} path
+   * @param {Object} scope
+   * @returns {*}
+   */
+  function find(path, scope) {
+    var i = -1, n = path.length, value = scope;
+
+    while (++i < n) {
+      value = value[path[i]];
+      if (value === undefined || value === null) {
+        return value;
+      }
+    }
+
+    return value;
+  }
+
+  Exact.RES = {
+    /**
+     * Find the resource in local, then in RES if necessary.
+     *
+     * @param {Array|string} path
+     * @param {Object} local
+     * @param {boolean} stop
+     * @returns {*}
+     */
+    search: function(path, local, stop) {
+      if (typeof path === 'string') {
+        path = PathUtil.parse(path);
+      }
+
+      if (local) {
+        var res = find(path, local);
+      }
+
+      if (!res && !stop) {
+        res = find(path, this);
+
+        //if (!res && Exact.global) {
+        //  res = find(path, Exact.global);
+        //}
+      }
+
+      return res;
+    },
+
+    /**
+     *
+     * @param {string|Array} path
+     * @param {*} value
+     * @param {boolean} override
+     * @returns {boolean}
+     */
+    register: function(path, value, override) {
+      var temp, target = this;
+
+      if (typeof path === 'string') {
+        path = PathUtil.parse(path);
+      }
+
+      var i = -1, n = path.length - 1;
+
+      while (++i < n) {
+        temp = target[path[i]];
+
+        if (temp == null) { // null or undefined
+          temp = target[path[i]] = {};
+        } else if (!(temp instanceof Object)) {
+          throw new TypeError('You can not register resource to ' + typeof temp);
+        }
+
+        target = temp;
+      }
+
+      var prop = path[i];
+
+      if (!override && target.hasOwnProperty(prop)) {
+        if ('development' === 'development') {
+          console.warn('the resource on path `' + path.join('.') + '` already exists');
+        }
+        return false;
+      }
+
+      Object.defineProperty(target, prop, {
+        value: value, writable: false, enumerable: true, configurable: true
+      });
+
+      return true;
+    }
+  };
 
 })();
 
@@ -956,121 +597,235 @@
 //######################################################################################################################
 (function() {
 
-  'use strict';
-//TODO: 分解
-  var ObjectUtil = Exact.ObjectUtil;
+  var MUST_USE_PROPERTY = 0x1;
+  var HAS_BOOLEAN_VALUE = 0x2;
+  // PROPERTIES, modified from React (https://facebook.github.io/react/)
+  var PROPERTIES = {
+    /**
+     * Standard Properties
+     */
+    accept: 0,
+    acceptCharset: 0,
+    accessKey: 0,
+    action: 0,
+    allowFullScreen: HAS_BOOLEAN_VALUE,
+    allowTransparency: 0,
+    alt: 0,
+    async: HAS_BOOLEAN_VALUE,
+    autoComplete: 0,
+    autoFocus: HAS_BOOLEAN_VALUE,
+    autoPlay: HAS_BOOLEAN_VALUE,
+    capture: HAS_BOOLEAN_VALUE,
+    cellPadding: 0,
+    cellSpacing: 0,
+    charSet: 0,
+    challenge: 0,
+    checked: MUST_USE_PROPERTY | HAS_BOOLEAN_VALUE,
+    cite: 0,
+    classID: 0,
+    className: 0,
+    cols: 0,//HAS_POSITIVE_NUMERIC_VALUE,
+    colSpan: 0,
+    content: 0,
+    contentEditable: 0,
+    contextMenu: 0,
+    controls: HAS_BOOLEAN_VALUE,
+    coords: 0,
+    crossOrigin: 0,
+    data: MUST_USE_PROPERTY, // For `<object />` acts as `src`, and TextNode.
+    dateTime: 0,
+    'default': HAS_BOOLEAN_VALUE,
+    defer: HAS_BOOLEAN_VALUE,
+    dir: 0,
+    disabled: HAS_BOOLEAN_VALUE,
+    download: 0,//HAS_OVERLOADED_BOOLEAN_VALUE,
+    draggable: 0,
+    encType: 0,
+    form: 0,
+    formAction: 0,
+    formEncType: 0,
+    formMethod: 0,
+    formNoValidate: HAS_BOOLEAN_VALUE,
+    formTarget: 0,
+    frameBorder: 0,
+    headers: 0,
+    height: 0,
+    hidden: HAS_BOOLEAN_VALUE,
+    high: 0,
+    href: 0,
+    hrefLang: 0,
+    htmlFor: 0,
+    httpEquiv: 0,
+    icon: 0,
+    id: 0,
+    // innerHTML
+    innerHTML: MUST_USE_PROPERTY,
+    inputMode: 0,
+    integrity: 0,
+    is: 0,
+    keyParams: 0,
+    keyType: 0,
+    kind: 0,
+    label: 0,
+    lang: 0,
+    list: 0,
+    loop: HAS_BOOLEAN_VALUE,
+    low: 0,
+    manifest: 0,
+    marginHeight: 0,
+    marginWidth: 0,
+    max: 0,
+    maxLength: 0,
+    media: 0,
+    mediaGroup: 0,
+    method: 0,
+    min: 0,
+    minLength: 0,
+    multiple: MUST_USE_PROPERTY | HAS_BOOLEAN_VALUE,
+    muted: MUST_USE_PROPERTY | HAS_BOOLEAN_VALUE,
+    name: 0,
+    nonce: 0,
+    noValidate: HAS_BOOLEAN_VALUE,
+    open: HAS_BOOLEAN_VALUE,
+    optimum: 0,
+    pattern: 0,
+    placeholder: 0,
+    poster: 0,
+    preload: 0,
+    profile: 0,
+    radioGroup: 0,
+    readOnly: HAS_BOOLEAN_VALUE,
+    referrerPolicy: 0,
+    rel: 0,
+    required: HAS_BOOLEAN_VALUE,
+    reversed: HAS_BOOLEAN_VALUE,
+    role: 0,
+    rows: 0,//HAS_POSITIVE_NUMERIC_VALUE,
+    rowSpan: 0,//HAS_NUMERIC_VALUE,
+    sandbox: 0,
+    scope: 0,
+    scoped: HAS_BOOLEAN_VALUE,
+    scrolling: 0,
+    seamless: HAS_BOOLEAN_VALUE,
+    selected: MUST_USE_PROPERTY | HAS_BOOLEAN_VALUE,
+    shape: 0,
+    size: 0,//HAS_POSITIVE_NUMERIC_VALUE,
+    sizes: 0,
+    span: 0,//HAS_POSITIVE_NUMERIC_VALUE,
+    spellCheck: 0,
+    src: 0,
+    srcDoc: 0,
+    srcLang: 0,
+    srcSet: 0,
+    start: 0,//HAS_NUMERIC_VALUE,
+    step: 0,
+    style: 0,
+    summary: 0,
+    tabIndex: 0,
+    target: 0,
+    title: 0,
+    type: 0,
+    useMap: 0,
+    value: MUST_USE_PROPERTY,
+    width: 0,
+    wmode: 0,
+    wrap: 0,
 
-  var PROPS_SHOULD_BE_USED = {
-    'data': true, 'value': true, 'checked': true, 'selected': true, 'muted': true, 'multiple': true
+    /**
+     * RDFa Properties
+     */
+    about: 0,
+    datatype: 0,
+    inlist: 0,
+    prefix: 0,
+    property: 0,
+    resource: 0,
+    'typeof': 0,
+    vocab: 0,
+
+    /**
+     * Non-standard Properties
+     */
+    autoCapitalize: 0,
+    autoCorrect: 0,
+    autoSave: 0,
+    color: 0,
+    itemProp: 0,
+    itemScope: HAS_BOOLEAN_VALUE,
+    itemType: 0,
+    itemID: 0,
+    itemRef: 0,
+    results: 0,
+    security: 0,
+    unselectable: 0
   };
 
-  var FIX_KEYS_FROM_JS_TO_HTML = (function(names) {
-    var key, map = {};
-    for (var i = 0, n = names.length; i < n; ++i) {
-      key = names[i];
-      map[key] = key.toLowerCase();
-    }
-    return map;
-  })([
-    'accessKey', 'allowFullScreen', 'allowTransparency', 'autoCapitalize', 'autoComplete', 'autoCorrect', 'autoPlay', 'autoSave',
-    'cellPadding', 'cellSpacing', 'charSet', 'classID', 'colSpan', 'contentEditable', 'contextMenu', 'crossOrigin',
-    'dateTime',
-    'encType',
-    'formAction', 'formEncType', 'formMethod', 'formNoValidate', 'formTarget', 'frameBorder',
-    'hrefLang',
-    'inputMode', 'itemID', 'itemProp', 'itemRef', 'itemType',
-    'keyParams', 'keyType',
-    'marginHeight', 'marginWidth', 'maxLength', 'mediaGroup',
-    'noValidate',
-    'radioGroup', 'readOnly', 'referrerPolicy', 'rowSpan',
-    'spellCheck', 'srcDoc', 'srcLang', 'srcSet',
-    'tabIndex',
-    'useMap'//TODO: ...
-  ]);
-
-  ObjectUtil.assign(
-    FIX_KEYS_FROM_JS_TO_HTML,
-    {
-      'htmlFor': 'for',
-      'cssFloat': 'float',
-      'className': 'class'
-    }
-  );
-
-  var FIX_KEYS_FROM_HTML_TO_JS = (function(map) {
-    var key, obj = {};
+  var JS_TO_HTML = (function(map) {
+    var key, cache = {};
     for (key in map) {
       if (map.hasOwnProperty(key)){
-        obj[map[key]] = key;
+        cache[key] = key.toLowerCase();
       }
     }
-    return obj;
-  })(FIX_KEYS_FROM_JS_TO_HTML);
+    return cache;
+  })(PROPERTIES);
 
-  var camelCaseCache = ObjectUtil.assign({}, FIX_KEYS_FROM_HTML_TO_JS);
-  var kebabCaseCache = ObjectUtil.assign({}, FIX_KEYS_FROM_JS_TO_HTML);
+  JS_TO_HTML.htmlFor = 'for';
+  JS_TO_HTML.cssFloat = 'float';
+  JS_TO_HTML.className = 'class';
+  JS_TO_HTML.innerHTML = 'inner-html';
+
+  var HTML_TO_JS = (function(map) {
+    var key, cache = {};
+    for (key in map) {
+      if (map.hasOwnProperty(key)){
+        cache[map[key]] = key;
+      }
+    }
+    return cache;
+  })(JS_TO_HTML);
 
   var namespaceURIs = {
-    svg: 'http://www.w3.org/2000/svg',
     html: 'http://www.w3.org/1999/xhtml',
-    math: 'http://www.w3.org/1998/Math/MathML'
+    math: 'http://www.w3.org/1998/Math/MathML',
+    svg: 'http://www.w3.org/2000/svg',
+    xlink: 'http://www.w3.org/1999/xlink'
   };
 
-  var cssVendorPrefix = '';
+  var CSSVendorPrefix, CSSVendorPrefixes = ['webkit', 'Webkit', 'Moz', 'ms', 'O'];
 
-  var doc = window.document;
-  
-  var
-    preventDefault, _preventDefault,
-    stopPropagation, _stopPropagation,
-    stopImmediatePropagation, _stopImmediatePropagation;
-
-  function decideEventMethods(event) {
-    if (event.preventDefault) {
-      _preventDefault = event.preventDefault;
-      preventDefault = function() {
-        this.isDefaultPrevented = true;//TODO: writable = false
-        _preventDefault.call(this);
-      };
-    } else {
-      preventDefault = function() {
-        this.isDefaultPrevented = true;//TODO: writable = false
-        this.returnValue = true;
-      };
-    }
-
-    if (event.stopPropagation) {
-      _stopPropagation = event.stopPropagation;
-      stopPropagation = function() {
-        this.isPropagationStopped = true;//TODO: writable = false
-        _stopPropagation.call(this);
-      }
-    } else {
-      stopPropagation = function() {
-        this.isPropagationStopped = true;//TODO: writable = false
-        this.cancelBubble = true;
-      }
-    }
-
-    if (event.stopImmediatePropagation) {
-      _stopImmediatePropagation = event.stopImmediatePropagation;
-      stopImmediatePropagation = function() {
-        this.isPropagationImmediateStopped = true;//TODO: writable = false
-        _stopImmediatePropagation.call(this);
-      }
-    } else {
-      stopImmediatePropagation = function() {
-        this.isPropagationImmediateStopped = true;//TODO: writable = false
-        this.cancelBubble = true;
+  function checkCSSVendorPrefix($style, keyCapitalized) {
+    for (var i = 0; i < CSSVendorPrefixes.length; ++i) {
+      if ((CSSVendorPrefixes[i] + keyCapitalized) in $style) {
+        return CSSVendorPrefixes[i];
       }
     }
   }
+
+  var doc = window.document;
+
+  var REGEXP_1 = /-([a-z])?/g;
+  var REGEXP_2 = /([A-Z])/g;
+
+  function toCamelCase(key) {
+    return HTML_TO_JS[key] || key.replace(REGEXP_1, function(match, char) {
+        return char ? char.toUpperCase() : '';
+      });
+  }
+
+  function toKebabCase(key) {
+    return JS_TO_HTML[key] || key.replace(REGEXP_2, function(match, char) {
+        return '-' + char.toLowerCase();
+      });
+  }
+
+  var Array$slice = Array.prototype.slice;
 
   function Skin() {
     var $skin = this, fn = arguments[0];
 
     if (fn && $skin[fn]) {
-      return $skin[fn].apply($skin, Array.prototype.slice.call(arguments, 1));
+      return $skin[fn].apply($skin, Array$slice.call(arguments, 1));
     }
     //throw new Error('');
   }
@@ -1082,55 +837,37 @@
       /**
        * @required
        */
-      toCamelCase: function toCamelCase(key) {
-        if (!(key in camelCaseCache)) {
-          //key.replace(/-(.)?/g, function(match, char) {
-          camelCaseCache[key] = key.replace(/-([a-z])?/g, function(match, char) {
-            return char ? char.toUpperCase() : '';
-          });
-        }
-
-        return camelCaseCache[key];
-      },
+      toCamelCase: toCamelCase,
 
       /**
        * @required
        * @internal
        */
-      toKebabCase: function toKebabCase(key) {
-        if (!(key in kebabCaseCache)) {
-          //key.replace(/-(.)?/g, function(match, char) {
-          kebabCaseCache[key] = key.replace(/([A-Z])/g, function(match, char) {
-            return '-' + char.toLowerCase();
-          });
-        }
-
-        return kebabCaseCache[key];
-      },
+      toKebabCase: toKebabCase,
 
       /**
        * @required
        */
       isText: function isText($skin) {
-        return $skin && $skin.nodeType === 3;
+        return $skin ? $skin.nodeType === 3 : false;
       },
 
       /**
        * @required
        */
       isComment: function isComment($skin) {
-        return $skin && $skin.nodeType === 8;
+        return $skin ? $skin.nodeType === 8 : false;
       },
 
       /**
        * @required
        */
       isElement: function isElement($skin) {
-        return $skin && $skin.nodeType === 1;
+        return $skin ? $skin.nodeType === 1 : false;
       },
 
       isFragment: function isFragment($skin) {
-        return $skin && $skin.nodeType === 11;
+        return $skin ? $skin.nodeType === 11 : false;
       },
 
       /**
@@ -1144,109 +881,93 @@
        * @required
        */
       createElement: function createElement(tag, ns) {//TODO: cache, clone
-        return !ns || !doc.createElementNS ? doc.createElement(tag) : doc.createElementNS(namespaceURIs[ns], tag);
+        return !ns /*|| !doc.createElementNS*/ ? doc.createElement(tag) : doc.createElementNS(namespaceURIs[ns], tag);
       },
 
-      createFragment: function createFragment() {
-        return doc.createDocumentFragment();
-      },
+      //createFragment: function createFragment() {
+      //  return doc.createDocumentFragment();
+      //},
 
       /**
        * @required
        */
       parse: function parse(html) {
+        var $parent, outerHtml;
         var i = html.indexOf(' ');
         var j = html.indexOf('>');
         var tag = html.slice(1, j < i ? j : i);
-        var type;
 
         i = html.lastIndexOf('xmlns', j);
+
         if (i > 0) {
           var nsURI = html.slice(i+7, html.indexOf('"', i+7));
-          if (nsURI === namespaceURIs.svg) {
-            type = 'svg';
-          } else if (nsURI === namespaceURIs.math) {
-            type = 'math';
+
+          if (tag !== 'svg' && nsURI === namespaceURIs.svg) {
+            outerHtml = '<svg xmlns="' + nsURI + '">' + html + '</svg>';
+          } else if (tag !== 'math' && nsURI === namespaceURIs.math) {
+            outerHtml = '<math xmlns="' + nsURI + '">' + html + '</math>';
           }
         }
 
-        if (!type) {
-          type = containers[tag] || 'div';
+        if (outerHtml) {
+          $parent = PARENT_NODES.DIV;
+          $parent.innerHTML = outerHtml;
+          $parent = $parent.firstChild;
+        } else {
+          $parent = PARENT_NODES[CONTAINERS[tag] || 'DIV'];
+          $parent.innerHTML = html;
         }
 
-        var parent = parents[type];
+        $parent.normalize();
 
-        //try {
-          parent.innerHTML = html;
-        //} catch (e) {}
-
-        return Skin.getChildrenCopy(parent);
+        return Skin.getChildren($parent);
       },
 
-      clone: function clone($skin) {
-        return $skin.cloneNode(true);
-      },
 
-      ///**
-      // * @required
-      // */
-      //focus: function focus($skin) {
-      //  return $skin.focus();
-      //},
-      //
-      ///**
-      // * @required
-      // */
-      //blur: function blur($skin) {
-      //  return $skin.blur();
-      //},
-      //
-      //call: function ($skin, fn) {
-      //  return $skin[fn].apply($skin, Array.prototype.slice.call(arguments, 1));
-      //},
+      /**
+       * @required
+       */
+      getTagName: function getTagName(skin) {
+        var tagName = skin.tagName; // Skin.getProp(skin, 'tagName');
+        return tagName ? tagName.toLowerCase() : '';
+      },
 
       /**
        * @required
        */
       getNameSpace: function getNameSpace($skin) {
-        var nsURI = Skin.getAttr($skin, 'xmlns') || Skin.getProp($skin, 'namespaceURI');
+        if (Skin.isElement($skin)) {
+          var nsURI = $skin.namespaceURI || $skin.getAttribute('xmlns');
 
-        if (!nsURI || nsURI === namespaceURIs.html) {
-          return '';
-        } else if (nsURI === namespaceURIs.svg) {
-          return 'svg';
-        } else if (nsURI === namespaceURIs.math) {
-          return 'math';
+          if (!nsURI || nsURI === namespaceURIs.html) {
+            return '';
+          } else if (nsURI === namespaceURIs.svg) {
+            return 'svg';
+          } else if (nsURI === namespaceURIs.math) {
+            return 'math';
+          }
         }
 
-        //return '';
-      },
-
-      /**
-       * @required
-       */
-      hasAttrs: function hasAttrs($skin) {
-        return $skin.hasAttributes ? $skin.hasAttributes() : ($skin.attributes && $skin.attributes.length > 0);
+        return '';
       },
 
       /**
        * @required
        */
       getAttrs: function getAttrs($skin) {
-        if ($skin._attrs) {
-          return $skin._attrs;
-        }
-
-        if (Skin.isElement($skin)) {
-          var attrs = {}, $attrs = $skin.attributes, $attr;
+        if (Skin.isElement($skin) && $skin.hasAttributes()) {
+          var attrs = {}, $attrs = $skin.attributes, $attr, name;
 
           for (var i = 0, n = $attrs.length; i < n; ++i) {
             $attr = $attrs[i];
-            attrs[$attr.name] = $attr.value;
+            name = $attr.name;
+            if (HTML_TO_JS.hasOwnProperty(name) && (PROPERTIES[HTML_TO_JS[name]] & HAS_BOOLEAN_VALUE)) {
+              attrs[name] = 'true';
+            } else {
+              attrs[name] = $attr.value;
+            }
           }
 
-          $skin._attrs = attrs;
-          //return $skin.attributes;
           return attrs;
         }
       },
@@ -1254,44 +975,6 @@
       /**
        * @required
        */
-      hasAttr: function hasAttr($skin, name) {
-        return $skin.hasAttribute(name);
-      },
-
-      /**
-       * @required
-       */
-      getAttr: function getAttr($skin, name) {
-        return $skin.getAttribute(name);
-      },
-
-      /**
-       * @required
-       * @internal
-       */
-      setAttr: function setAttr($skin, name, value) {
-        var type = typeof value;
-
-        if (type === 'boolean') {
-          if (value) {
-            $skin.setAttribute(name, '');
-          } else {
-            $skin.removeAttribute(name);
-          }
-        } else {
-          $skin.setAttribute(name, value);
-        }
-      },
-
-      /**
-       * @required
-       * @internal
-       */
-      removeAttr: function removeAttr($skin, name) {
-        return $skin.removeAttribute(name);
-      },
-
-
       hasProp: function hasProp($skin, name) {
         return name in $skin;
       },
@@ -1303,136 +986,79 @@
         return $skin[name];
       },
 
-      /**
-       * @required
-       * @internal
-       */
-      setProp: function setProp($skin, name, value) {
-        //console.log($skin, $skin[name], Object.getOwnPropertyDescriptor($skin, name));
-        $skin[name] = value;
-      },
+      ///**
+      // * @required
+      // * @internal
+      // */
+      //setProp: function setProp($skin, name, value) {
+      //  $skin[name] = value;
+      //},
 
-      removeProp: function removeProp($skin, name) {
-        delete $skin[name];
-      },
-
-      getComputedStyle: function getComputedStyle($skin) {
-        return window.getComputedStyle($skin);
-      },
+      //getComputedStyle: function getComputedStyle($skin) {
+      //  return window.getComputedStyle($skin);
+      //},
 
       /**
        * @required
-       * @internal
        */
-      setStyleProp: function setStyleProp($skin, name, value) {
-        //TODO: name = toCamelCase(name);
-        $skin.style[name] = value;
+      getChildren: function getChildren($skin) { // include texts and comments, getChildrenCopy, getContents
+        var $copy = [], $children = $skin.childNodes;// Skin.getProp($skin, 'childNodes');
 
-        if (name in $skin.style) {
-          $skin.style[name] = value;
-        } else {
-          var capitalizedName = name.charAt(0).toUpperCase() + name.slice(1);
-
-          if (!cssVendorPrefix) {
-            var cssVendorPrefixes = ['webkit', 'Webkit', 'Moz', 'ms', 'O'];
-
-            for (var i = 0; i < 5; ++i) {
-              if ((cssVendorPrefixes[i] + capitalizedName) in $skin.style) {
-                cssVendorPrefix = cssVendorPrefixes[i];
-                break;
-              }
-            }
-          }
-
-          $skin.style[cssVendorPrefix + capitalizedName] = value;
+        if ($children && $children.length) {
+          $copy.push.apply($copy, $children);
         }
 
-
-      },
-
-      /**
-       * @required
-       * @internal
-       */
-      removeStyleProp: function removeStyleProp($skin, name) {
-        $skin.style[name] = '';
-      },
-
-      normalize: function normalize($skin) {
-        $skin.normalize && $skin.normalize();
-      },
-
-      getChildrenNum: function getChildrenNum($skin) {
-        var children = Skin.getProp($skin, 'childNodes');// || Skin.getChildNodes(node);
-        return children.length;
+        return $copy;
       },
 
       /**
        * @required
        */
-      getChildrenCopy: function getChildrenCopy($skin) { // include texts and comments
-        var copy = [], children = Skin.getProp($skin, 'childNodes');
-
-        copy.push.apply(copy, children);
-
-        return copy;
-      },
-
-      getChildAt: function getChildAt($skin, index) {
-        return Skin.getProp($skin, 'childNodes')[index];
-      },
-      
-      /**
-       * @required
-       */
-      getParent: function getParent($skin) { // unnecessary, use `getProp`
+      getParent: function getParent($skin) {
         return $skin.parentNode;
       },
 
       /**
-       * @required
-       * @internal
+       * Get the shadow of the $skin
+       *
+       * @param {Node} $skin
+       * @returns {Shadow}
        */
-      appendChild: function appendChild($skin, child) {
-        return $skin.appendChild(child);
+      getShadow: function getShadow($skin) {
+        return $skin && $skin._shadow;
       },
 
       /**
-       * @required
-       * @internal
+       * Set the shadow of the $skin
+       *
+       * @param {Node} $skin
+       * @param {Shadow} shadow
        */
-      insertChild: function insertChild($skin, child, before) {
-        return $skin.insertBefore(child, before);
+      setShadow: function($skin, shadow) {
+        if (shadow) {
+          Object.defineProperty($skin, '_shadow', {
+            value: shadow,
+            writable: true,
+            enumerable: false,
+            configurable: true
+          });
+        } else {
+          delete $skin._shadow;
+        }
       },
 
-      replaceChild: function replaceChild($skin, child, existed) {
-        return $skin.replaceChild(child, existed);
+      query: function query($skin, selector) {
+        return $skin.querySelector(selector);
       },
 
-      /**
-       * @required
-       * @internal
-       */
-      removeChild: function removeChild($skin, child) {
-        return $skin.removeChild(child);
-      },
-
-      removeAllChildren: function removeAllChildren($skin) {
-        Skin.setProp($skin, 'textContent', '');
-      },
-
-      query: function query($skin, selector) { //find
-        return $skin.querySelector(selector); //TODO: getElementById...
-      },
-
-      queryAll: function queryAll($skin, selector) { //select
-        return $skin.querySelectorAll(selector); //TODO: getElementsByTag...
-      },
+      //queryAll: function queryAll($skin, selector) {
+      //  return $skin.querySelectorAll(selector);
+      //},
 
       /**
        * @required
        */
-      mayDispatchEvent: function mayDispatchEvent($skin, type) {//TODO: mayDispatchEvent
+      mayDispatchEvent: function mayDispatchEvent($skin, type) {
         return ('on' + type) in $skin;
       },
 
@@ -1440,25 +1066,9 @@
        * @required
        */
       getFixedEvent: function getFixedEvent(event) {
-        event = event || window.event;
-
-        if (!event.target) {
-          event.target = event.srcElement;
-        }
-
         if (event.key) {
           event.keyName = event.key[0].toLowerCase() + event.key.slice(1);
         }
-
-        //TODO: timeStamp, not here
-
-        if (!preventDefault) { // TODO:
-          decideEventMethods(event);
-        }
-
-        event.preventDefault = preventDefault;
-        event.stopPropagation = stopPropagation;
-        event.stopImmediatePropagation = stopImmediatePropagation;
 
         return event;
       },
@@ -1467,43 +1077,46 @@
        * @required
        */
       addEventListener: function addEventListener($skin, type, listener, useCapture) {
-        if ($skin.addEventListener) {
-          $skin.addEventListener(type, listener, useCapture);
-        } else if ($skin.attachEvent) {
-          $skin.attachEvent('on' + type, listener/*, useCapture*/);
-        }
+        $skin.addEventListener(type, listener, useCapture);
       },
 
       /**
        * @required
        */
       removeEventListener: function removeEventListener($skin, type, listener, useCapture) {
-        if ($skin.removeEventListener) {
-          $skin.removeEventListener(type, listener, useCapture);
-        } else if ($skin.detachEvent) {
-          $skin.detachEvent('on' + type, listener/*, useCapture*/);
-        }
+        $skin.removeEventListener(type, listener, useCapture);
       },
 
       /**
        * @required
        */
       renderAttrs: function renderAttrs($skin, attrs, dirty) {
-        var key, value;
-
-        if (!dirty) { return; }
-
+        var key, value, index, nsURI;
+        //if (!dirty) { return; }
         for (key in dirty) {
-          if (!dirty.hasOwnProperty(key)) {
-            continue;
-          }
+          if (!dirty.hasOwnProperty(key)) { continue; }
 
           value = attrs[key];
+          index = key.indexOf(':');
 
-          if (value == undefined/* && Skin.hasAttr($skin, key)*/) {
-            Skin.removeAttr($skin, key);
+          if (index > 0) {
+            nsURI = namespaceURIs[key.slice(0, index)];
+          }
+
+          if (!nsURI) {
+            if (value != null) {
+              $skin.setAttribute(key, value);
+            } else {
+              $skin.removeAttribute(key);
+            }
           } else {
-            Skin.setAttr($skin, key, value);
+            key = key.slice(index + 1);
+
+            if (value != null) {
+              $skin.setAttributeNS(nsURI, key, value);
+            } else {
+              $skin.removeAttributeNS(nsURI, key);
+            }
           }
         }
       },
@@ -1511,24 +1124,20 @@
       /**
        * @required
        */
-      renderProps: function renderProps($skin, props, dirty, sealed) {
+      renderProps: function renderProps($skin, props, dirty) {
         var key, value;
-
-        if (!dirty) { return; }
-
+        //if (!dirty) { return; }
         for (key in dirty) {
-          if (!dirty.hasOwnProperty(key)) {
-            continue;
-          }
+          if (!dirty.hasOwnProperty(key)) { continue; }
 
           value = props[key];
 
-          if (key in PROPS_SHOULD_BE_USED) {
-            Skin.setProp($skin, key, value);
-          } else if (value == undefined) { // null or undefined
-            Skin.removeAttr($skin, Skin.toKebabCase(key));
-          } else if (!sealed || (Skin.hasProp($skin, key) /*&& typeof value !== 'object'*/)) {
-            Skin.setAttr($skin, Skin.toKebabCase(key), value);
+          if (PROPERTIES[key]) { // MUST_USE_PROPERTY or HAS_BOOLEAN_VALUE
+            $skin[key] = value;
+          } else if (value == null) { // null or undefined
+            $skin.removeAttribute(toKebabCase(key));
+          } else if (Skin.hasProp($skin, key)) {
+            $skin.setAttribute(toKebabCase(key), value);
           }
         }
       },
@@ -1537,22 +1146,25 @@
        * @required
        */
       renderStyle: function renderStyle($skin, style, dirty) {
-        var key, value;
-
-        if (!dirty) { return; }
-
+        var key, $style = $skin.style;
+        //if (!dirty) { return; }
         for (key in dirty) {
-          if (dirty.hasOwnProperty(key)) {
-            value = style[key];
+          if (!dirty.hasOwnProperty(key)) { continue; }
 
-            if (value) {
-              Skin.setStyleProp($skin, key, value);
-            } else {
-              Skin.removeStyleProp($skin, key);
+          if (key in $style) {
+            $style[key] = style[key];
+          } else {
+            var keyCapitalized = key.charAt(0).toUpperCase() + key.slice(1);
+
+            if (!CSSVendorPrefix) {
+              CSSVendorPrefix = checkCSSVendorPrefix($style, keyCapitalized);
+            }
+
+            if (CSSVendorPrefix) {
+              $style[CSSVendorPrefix + keyCapitalized] = style[key];
             }
           }
         }
-
       },
 
       /**
@@ -1560,17 +1172,15 @@
        */
       renderClasses: function renderClasses($skin, classes, dirty) {
         var key, classList = $skin.classList;
-
-        if (!dirty) { return; }
-
+        //if (!dirty) { return; }
         if (classList) {
           for (key in dirty) {
-            if (dirty.hasOwnProperty(key)) {
-              if (classes[key]) {
-                classList.add(key);
-              } else {
-                classList.remove(key);
-              }
+            if (!dirty.hasOwnProperty(key)) { continue; }
+
+            if (classes[key]) {
+              classList.add(key);
+            } else {
+              classList.remove(key);
             }
           }
         } else {
@@ -1581,82 +1191,41 @@
               names.push(key);
             }
           }
-          //Skin.setProp($skin, 'className', names.join(' '));
-          Skin.setAttr($skin, 'class', names.join(' '));
+
+          $skin.setAttribute('class', names.join(' '));
         }
       },
 
       /**
        * @required
        */
-      renderChildren: function renderChildren($skin, $children) {
-        var i, n, m, $child, $existed, $removed;
+      renderChildren: function renderChildren($skin, children) {
+        var i, n, m, $child, $existed, $removed, $children = $skin.childNodes;
 
-        n = $children.length;
+        n = children.length;
 
         if (n) {
           for (i = 0; i < n; ++i) {
-            $existed = Skin.getChildAt($skin, i);
-            $child = $children[i];
+            $existed = $children[i];
+            $child = children[i].$skin;
 
             if (!$existed) {
-              Skin.appendChild($skin, $child);
+              $skin.appendChild($child);
             } else if ($child !== $existed) {
-              Skin.insertChild($skin, $child, $existed);
+              $skin.insertBefore($child, $existed);
             }
           }
         }
 
-        m = Skin.getChildrenNum($skin);
+        m = $children.length;
 
         if (n < m) {
           $removed = [];
           for (i = m - 1; i >= n; --i) {
-            $existed = Skin.getChildAt($skin, i);
-            Skin.removeChild($skin, $existed);
+            $existed = $children[i];
             $removed.push($existed);
+            $skin.removeChild($existed);
           }
-        }
-
-        return $removed;
-      },
-
-      renderChildren2: function renderChildren($skin, $children) {
-        var i, j = 0, n, m, $child, $removed;
-
-        n = $children.length;
-
-        if (n) {
-          var $frag = Skin.createFragment();
-
-          j = n;
-
-          for (i = 0; i < n; ++i) {
-            $child = $children[i];
-
-            if (j === n && $child !== Skin.getChildAt($skin, i)) {
-              j = i;
-            }
-
-            if (i >= j) {
-              $frag.appendChild($child);
-            }
-          }
-        }
-
-        m = Skin.getChildrenNum($skin);
-
-        if (m > j) {
-          $removed = [];
-          for (i = m - 1; i >= j; --i) {
-            $child = Skin.getChildAt($skin, i);
-            Skin.removeChild($skin, $child);
-            $removed.push($child);
-          }
-        }
-
-        if ($frag) {
-          Skin.appendChild($skin, $frag);
         }
 
         return $removed;
@@ -1665,20 +1234,28 @@
 
   });
 
-  var containers = {
-    'option': 'select',
-    'tbody': 'table', 'thead': 'table', 'tfoot': 'table', 'tr': 'tbody', 'td': 'tr', 'th': 'tr'
+  var CONTAINERS = {
+    area: 'MAP',
+    param: 'OBJECT',
+    legend: 'FIELDSET',
+    option: 'SELECT', optgroup: 'SELECT',
+    tr: 'TBODY', 'td': 'TR', 'th': 'TR', col: 'COLGROUP',
+    tbody: 'TABLE', thead: 'TABLE', tfoot: 'TABLE', caption: 'TABLE', colgroup: 'TABLE'
+
   };
 
-  var parents = {
-    'div': Skin.createElement('div'),
-    'svg': Skin.createElement('svg', namespaceURIs.svg),
-    'math': Skin.createElement('div', namespaceURIs.math),
-
-    'tr': Skin.createElement('tr'),
-    'table': Skin.createElement('table'),
-    'tbody': Skin.createElement('tbody'),
-    'select': Skin.createElement('select')
+  var PARENT_NODES = {
+    DIV: Skin.createElement('div'),
+    MAP: Skin.createElement('map'),
+    //'svg': Skin.createElement('svg', 'svg'),
+    //'math': Skin.createElement('math', 'math'),
+    TR: Skin.createElement('tr'),
+    TABLE: Skin.createElement('table'),
+    TBODY: Skin.createElement('tbody'),
+    SELECT: Skin.createElement('select'),
+    OBJECT: Skin.createElement('object'),
+    COLGROUP: Skin.createElement('colgroup'),
+    FIELDSET: Skin.createElement('fieldset')
   };
 
   Exact.Skin = Skin;
@@ -1690,10 +1267,7 @@
 //######################################################################################################################
 (function() {
 
-  'use strict';
-
-  var Array$slice= [].slice;
-  var ObjectUtil_defineProp = Exact.ObjectUtil.defineProp;
+  var Array$slice= Array.prototype.slice;
 
   function Watcher() {
     this._actions = null;
@@ -1721,7 +1295,7 @@
   }
 
   /**
-   * Add DOM event or custom event listener.
+   * Add custom event handler or DOM event listener.
    *
    * @param {Watcher} watcher
    * @param {Object|string} type
@@ -1732,12 +1306,13 @@
   function register(watcher, type, exec, useCapture) {
     var actions = watcher._actions, constructor = watcher.constructor;
 
-    // !(exec instanceof Function)
     if (typeof exec !== 'function') { return null; }
 
     if (!actions) {
-      ObjectUtil_defineProp(watcher, '_actions', {value: {}});
-      actions = watcher._actions;// = {};
+      Object.defineProperty(watcher, '_actions', {
+        value: {}, writable: false, enumerable: false, configurable: true
+      });
+      actions = watcher._actions;
     }
 
     var event = getFixedEvent(type);
@@ -1745,8 +1320,8 @@
     var action = actions[event.type];
 
     //  Create action
-    if (!action) {// <=> action === undefined
-      action = actions[event.type] = { handlers: []/*, keys: {}, listener: null*/ }; //TODO: {handlers: [], keys: {enter: []}}
+    if (!action) {
+      action = actions[event.type] = { handlers: []/*, listener: null*/ };
     }
 
     var handlers = action.handlers, keyName = event.keyName;
@@ -1774,8 +1349,8 @@
 
     //May add DOM event listener.
     if (!('listener' in action)){
-      if (typeof constructor.addEventListenerFor === 'function') {
-        constructor.addEventListenerFor(watcher, event.type, useCapture);
+      if (typeof constructor.addEventListener === 'function') {
+        constructor.addEventListener(watcher, action, event.type);
       } else {
         handler.listener = null;
       }
@@ -1785,7 +1360,7 @@
   }
 
   /**
-   * Remove DOM event or custom event listener.
+   * Remove custom event handler or DOM event listener.
    *
    * @param {Watcher} watcher
    * @param {Object|string} type
@@ -1813,19 +1388,20 @@
     if (all && !keyName) {
       handlers.splice(0);
     } else {
-      for (i = 0; i < n; ++i) {
+      for (i = n-1; i >= 0; --i) {
+      //for (i = 0; i < n; ++i) {
         handler = handlers[i];
         if ((all || exec === handler.exec) && (!keyName || keyName === handler.keyName)) {
           handlers.splice(i, 1);
-          --action.count;
+          //--action.count;
           break;
         }
       }
     }
 
-    if (handlers.length === 0) {
-      if (action.listener && typeof constructor.removeEventListenerFor === 'function') {/* <=> element && ('on' + type) in element*/
-        constructor.removeEventListenerFor(watcher, event.type, useCapture);
+    if (handlers.length === 0) { //TODO: detach
+      if (action.listener && typeof constructor.removeEventListener === 'function') {
+        constructor.removeEventListener(watcher, action, event.type);
       }
 
       delete actions[event.type];
@@ -1849,40 +1425,39 @@
   /**
    *
    * @param {Watcher} watcher
-   * @param {Boolean} keep
-   * @param {Event|string} event
    * @param {Array} params
+   * @param {Event|string} event
+   * @param {boolean} keep
    */
-  function dispatch(watcher, keep, event, params) {
+  function dispatch(watcher, params, event, keep) {
     var actions = watcher._actions, action;
 
-    if (actions) {
-      event = getFixedEvent(event);
-      //TODO: fix event
-      action = actions[event.type];
+    if (!actions) { return; }
 
-      if (action) {
-        event.dispatcher = watcher;
+    event = getFixedEvent(event);
 
-        if (keep) {
-          params.unshift(event); //[event].concat(params);
-        }
+    action = actions[event.type];
 
-        var i, n, exec, handler, handlers = action.handlers;
+    if (action) {
+      event.dispatcher = watcher;
 
-        n = handlers.length;
-        // trigger handlers
-        //for (i = 0; i < n; ++i) {
-        for (i = n-1; i >= 0; --i) {
-          handler = handlers[i];// handlers[ i ]( event.clone() );
+      if (keep) {
+        params.unshift(event); //[event].concat(params);
+      }
 
-          if (!handler || (handler.keyName && handler.keyName !== event.keyName)) { continue; }
+      var i, n, exec, handler, handlers = action.handlers;
 
-          if (/*!event.eventPhase ||  */(event.eventPhase === 1) === !!handler.useCapture) {
-            exec = handler.exec;
-            exec.apply(null, params);
-          }
+      n = handlers.length;
+      // trigger handlers
+      //for (i = 0; i < n; ++i) {
+      for (i = n-1; i >= 0; --i) {
+        handler = handlers[i];
 
+        if (!handler || (handler.keyName && handler.keyName !== event.keyName)) { continue; }
+
+        if ((event.eventPhase === 1) === !!handler.useCapture) {
+          exec = handler.exec;
+          exec.apply(null, params);
         }
       }
     }
@@ -1915,13 +1490,13 @@
 
           value = opts[type];
 
-          if (Array.isArray(value)){//  .on({click: [function(){...}}, true]);
+          if (Array.isArray(value)){  // e.g. on({click: [function(){...}}, true]); useCapture as 2nd argument
             register(this, type, value[0], value[1]);
-          } else {//  .on({click: function(){...}});
+          } else {                    // e.g. on({click: function(){...}});
             register(this, type, value);
           }
         }
-      } else if (type) {//  .on('click', context.onClick);
+      } else if (type) {              // e.g. on('click', context.onClick);
         register(this, type, exec, useCapture);
       }
 
@@ -1940,30 +1515,25 @@
     off: function off(type, exec, useCapture) {
       var n = arguments.length, t = typeof type, opts, value;
 
-      if (n === 0) {// .off()
-
+      if (n === 0) {      // e.g. off()
         clean(this);
-
       } else if (t === 'string') {
-
-        if (n === 1) {//  .off('click');
+        if (n === 1) {    // e.g. off('click');
           remove(this, type);
-        } else {//  .off('click', context.onClick);
+        } else {          // e.g. off('click', context.onClick);
           remove(this, type, exec, useCapture);
         }
-
       } else if (t === 'object') {
         opts = type;
         for (type in opts) {
           if (!opts.hasOwnProperty(type)) { continue; }
           value = opts[type];
-          if (Array.isArray(value)) {//  .off({click: [context.onClick, true]});
+          if (Array.isArray(value)) {   // e.g. off({click: [context.onClick, true]});
             remove(this, type, value[0], value[1]);
-          } else {//  .off({click: context.onClick});
+          } else {                      // e.g. off({click: context.onClick});
             remove(this, type, value);
           }
         }
-
       }
 
       return this;
@@ -1999,7 +1569,7 @@
      */
     emit: function emit(type/*, ...rest*/) {
       var params = Array$slice.call(arguments, 1);
-      dispatch(this, false, type, params);
+      dispatch(this, params, type, false);
       return this;
     },
 
@@ -2012,85 +1582,98 @@
      */
     send: function send(type/*, ...rest*/) {
       var params = Array$slice.call(arguments, 1);
-      dispatch(this, true, type, params);
+      dispatch(this, params, type, true);
       return this;
     }
 
   });
-
-  //TODO: freeze
 
   Exact.Watcher = Watcher;
 
 })();
 
 //######################################################################################################################
-// src/base/Updater.js
+// src/base/Accessor.js
 //######################################################################################################################
 (function() {
-  //TODO: schedule...
-  'use strict';
 
-  var setImmediate = Exact.setImmediate;
+  var descriptorShared = {
+    enumerable: true,
+    configurable: true
+  };
 
-  var pool = [], queue = [], cursor = 0, /*count = 0,*/ waiting = false, running = false;
+  var getters = {}, setters = {};
 
-  /**
-   *
-   * @constructor
-   */
-  function Updater() {
-    throw new Error('');
+  function makeGetter(key) {
+    if (!getters.hasOwnProperty(key)) {
+      getters[key] = function() {
+        return this.get(key);
+      };
+    }
+
+    return getters[key];
+  }
+
+  function makeSetter(key) {
+    if (!setters.hasOwnProperty(key)) {
+      setters[key] = function(val) {
+        this.set(key, val);
+      };
+    }
+
+    return setters[key];
+  }
+
+  function Accessor() {
+    throw new Error('Accessor is abstract class and can not be instantiated');
   }
 
   Exact.defineClass({
-    constructor: Updater,
+    constructor: Accessor,
 
     statics: {
-      /**
-       * target to be inserted must have method `update`
-       * @param {Object} target
-       */
-      insert: function(target) {
-        if (!target) { return; }
-
-        var i, n = pool.length, id = target.guid;
-
-        if (!running) {
-          i = n - 1;
-          while (i >= 0 && id < pool[i].guid) {
-            --i;
-          }
-          ++i;
-        } else {
-          i = cursor;
-          while (i < n && id >= pool[i].guid) {
-            ++i;
-          }
-        }
-
-        pool.splice(i, 0, target);
-
-        if (!waiting) {
-          waiting = true;
-
-          setImmediate(run);
-
-          //if ('development' === 'development') {
-          //  Exact.Shadow.refreshed = 0;
-          //}
-        }
-      },
-
-      /**
-       * target to be appended must have method `render`
-       * @param {Object} target
-       */
-      append: function(target) {
-        queue.push(target);
+      define: function define(prototype, key) {
+        descriptorShared.get = makeGetter(key);
+        descriptorShared.set = makeSetter(key);
+        Object.defineProperty(prototype, key, descriptorShared);
       }
+    },
+
+    get: function get(key) {
+      throw new Error('this method must be implemented by sub-class');
+    },
+
+    set: function set(key, value) {
+      throw new Error('this method must be implemented by sub-class');
+    },
+
+    save: function save(props) {
+      for (var key in props) {
+        if (props.hasOwnProperty(key)) {
+          this.set(key, props[key]);
+        }
+      }
+      //return this;
+    },
+
+    unset: function unset(key) {
+      this.set(key, undefined);
+      delete this[key];
     }
   });
+
+  Exact.Accessor = Accessor;
+
+})();
+
+//######################################################################################################################
+// src/base/Schedule.js
+//######################################################################################################################
+(function() {
+
+  var setImmediate = Exact.setImmediate;
+
+  var pool = [], queue = [], cursor = 0, waiting = false, running = false;
 
   function run() {
 
@@ -2113,219 +1696,52 @@
       target.render();
     }
 
-    //if ('development' === 'development') {
-    //  console.log('==== executed', pool.length, '==== refreshed', Exact.Shadow.refreshed, '====');
-    //}
-
     waiting = false;
     running = false;
     queue.splice(0); //queue.length = 0;
     pool.splice(0); //pool.length = 0;
     cursor = 0;
-    //pool.push.apply(pool, pool);
   }
 
-  Exact.Updater = Updater;
+  Exact.Schedule = {
+    /**
+     * target to be inserted must have `guid` and method `update`
+     * @param {Object} target
+     */
+    insert: function(target) {
+      //if (!target || !target.update) { return; }
+      var i, n = pool.length, id = target.guid;
 
-})();
-
-//######################################################################################################################
-// src/base/Accessor.js
-//######################################################################################################################
-(function() {
-
-  'use strict';
-
-  var ObjectUtil_assign = Exact.ObjectUtil.assign;
-  var ObjectUtil_defineProp = Exact.ObjectUtil.defineProp;
-
-  var canDefineGetterAndSetter = Exact.ObjectUtil.support('accessor');
-
-  var set, save;
-
-  if (canDefineGetterAndSetter) {
-    set = function set(key, value) {
-      var constructor = this.constructor, set = constructor.set, descriptors = constructor._descriptors_;
-
-      set.call(key in descriptors ? this._props : this, key, value, this[key], this, descriptors);
-
-      return this;
-    };
-
-    save = function save(props) {
-      var constructor = this.constructor, set = constructor.set, descriptors = constructor._descriptors_;
-
-      for (var key in props) {
-        if (props.hasOwnProperty(key)) {
-          set.call(key in descriptors ? this._props : this, key, props[key], this[key], this, descriptors);
+      if (!running) {
+        i = n - 1;
+        while (i >= 0 && id < pool[i].guid) {
+          --i;
+        }
+        ++i;
+      } else {
+        i = cursor;
+        while (i < n && id >= pool[i].guid) {
+          ++i;
         }
       }
 
-      return this;
-    };
-  } else {
-    set = function set(key, value) {
-      var constructor = this.constructor, set = constructor.set, descriptors = constructor._descriptors_;
+      pool.splice(i, 0, target);
 
-      set.call(this, key, value, this[key], this, descriptors);
-
-      return this;
-    };
-
-    save = function save(props) {
-      var constructor = this.constructor, set = constructor.set, descriptors = constructor._descriptors_;
-
-      for (var key in props) {
-        if (props.hasOwnProperty(key)) {
-          set.call(this, key, props[key], this[key], this, descriptors);
-        }
-      }
-
-      return this;
-    };
-  }
-
-  function makeGetter(key) {
-    // TODO: cache
-    return function() {
-      var _props = this._props;
-      return _props.get(key, this, this.constructor._descriptors_);
-    }
-  }
-
-  function makeSetter(key) {
-    // TODO: cache
-    return function(val) {
-      var _props = this._props;
-      _props.set(key, val, _props[key], this, this.constructor._descriptors_);
-    }
-  }
-
-  var descriptorShared = {
-    enumerable: true,
-    configurable: true
-  };
-
-  function applyDescriptors(prototype, constructor, descriptors) {
-    var desc, keys, key, n = 0;
-
-    if (Array.isArray(descriptors)) { // like ['title', 'name', {price: {type: 'number'}}]
-      keys = descriptors;//.slice(0);
-      descriptors = null;
-      n = keys.length;
-      if (typeof keys[n - 1] === 'object') {
-        descriptors = keys[n - 1];
-        --n;
-      }
-    }
-    //descriptors = descriptors || {};
-    descriptors = ObjectUtil_assign({}, descriptors);
-
-    while (--n >= 0) {
-      key = keys[n];
-      if (key && !(key in descriptors)) {
-        descriptors[key] = undefined; // must be undefined
-      }
-    }
-
-    //var opts = descriptorShared;
-    for (key in descriptors) {
-      if (!descriptors.hasOwnProperty(key)/* || !descriptors[key]*/) { continue; }
-
-      desc = descriptors[key];
-
-      desc = typeof desc === 'object' ? desc : {type: desc};
-
-      if (canDefineGetterAndSetter) {
-        //var opts = {
-        //  enumerable: /*'enumerable' in desc ? desc.enumerable :*/ true,
-        //  configurable: /*'configurable' in desc ? desc.configurable :*/ true
-        //};
-
-        descriptorShared.get = makeGetter(key);
-        descriptorShared.set = makeSetter(key);
-
-        ObjectUtil_defineProp(prototype, key, descriptorShared);
-      }
-
-      descriptors[key] = desc;
-    }
-
-    ObjectUtil_defineProp(constructor, '_descriptors_', {value: descriptors});
-    //return descriptors;
-  }
-
-  function Accessor(props) {
-    throw new Error('Accessor is abstract class and can not be instantiated');
-  }
-
-  Exact.defineClass({
-
-    constructor: Accessor,
-
-    statics: {
-
-      get: function(key, accessor, descriptors) {
-        var get = /*descriptors &&*/ descriptors[key] && descriptors[key].get;
-
-        if (get) {
-          return get.call(accessor, this);
-        } else {
-          return this[key];
-        }
-      },
-
-      set: function(key, val, old, accessor, descriptors) {
-        //if (val !== old) {
-        //  this[key] = val;
-        //  return true;
-        //}
-
-        if (val !== old) {
-          var set = /*descriptors &&*/ descriptors[key] && descriptors[key].set;
-
-          if (set) {
-            set.call(accessor, val, this);
-          } else {
-            this[key] = val;
-          }
-
-          //return true;
-        }
-
-
-
-        return this[key] !== old;
-      },
-
-      initialize: function initialize(accessor, props) {
-        var constructor = accessor.constructor, descriptors = constructor.descriptors, prototype = constructor.prototype;
-
-        if (accessor._props === undefined) {
-          var _props = {};
-          ObjectUtil_defineProp(accessor, '_props', {value: _props});
-          ObjectUtil_defineProp(_props, 'get', {value: Accessor.get});
-          ObjectUtil_defineProp(_props, 'set', {value: constructor.set});
-        }
-
-        if (!constructor._descriptors_ /*&& Array.isArray(descriptors)*/) {
-          applyDescriptors(prototype, constructor, descriptors);
-        }
-
-        if (typeof accessor.defaults === 'function') {
-          var defaults = accessor.defaults();
-        }
-
-        accessor.save(ObjectUtil_assign({}, defaults, props));
+      if (!waiting) {
+        waiting = true;
+        setImmediate(run);
       }
     },
 
-    save: save,
-
-    set: set
-  });
-
-  Exact.Accessor = Accessor;
+    /**
+     * target to be appended must have method `render`
+     * @param {Object} target
+     */
+    append: function(target) {
+      //if (!target || !target.render) { return; }
+      queue.push(target);
+    }
+  };
 
 })();
 
@@ -2333,14 +1749,6 @@
 // src/base/Validator.js
 //######################################################################################################################
 (function() {
-
-  'use strict';
-
-  //var TYPE_REGEXPS = {
-  //  number: /\bnumber\b/,
-  //  string: /\bstring\b/,
-  //  boolean: /\bboolean\b/
-  //};
 
   function getType(value) {
     if (value instanceof Object) {
@@ -2359,11 +1767,6 @@
   function makeTypesError(constructorName, propertyName, expectedTypes, actualType) {
     var types = [];
     for (var i = 0, n = expectedTypes.length; i < n; ++i) {
-      //if (typeof expectedTypes[i] === 'function') {
-      //  str += expectedTypes[i].name;
-      //} else {
-      //  str += expectedTypes[i].name;
-      //}
       types.push('`' + (expectedTypes[i].name || expectedTypes[i]) + '`');
     }
 
@@ -2372,50 +1775,56 @@
   }
 
   /**
-   * Validate the type of the value when the key is set in accessor.
+   * Validate the type of the value when the key is set in target.
    *
-   * @param {Accessor} accessor
+   * @param {Object} target
    * @param {string} key
    * @param {*} value
    * @param {string|Function} type
    * @returns {TypeError}
    */
-  function validateType(accessor, key, value, type) {
-    if (value === undefined) { return; } //TODO: required ?
+  function validateType(target, key, value, type) {
+    var t = typeof type, error, constructor;
 
-    var t1 = typeof type, t2, error, constructor;
-
-    //t2 = typeof value;
-    if (t1 === 'string' && typeof value !== type) { //TODO: type can be array
-//    if (t1 === 'string' && !TYPE_REGEXPS[t2].test(type)) {
-      t1 = type;
+    if (t === 'string' && typeof value !== type) { //TODO: type can be array
+      t = type;
       error = true;
-    } else if (t1 === 'function' && !(value instanceof type)) {
-      t1 = type.fullName || type.name;
+    } else if (t === 'function' && !(value instanceof type)) {
+      t = type.fullName || type.name;
       error = true;
     }
 
     if (error) {
-      constructor = accessor.constructor;
-      return makeTypeError(constructor.fullName || constructor.name, key, t1, getType(value));
+      constructor = target.constructor;
+      return makeTypeError(constructor.fullName || constructor.name, key, t, getType(value));
     } else if (Array.isArray(type)) {
       for (var i = 0, n = type.length; i < n; ++i) {
-        t1 = typeof type[i];
-        if ((t1 === 'string' && typeof value === type[i]) || (t1 === 'function' && value instanceof type[i])) {
+        t = typeof type[i];
+        if ((t === 'string' && typeof value === type[i]) || (t === 'function' && value instanceof type[i])) {
           break;
         }
       }
 
       if (i === n) {
-        constructor = accessor.constructor;
+        constructor = target.constructor;
         return makeTypesError(constructor.fullName || constructor.name, key, type, getType(value));
       }
     }
   }
 
-  function validatePattern(accessor, key, value, pattern) {
+  /**
+   * Validate if the value matches the pattern.
+   *
+   * @param {Object} target
+   * @param {string} key
+   * @param {*} value
+   * @param {RegExp} pattern
+   * @returns {Error}
+   */
+  function validatePattern(target, key, value, pattern) {
     if (!pattern.test(value)) {
-      return new Error(value, 'does not match the pattern ' + pattern.toString());
+      return new Error(value + ' does not match the pattern ' + pattern.toString() +
+        ' of the property `' + key + '` in ' +  target.toString());
     }
   }
 
@@ -2424,82 +1833,186 @@
    *
    * @example A constructor has descriptors:
    *
-   *  { name: 'string', role: Student, age: {type: 'number', validator: validateRange} }
+   *  {
+   *    name: 'string',
+   *    list: Array,
+   *    date: {
+   *      type: [Date, 'number', 'string]
+   *    },
+   *    phone: {
+   *      validator: /\d{13}/
+   *    },
+   *    price: {
+   *      type: 'number',
+   *      validator: function() {...} // returns error or not
+   *    }
+   *  }
    *
-   * The validator can check if the type of `name` is 'string', `role` is an instance of Student, and `age` is number
-   * in the legal range.
    *
    * @static
    * @constructor
    */
-  function Validator() {
-    throw new Error('Validator is static class');
-  }
+  Exact.Validator = {
+    /**
+     * Validate the value when the key is set in target.
+     *
+     * @param {Object} target
+     * @param {string} key
+     * @param {*} value
+     * @param {Object} desc   - descriptor
+     * @returns {boolean}
+     */
+    validate: function validate(target, key, value, desc) {
+      if (!desc.type && !desc.validator) { return true; }
 
-  Exact.defineClass({
+      var error, validator, type, validated;
 
-    constructor: Validator,
+      type = desc.type;
+      //required = desc.required;
+      validator = desc.validator;
 
-    statics: {
-      /**
-       * Validate the value when the key is set in accessor.
-       *
-       * @param {Accessor} accessor
-       * @param {string} key
-       * @param {*} value
-       * @param {Object} descriptors
-       * @returns {boolean}
-       */
-      validate: function validate(accessor, key, value, descriptors) {
-        var error, validator, pattern, type, desc, validated;//, descriptors = constructor._descriptors_;
+      if (/*!error && */type) {
+        validated = true;
+        error = validateType(target, key, value, type);
+      }
 
-        if (descriptors && descriptors.hasOwnProperty(key)) {
-          desc = descriptors[key]; //TODO: descriptions[key]
-
-          if (!desc) { return true; }
-
-          type = desc.type;
-          //pattern = desc.pattern;
-          //required = desc.required;
-          validator = desc.validator;
-
-          if (/*!error && */type) {
-            validated = true;
-            error = validateType(accessor, key, value, type);
-          }
-
-          //if (!error && pattern) {
-          //  validated = true;
-          //  error = validatePattern(accessor, key, value, pattern);
-          //}
-
-          if (!error && validator) {
-            validated = true;
-            if (typeof validator === 'function') {
-              error = validator.call(accessor, value, key);
-            } else {
-              error = validatePattern(accessor, key, value, validator);
-            }
-          }
-
-          if (validated && /*accessor.on &&*/ accessor.send) {
-            accessor.send('validated.' + key, error);
-          }
-
-          if (error) {
-            if ('development' === 'development') {
-              console.warn('Invalid:', error.message);
-            }
-            return false;
-          }
+      if (!error && validator) {
+        validated = true;
+        if (typeof validator === 'function') {
+          error = validator.call(target, value, key);
+        } else {
+          error = validatePattern(target, key, value, validator);
         }
+      }
 
-        return true;
+      if (validated && target.on && target.send) {
+        target.send('validated.' + key, error);
+      }
+
+      if (error) {
+        if ('development' === 'development') {
+          console.warn('Invalid:', error.message);
+        }
+        return false;
+      }
+
+      return true;
+    }
+  };
+
+})();
+
+//######################################################################################################################
+// src/base/Evaluator.js
+//######################################################################################################################
+(function() {
+
+  var RES = Exact.RES;
+
+  var emptyArray = [];
+
+  var ARGUMENT_FLAGS = {
+    EVALUATOR: -1,
+    INVARIABLE: 0,
+    LOCAL_PATH: 1
+  };
+
+  function genArgs(args, locals) {
+    var i, n, l, path, origin, flag, flags = args.flags, results = args.slice(0);
+
+    if (flags && flags.length) {
+      for (i = 0, n = flags.length; i < n; ++i) {
+        flag = flags[i];
+
+        if (flag === ARGUMENT_FLAGS.LOCAL_PATH) {
+          path = args[i];
+          l = path.length;
+          origin = locals[path.origin];
+          results[i] = l === 1 ? origin[path[0]] : (l ? RES.search(path, origin, true) : origin);
+        } else if (flag === ARGUMENT_FLAGS.EVALUATOR) {
+          results[i] = activate(args[i], 'exec', locals);
+        }
       }
     }
-  });
 
-  Exact.Validator = Validator;
+    return results;
+  }
+
+  /**
+   *
+   * @param {Evaluator} evaluator
+   * @param {string} name - 'exec' or 'back'
+   * @param {Array} locals
+   * @param {*} value
+   * @returns {*}
+   */
+  function activate(evaluator, name, locals, value) {
+    var ctx = null, exec, args;
+
+    exec = evaluator[name];
+
+    if (!exec) {
+      var path = evaluator.path;
+      var n = path.length - 1;
+
+      if (!n) {
+        ctx = locals[path.origin];
+      }  else {
+        ctx = RES.search(path.slice(0, n), locals[path.origin], true);
+      }
+
+      exec = ctx[path[n]];
+    }
+
+    args = genArgs(evaluator.args || emptyArray, locals);
+
+    if (arguments.length > 3) {
+      args.unshift(value);
+    }
+
+    return exec.apply(ctx, args);
+  }
+
+  function Evaluator(exec, args, back) {
+    this.exec = exec;
+    this.back = back;
+    this.args = args;
+  }
+
+  Evaluator.ARGUMENT_FLAGS = ARGUMENT_FLAGS;
+
+  Evaluator.activate = activate;
+
+  Evaluator.create = function create(exec, args, back) {
+    return new Evaluator(exec, args, back);
+  };
+
+  Exact.Evaluator = Evaluator;
+  
+})();
+
+//######################################################################################################################
+// src/base/Expression.js
+//######################################################################################################################
+(function() {
+
+  function Expression(compiler, template) {
+    this.compiler = compiler; // builder
+    this.template = template;
+  }
+
+  Expression.create = function create(compiler, template) {
+    return new Expression(compiler, template);
+  };
+
+  Expression.activate = function activate(expression, property, target, context, locals) {
+    var compiler = expression.compiler, template = expression.template;
+    if (compiler && compiler.compile) {
+      compiler.compile(template, property, target, context, locals);
+    }
+  };
+
+  Exact.Expression = Expression;
 
 })();
 
@@ -2507,10 +2020,6 @@
 // src/base/DirtyMarker.js
 //######################################################################################################################
 (function() {
-
-  'use strict';
-
-  var ObjectUtil_defineProp = Exact.ObjectUtil.defineProp;
 
   function DirtyMarker() {
     throw new Error('DirtyMarker is static class and can not be instantiated');
@@ -2536,7 +2045,7 @@
         if (!_dirty) {
           _dirty = {};
 
-          ObjectUtil_defineProp(object, '_dirty', {
+          Object.defineProperty(object, '_dirty', {
               value: _dirty, enumerable: false, writable: true, configurable: true}
           );
         }
@@ -2556,16 +2065,11 @@
        */
       clean: function clean(object, key) {
         if (!key) {
-          delete object._dirty;
+          object._dirty = null;
         } else {
           delete object._dirty[key];
         }
-      }/*,
-
-      hasDirty: function hasDirty(object, key) { // hasDirtyAttr, hasDirty
-        var _dirty = object._dirty;
-        return _dirty ? (key === undefined || _dirty.hasOwnProperty(key)) : false;
-      }*/
+      }
     },
 
     /**
@@ -2576,7 +2080,7 @@
      */
     hasDirty: function hasDirty(key) {
       var _dirty = this._dirty;
-      return _dirty ? (key === undefined || _dirty.hasOwnProperty(key)) : false;
+      return _dirty ? (key == null || _dirty.hasOwnProperty(key)) : false;
     }
   });
 
@@ -2585,126 +2089,22 @@
 })();
 
 //######################################################################################################################
-// src/core/models/Cache.js
-//######################################################################################################################
-(function() {
-  'use strict';
-
-  var Accessor = Exact.Accessor;
-  var DirtyMarker = Exact.DirtyMarker;
-
-  var Accessor_set = Accessor.set;
-  var DirtyMarker_check = DirtyMarker.check;
-  var DirtyMarker_clean = DirtyMarker.clean;
-
-  /**
-   *
-   * @constructor
-   */
-  function Cache(props) { //
-    Accessor.initialize(this, props);
-  }
-
-  Exact.defineClass({
-
-    constructor: Cache,
-
-    mixins: [Accessor.prototype, DirtyMarker.prototype],
-
-    statics: {
-
-      set: function set(key, val, old, cache, descriptors) {
-        var changed = Accessor_set.call(this, key, val, old, cache, descriptors);
-
-        if (changed) {
-          DirtyMarker_check(cache, key, this[key], old);
-
-          if (cache.onChange) {
-            cache.onChange();
-          }
-        }
-
-        return changed;
-      },
-
-      clean: DirtyMarker_clean
-    }
-  });
-
-  Exact.Cache = Cache;
-
-})();
-
-//######################################################################################################################
-// src/core/models/Store.js
-//######################################################################################################################
-(function() {
-
-  'use strict';
-
-  var Watcher = Exact.Watcher;
-  var Accessor = Exact.Accessor;
-  var Validator = Exact.Validator;
-
-  var Accessor_set = Accessor.set;
-  var Validator_validate = Validator.validate;
-
-  function Store(props) {
-    Accessor.initialize(this, props);
-  }
-
-  Exact.defineClass({
-    constructor: Store,
-
-    //extend: Accessor,
-
-    mixins: [Watcher.prototype, Accessor.prototype],
-
-    statics: {
-      /**
-       * Set the prop of the store by given key.
-       *
-       * @returns {boolean}
-       */
-      set: function set(key, val, old, store, descriptors) {
-
-        if (!Validator_validate(store, key, val, descriptors)) { return false; }
-
-        var changed = Accessor_set.call(this, key, val, old, store, descriptors);
-
-        if (changed) {
-          store.send('changed.' + key);
-        }
-
-        return changed;
-      },
-
-      from: function from(props) {
-        return new Store(props);
-      }
-    }
-  });
-
-  Exact.Store = Store;
-
-})();
-
-//######################################################################################################################
 // src/core/models/Collection.js
 //######################################################################################################################
 (function() {
 
-  'use strict';
-
   var Watcher = Exact.Watcher;
 
-  /**
-   *
-   * @constructor
-   * @internal
-   */
   function Collection() {//TODO: changed.length
-    this.push.apply(this, arguments);
+    var l = arguments.length, n = arguments[0];
+
+    if (l) {
+      if (l === 1 && typeof n === 'number') {
+        this.push.apply(this, new Array(n));
+      } else {
+        this.push.apply(this, arguments);
+      }
+    }
   }
 
   var base = Array.prototype;
@@ -2713,9 +2113,9 @@
     collection.isInvalidated = true;
     collection.send(key ? 'changed.' + key : 'changed'); //collection.send(key ? 'change.' + key : 'change);
 
-    if (collection.onChange) { // TODO: remove
-      collection.onChange();
-    }
+    //if (collection.onChange) { // TODO: remove
+    //  collection.onChange();
+    //}
   }
 
   Exact.defineClass({
@@ -2736,6 +2136,8 @@
         collection.isInvalidated = false;
       }
     },
+
+    //type: Object,
 
 //    clean: function() {
 //      this.isInvalidated = false;
@@ -2794,6 +2196,14 @@
       return this;
     },
 
+    reverse: function() {
+      base.reverse.call(this);
+
+      invalidate(this);
+
+      return this;
+    },
+
     //TODO: filter, sort, map, ...
 
     set: function(index, item) {
@@ -2811,7 +2221,7 @@
 
       invalidate(this);
 
-      return this;
+      //return this;
     },
 
     reset: function(items) {
@@ -2839,14 +2249,14 @@
         invalidate(this, m != n ? 'length' : '');
       }
 
-      return this;
-
+      //return this;
     },
 
-    insert: function(item, before) { //TODO: before can be number index
-      if (!(item instanceof Object) || (arguments.length > 1 && !(before instanceof Object))) {
-        throw new TypeError("Failed to execute `insert` on `Collection`: 2 arguments must be object.");
-      }
+    insert: function(item, before) { //TODO: add type checker, Children
+      //if (!(item instanceof this.type) || (arguments.length > 1 && !(before instanceof this.type))) {
+      ////if (!(item instanceof Object) || (arguments.length > 1 && !(before instanceof Object))) {
+      //  throw new TypeError("Failed to execute `insert` on `Collection`: 2 arguments must be object.");
+      //}
 
       var i, n;
 
@@ -2862,7 +2272,7 @@
         }
       }
 
-      if (before) {
+      if (before != null) {
         for (i = 0; i < n; ++i) {
           if (this[i] === before) {
             break;
@@ -2880,13 +2290,14 @@
 
       invalidate(this, 'length');
 
-      return this;
+      //return this;
     },
 
     remove: function(item) { //TODO: can be number index
-      if (!(item instanceof Object)) {
-        throw new TypeError("Failed to execute `remove` on `Collection`: the item to be removed must be object.");
-      }
+      //if (!(item instanceof this.type)) {
+      ////if (!(item instanceof Object)) {
+      //  throw new TypeError("Failed to execute `remove` on `Collection`: the item to be removed must be object.");
+      //}
 
       var i, n;
 
@@ -2908,15 +2319,16 @@
 
       invalidate(this, 'length');
 
-      return this;
+      //return this;
     },
 
     replace: function(item, existed) {
-      if (!(item instanceof Object) || !(existed instanceof Object)) {
-        throw new TypeError("Failed to execute `insert` on `Collection`: 2 arguments must be object.");
-      }
+      //if (!(item instanceof this.type) || !(existed instanceof this.type)) {
+      ////if (!(item instanceof Object) || !(existed instanceof Object)) {
+      //  throw new TypeError("Failed to execute `insert` on `Collection`: 2 arguments must be object.");
+      //}
 
-      if (item === existed) { return this; }
+      if (item === existed) { return /*this*/; }
 
       var i, n;
 
@@ -2934,7 +2346,7 @@
 
       invalidate(this);
 
-      return this;
+      //return this;
     }
   });
 
@@ -2943,71 +2355,176 @@
 })();
 
 //######################################################################################################################
+// src/core/models/Container.js
+//######################################################################################################################
+(function() {
+
+  var Accessor = Exact.Accessor;
+  var DirtyMarker = Exact.DirtyMarker;
+
+  function Container(props, onChange) { // internal class
+    this.onChange = onChange;
+
+    if (props) {
+      this.save(props);
+    }
+  }
+
+  Exact.defineClass({
+
+    constructor: Container,
+
+    mixins: [Accessor.prototype, DirtyMarker.prototype],
+
+    statics: {
+      create: function create(props, onChange) {
+        return new Container(props, onChange);
+      }
+    },
+
+    set: function set(key, val) {
+      var old = this[key];
+
+      if (val !== old) {
+        this[key] = val;
+
+        DirtyMarker.check(this, key, val, old);
+
+        if (this.onChange) {
+          this.onChange();
+        }
+      }
+    }
+  });
+
+  Exact.Container = Container;
+
+})();
+
+//######################################################################################################################
+// src/core/models/Store.js
+//######################################################################################################################
+(function() {
+
+  var Watcher = Exact.Watcher;
+  var Accessor = Exact.Accessor;
+
+  function Store(props) {
+    Store.initialize(this, props);
+  }
+
+  Exact.defineClass({
+    constructor: Store,
+
+    mixins: [Accessor.prototype, Watcher.prototype],
+
+    statics: {
+      create: function create(props) {
+        return new Store(props);
+      },
+
+      initialize: function initialize(store, props) {
+        if (!store._props) {
+          Object.defineProperty(store, '_props', {value: {}/*, configurable: true*/});
+        }
+
+        store.save(props);
+      }
+    },
+
+    get: function(key) {
+      return this._props[key];
+    },
+
+    set: function set(key, val) {
+      var props = this._props;
+
+      if (!props.hasOwnProperty(key)) {
+        Accessor.define(this, key);
+        props[key] = null;
+      }
+
+      var old = props[key];
+
+      if (val !== old) {
+        props[key] = val;
+
+        if ('>=ES5' === '<ES5') {
+          this[key] = val;
+        }
+
+        this.send('changed.' + key, val, old);
+      }
+    }
+  });
+
+  Exact.Store = Store;
+
+})();
+
+//######################################################################################################################
 // src/core/shadows/Shadow.js
 //######################################################################################################################
 (function() {
-  'use strict';
 
   var Skin = Exact.Skin;
 
-  var Cache = Exact.Cache;
+  var Container = Exact.Container;
   var Collection = Exact.Collection;
 
-  var Updater = Exact.Updater;
   var Watcher = Exact.Watcher;
   var Accessor = Exact.Accessor;
+  var Schedule = Exact.Schedule;
   var DirtyMarker = Exact.DirtyMarker;
 
   var setImmediate = Exact.setImmediate;
 
-  var ObjectUtil = Exact.ObjectUtil;
+  var guid = 0;//Number.MIN_VALUE;
 
-  var Accessor_set = Accessor.set;
-  var DirtyMarker_check = DirtyMarker.check;
-  var DirtyMarker_clean = DirtyMarker.clean;
-
-  var ObjectUtil_assign = ObjectUtil.assign;
-  var ObjectUtil_defineProp = ObjectUtil.defineProp;
-
-  var uid = 0;//Number.MIN_VALUE;
-
-  function createCache(shadow) {
-    var cache = new Cache();
-
-    cache.onChange = shadow.invalidate;
-
-    return cache;
+  function createContainer(shadow) {
+    return Container.create(null, shadow.invalidate);
   }
 
   function createCollection(shadow) {
     var collection = new Collection();
 
-    collection.onChange = shadow.invalidate;
-    //TODO: collection.on('change', shadow.invalidate);
+    collection.on('changed', shadow.invalidate);
 
     return collection;
   }
 
   /**
-   * props getter
+   * attrs getter
    *
-   * @returns {Cache}
+   * @returns {Container}
    */
   function getAttrs() {
-    if (!this._attrs) {
-      ObjectUtil_defineProp(this, '_attrs', {value: createCache(this), configurable: true});
+    if (!this._attrs/* && this.tag*/) {
+      Object.defineProperty(this, '_attrs', {value: createContainer(this), configurable: true});
     }
     return this._attrs;
   }
 
   /**
+   * props getter
+   *
+   * @returns {Container}
+   */
+  function getProps() {
+    //if (!this._props/* && this.tag*/) {
+    //  Object.defineProperty(this, '_props', {value: createContainer(this), configurable: true});
+    //}
+    return this._props;
+  }
+
+  /**
    * style getter
    *
-   * @returns {Cache}
+   * @returns {Container}
    */
   function getStyle() {
-    if (!this._style && Skin.isElement(this.$skin)) {
-      ObjectUtil_defineProp(this, '_style', {value: createCache(this), configurable: true});
+    if (!this._style/* && this.tag*/) {
+      Object.defineProperty(this, '_style', {value: createContainer(this), configurable: true});
     }
     return this._style;
   }
@@ -3015,11 +2532,11 @@
   /**
    * classes getter
    *
-   * @returns {Cache}
+   * @returns {Container}
    */
-  function getClasses() {
-    if (!this._classes && Skin.isElement(this.$skin)) {
-      ObjectUtil_defineProp(this, '_classes', {value: createCache(this), configurable: true});
+  function getClasses() { // TODO: class ClassList extends Container { append, remove }
+    if (!this._classes/* && this.tag*/) {
+      Object.defineProperty(this, '_classes', {value: createContainer(this), configurable: true});
     }
     return this._classes;
   }
@@ -3030,79 +2547,79 @@
    * @returns {Collection}
    */
   function getChildren() {
-    if (!this._children && Skin.isElement(this.$skin)) {
-      ObjectUtil_defineProp(this, '_children', {value: createCollection(this), configurable: true});
+    if (!this._children /*&& this.tag*/) {
+      Object.defineProperty(this, '_children', {value: createCollection(this), configurable: true});
     }
     return this._children;
   }
 
-  /**
-   * children getter
-   *
-   * @returns {Collection}
-   */
-  function getContents() {
-    if (!this._contents && Skin.isElement(this.$skin)) {
-      ObjectUtil_defineProp(this, '_contents', {value: createCollection(this), configurable: true});
+  ///**
+  // * contents getter
+  // *
+  // * @returns {Collection}
+  // */
+  //function getContents() {
+  //  if (!this._contents && Skin.isElement(this.$skin)) {
+  //    Object.defineProperty(this, '_contents', {value: createCollection(this), configurable: true});
+  //  }
+  //  return this._contents;
+  //}
+
+  // lazy mode when getter is supported
+  var defineMembersOf = function(shadow) {
+    Object.defineProperty(shadow, '_props', {
+      value: {}, writable: false, enumerable: false, configurable: false
+    });
+    Object.defineProperty(shadow, 'props', {get: getProps});
+
+    if (shadow.tag) {
+      Object.defineProperty(shadow, 'attrs', {get: getAttrs});
+      Object.defineProperty(shadow, 'style', {get: getStyle});
+      Object.defineProperty(shadow, 'classes', {get: getClasses});
+      Object.defineProperty(shadow, 'children', {get: getChildren});
+      //ObjectUtil.defineProperty(shadow, 'contents', {get: getContents});  //TODO: set('contents', []) is ok
     }
-    return this._contents;
-  }
+  };
 
-  var defineMembersOf;
-
-  if (ObjectUtil.support('accessor')) {
-    // lazy mode when getter is supported
-    defineMembersOf = function(shadow) {
-      ObjectUtil_defineProp(shadow, 'attrs', {get: getAttrs});
-      ObjectUtil_defineProp(shadow, 'style', {get: getStyle});
-      ObjectUtil_defineProp(shadow, 'classes', {get: getClasses});
-      ObjectUtil_defineProp(shadow, 'children', {get: getChildren});
-      //ObjectUtil_defineProp(shadow, 'contents', {get: getContents});//TODO: set('contents', []) if fine
-    }
-
-  } else {
+  if ('>=ES5' === '<ES5') {
     // immediate mode when getter is not supported
     defineMembersOf = function(shadow) {
-      ObjectUtil_defineProp(shadow, 'attrs', {value: createCache(shadow)});
-      ObjectUtil_defineProp(shadow, 'style', {value: createCache(shadow)});
-      ObjectUtil_defineProp(shadow, 'classes', {value: createCache(shadow)});
-      ObjectUtil_defineProp(shadow, 'children', {value: createCollection(shadow)});
-      //ObjectUtil_defineProp(shadow, 'contents', {value: createCollection(shadow)});
+      Object.defineProperty(shadow, '_props', {
+        value: {}, writable: false, enumerable: false, configurable: false
+      });
+      shadow.props = shadow._props;
 
-      shadow._attrs = shadow.attrs;
-      shadow._style = shadow.style;
-      shadow._classes = shadow.classes;
-      shadow._children = shadow.children;
-      shadow._contents = shadow.contents;
-    }
-  }
+      if (shadow.tag) {
+        Object.defineProperty(shadow, 'attrs', {value: createContainer(shadow)});
+        Object.defineProperty(shadow, 'style', {value: createContainer(shadow)});
+        Object.defineProperty(shadow, 'classes', {value: createContainer(shadow)});
+        Object.defineProperty(shadow, 'children', {value: createCollection(shadow)});
+        //ObjectUtil_defineProp(shadow, 'contents', {value: createCollection(shadow)});
 
-  function extract(children) {
-    var i, n, $skin, child, $children;
-
-    n = children.length;
-
-    $children = [];
-
-    for (i = 0; i < n; ++i) {
-      child = children[i];
-      $skin = child.$skin;
-
-      if ((child instanceof Shadow) && /*!child.excluded &&*/ $skin) {
-        $children.push($skin);
+        shadow._attrs = shadow.attrs;
+        shadow._style = shadow.style;
+        shadow._classes = shadow.classes;
+        shadow._children = shadow.children;
+        shadow._contents = shadow.contents;
       }
     }
-
-    return $children;
   }
 
+  function initSkin(shadow, $skin) {
+    var ns = shadow.ns, tag = shadow.tag, _shadow;
 
-  /**
-   *
-   * @constructor
-   */
+    if (!$skin || tag !== Skin.getTagName($skin) || ns !== Skin.getNameSpace($skin)
+      || ((_shadow = $skin ? Skin.getShadow($skin) : null) && _shadow !== shadow)) {
+      $skin = tag ? Skin.createElement(tag, ns) : Skin.createText('');
+    }
+
+    shadow.attach($skin);
+
+    return $skin;
+  }
+
   function Shadow() {
-    throw new Error('');
+    throw new Error('Shadow is abstract and can not be instantiated');
   }
 
   Exact.defineClass({
@@ -3111,287 +2628,319 @@
     mixins: [Watcher.prototype, Accessor.prototype, DirtyMarker.prototype],
 
     /**
-     * Make this shadow invalid and register it to the batchUpdater.
-     *
-     * @returns {self}
+     * invalidate this shadow and insert it to the schedule
      */
-    invalidate: function invalidate(key, val, old) { //TODO: as static method, maybe
-
-      if (!this.isInvalidated /*&& this.isDirty()*/) {
+    invalidate: function invalidate(key, val, old) {
+      if (!this.isInvalidated) {
         //console.log('invalidate', this.toString());
         this.isInvalidated = true;
-        Updater.insert(this);
+        Schedule.insert(this);
       }
-
-      //return this;
     },
 
+    /**
+     * Update this shadow and append it to the schedule
+     */
     update: function update() { //TODO: enumerable = false
-      if (!this.isInvalidated) { return; } // TODO: _secrets, is.invalid, is.refreshed,
-
+      if (!this.isInvalidated) { return; }
       //console.log('update', this.toString());
-
       if (this.refresh) {
         this.refresh();
-      } //TODO: last chance to update shadow and its children
+      }
+
+      //this.send('updated');
+
+      var $skin = this.$skin;
+
+      if ($skin) {
+        var child, children = this._children, $children;
+        // TODO: child._depth = this._depth + 1;
+        if (children && children.isInvalidated) {
+          for (var i = 0, n = children.length; i < n; ++i) {
+            child = children[i];
+            if (!child.$skin) {
+              $children = $children || Skin.getChildren($skin);
+              initSkin(child, $children[i]);
+            }
+          }
+        }
+      } else {
+        initSkin(this);
+      }
+
+      Schedule.append(this); //this.render(); TODO: immediate rendering is ok
+
+      this.isInvalidated = false;
 
       this.send('updated');
-
-      Updater.append(this);
-      //Shadow.render(this);
-      //Shadow.clean(this);
-
-
     },
 
+    /**
+     * Render the dirty parts of this shadow to $skin
+     */
     render: function render() {
-      if (!this.isInvalidated) { return; }
+      var $skin = this.$skin;
 
-      var $skin = this.$skin,
-        props = this, // <--
+      if (!$skin) { return; }
+
+      var dirty = this._dirty,
+        props = this._props,
         attrs = this._attrs,
         style = this._style,
         classes = this._classes,
-        children = this._children,
-        dirty = null;
+        children = this._children;
 
-      if (props && props._dirty) {
-        dirty = props._dirty;
-        //Shadow.clean(props);
-        //if ('excluded' in dirty) {
-        //  var parent = Shadow.getParent(this);
-        //  parent.children.invalidated = true;
-        //  parent.invalidate();
-        //  delete dirty.excluded;
-        //} // TODO: support more directives
-
-        Skin.renderProps($skin, props, dirty, this._secrets.final);
+      if (dirty) {
+        Skin.renderProps($skin, props, dirty);
+        DirtyMarker.clean(this);
       }
 
-      Shadow.clean(this);
-
-      if (Skin.isElement($skin)) {
+      if (this.tag) {
         if (attrs && attrs._dirty) {
-          dirty = attrs._dirty;
-          Cache.clean(attrs);
-
-          Skin.renderAttrs($skin, attrs, dirty);
+          Skin.renderAttrs($skin, attrs, attrs._dirty);
+          DirtyMarker.clean(attrs);
         }
 
         if (style && style._dirty) {
-          dirty = style._dirty;
-          Cache.clean(style);
-
-          Skin.renderStyle($skin, style, dirty);
+          Skin.renderStyle($skin, style, style._dirty);
+          DirtyMarker.clean(style);
         }
 
         if (classes && classes._dirty) {
-          dirty = classes._dirty;
-          Cache.clean(classes);
-
-          Skin.renderClasses($skin, classes, dirty);
+          Skin.renderClasses($skin, classes, classes._dirty);
+          DirtyMarker.clean(classes);
         }
 
-        if (children && children.isInvalidated) {
-          Collection.clean(children);
+        if (children && (children.isInvalidated)) {
+          if ('development' === 'development') {
+            if (props.hasOwnProperty('innerHTML') && children.length) {
+              console.error("You'd better not use innerHTML and children together.");
+            }
+          }
 
-          var $removed = Skin.renderChildren($skin, extract(children));
+          var $removed = Skin.renderChildren($skin, children);
 
-          if ($removed && $removed.length > 0) {
+          if ($removed && $removed.length) {
             for (var i = 0, n = $removed.length; i < n; ++i) {
               var $parent = Skin.getParent($removed[i]);
-              var shadow = Shadow.getShadow($removed[i]);
-              if (!$parent && !shadow.hasOwnProperty('excluded')) {
-                Shadow.release(shadow);
+              var shadow = Skin.getShadow($removed[i]);
+              if (!$parent && shadow) { // TODO: && !shadow._secrets.reuse
+                shadow.detach();
+                Shadow.destroy(shadow);
               }
             }
           }
-          // TODO: It is a little hard for IE 8
-        }
 
-        this.send('rendered');//TODO: beforeRefresh, refreshing
+          Collection.clean(children);
+        }
       }
+
+      //this.send('rendered');//TODO: beforeRefresh, refreshing
     },
 
-    //TODO: debug
+    /**
+     *
+     * @param {HTMLElement} $skin
+     */
+    attach: function attach($skin) {
+      var shadow = Skin.getShadow($skin);
+
+      // check
+      if (shadow) {
+        if (shadow === this) {
+          return;
+        } else {
+          throw new Error('a shadow can not attach a $skin that has been attached');
+        }
+      }
+
+      if (this.tag !== Skin.getTagName($skin)) {
+        throw new Error('a shadow can not attach a $skin that has a different tag');
+      }
+
+      if (this.ns !== Skin.getNameSpace($skin)) {
+        throw new Error('a shadow can not attach a $skin that has a different namespace');
+      }
+
+      // define
+      Object.defineProperty(this, '$skin', {
+        value: $skin,
+        writable: true,
+        enumerable: false,
+        configurable: true
+      });
+
+      Skin.setShadow($skin, this);
+
+      // finish
+      var type, action, actions = this._actions;
+
+      if (actions) {
+        for (type in actions) {
+          if (!actions.hasOwnProperty(type)) { continue; }
+
+          action = actions[type];
+
+          if (action) {
+            Shadow.addEventListener(this, action, type);
+          }
+        }
+      }
+
+      this.invalidate();
+      //this.send('attached');
+      //return this;
+    },
+
+    /**
+     *
+     */
+    detach: function detach() {
+      var type, action, actions = this._actions, $skin = this.$skin;
+
+      if (actions) {
+        for (type in actions) {
+          if (!actions.hasOwnProperty(type)) { continue; }
+
+          action = actions[type];
+
+          if (action) {
+            Shadow.removeEventListener(this, action, type);
+          }
+        }
+      }
+
+      Skin.setShadow($skin, null);
+
+      this.$skin = null;
+      //this.send('detached');
+      //return this;
+    },
+
     toString: function toString() {
       var constructor = this.constructor;
-
-      var tag = Skin.getProp(this.$skin, 'tagName');
-
-      return (constructor.fullName || constructor.name) + '<' + (tag ? tag.toLowerCase() : '') + '>('+this.guid+')';
+      return (constructor.fullName || constructor.name) + '<' + this.tag + '>(' + this.guid + ')';
     },
 
     blur: function blur() { //TODO: remove
       var $skin = this.$skin;
-      setImmediate(function() {
+
+      $skin && setImmediate(function() {
         Skin.call($skin, 'blur');
       });
+      //return this;
     },
 
     focus: function focus() { //TODO: remove
       var $skin = this.$skin;
-      setImmediate(function() {
+
+      $skin && setImmediate(function() {
         Skin.call($skin, 'focus');
       });
+      //return this;
+    },
+
+    get: function(key) {
+      return this._props[key];
+    },
+    
+    set: function set(key, val) {
+      var props = this._props;
+    
+      var old = props[key];
+    
+      if (val !== old) {
+        props[key] = val;
+    
+        if ('>=ES5' === '<ES5') {
+          this[key] = val;
+        }
+    
+        DirtyMarker.check(this, key, val, old);
+
+        this.invalidate();
+      }
     },
 
     statics: {
-
-      set: function set(key, val, old, shadow, descriptors) { // TODO: params
-        var changed = Accessor_set.call(this, key, val, old, shadow, descriptors);
-
-        if (changed) {
-          DirtyMarker_check(shadow, key, this[key], old);
-
-          shadow.invalidate(key, this[key], old);//TODO:
-        }
-
-        return changed;
-      },
-
-
       /**
-       * @param {Shadow} shadow
-       * @param {Object} props
-       * * @param {string} tag
-       * @param {string} ns
-       */
-      initialize: function initialize(shadow, props, tag, ns) {
-//        throw new Error('initialize() must be implemented by subclass!');
-        shadow.guid = ++uid;
-        shadow._secrets = {}; //TODO:
-        shadow.update = shadow.update.bind(shadow); //TODO: defineProp
-        shadow.render = shadow.render.bind(shadow); //TODO: defineProp
-        shadow.invalidate = shadow.invalidate.bind(shadow);
-        //shadow._update = Shadow.update.bind(null, shadow);
-
-        Shadow.initSkin(shadow, tag, ns);
-
-        if (Skin.isElement(shadow.$skin)) {
-          defineMembersOf(shadow);
-        }
-
-        Accessor.initialize(shadow, props); //TODO: not here
-      },
-
-      /**
-       * Create $skin for the shadow.
-       *
        * @param {Shadow} shadow
        * @param {string} tag
-       * @param {string} ns ''/'svg'/'math'
+       * @param {string} ns
        */
-      initSkin: function initSkin(shadow, tag, ns) {
-        ObjectUtil_defineProp(shadow, '$skin', {value: tag/* !== 'TEXT'*/ ? Skin.createElement(tag, ns) : Skin.createText('')}); //TODO: $shin._secrets = {$skin: ...}
-//        shadow.$skin._shadow = shadow; //TODO: strict
-//        if (Skin.canExtend(shadow.$skin)) {
-          ObjectUtil_defineProp(shadow.$skin, '_shadow', {value: shadow});
-        //}
-      },
+      initialize: function initialize(shadow, tag, ns) {
+        shadow.invalidate = shadow.invalidate.bind(shadow);
 
-      clean: function clean(shadow) {
-        shadow.isInvalidated = false;
-        DirtyMarker_clean(shadow); //delete shadow._dirty;
+        Object.defineProperty(shadow, 'guid', {
+          value: ++guid, writable: false, enumerable: false, configurable: false
+        });
+
+        Object.defineProperty(shadow, 'tag', {
+          value: tag, writable: false, enumerable: false, configurable: false
+        });
+
+        Object.defineProperty(shadow, 'ns', {
+          value: ns, writable: false, enumerable: false, configurable: false
+        });
+
+        defineMembersOf(shadow);
       },
 
       /**
        * @param {Shadow} shadow
        */
-      release: function release(shadow) {
-        var releaseImpl = shadow.constructor.release;
-        if (releaseImpl) {
-          releaseImpl(shadow);
+      destroy: function destroy(shadow) {
+        shadow.off();
+
+        DirtyMarker.clean(shadow);
+
+        var i, children = shadow._children;
+        if (children) {
+          for (i = children.length - 1; i >= 0; --i) {
+            Shadow.destroy(children[i]);
+          }
+        }
+
+        var binding, bindings = shadow._bindings; //
+        if (bindings) {
+          for (i = bindings.length - 1; i >= 0; --i) {
+            binding = bindings[i];
+            binding.constructor.clean(binding);
+          }
         }
 
         if (shadow.release) {
           shadow.release();
         }
-      }, //TODO: when and how to destroy?
-
-      /**
-       * Get the shadow of the $skin
-       *
-       * @param {Node} $skin
-       * @returns {Shadow}
-       */
-      getShadow: function getShadow($skin) {
-        return $skin && $skin._shadow;
       },
 
-      /**
-       * Find the part matching the CSS selector
-       *
-       * @param {Shadow} shadow
-       * @param {string} selector
-       * @returns {Shadow}
-       */
-      findShadow: function findShadow(shadow, selector) { //TODO: helper, findShadow
-        if (Skin.isElement(shadow.$skin)) {
-          return Shadow.getShadow(Skin.query(shadow.$skin, selector));
-        }
-      },
-
-      /**
-       * Find all the parts matching the CSS selector
-       *
-       * @param {Shadow} shadow
-       * @param {string} selector
-       * @returns {Array}
-       */
-      findShadows: function findShadows(shadow, selector) { //TODO: helper, findShadows
-        if (Skin.isElement(shadow.$skin)) {
-          var i, n, parts = [], $nodes = Skin.queryAll(shadow.$skin, selector);
-
-          for (i = 0, n = $nodes.length; i < n; ++i) {
-            parts.push(Shadow.getShadow($nodes[i]));
-          }
-
-          return parts;
-        }
-      },
-
-      /**
-       * Get the parent shadow of the shadow
-       *
-       * @param {Shadow} shadow
-       * @returns {Shadow}
-       */
-      getParentShadow: function getParentShadow(shadow) { //TODO: helper
-        return Shadow.getShadow(Skin.getParent(shadow.$skin));
-      },
-
-
-      addEventListenerFor: function (shadow, type, useCapture) {
+      addEventListener: function(shadow, action, type) {
         var $skin = shadow.$skin;
+
         if (!$skin) { return; }
 
-        var action = shadow._actions[type];
-
-        if (Skin.mayDispatchEvent($skin, type)) {//TODO: No problem?
+        if (Skin.mayDispatchEvent($skin, type)) { // TODO: No problem?
           action.listener = function (event) {
-            shadow.send(Skin.getFixedEvent(event)); // TODO: Shadow.getShadow(domEvent.currentTarget).send()
+            shadow.send(Skin.getFixedEvent(event)); // TODO: Shadow.getShadow(domEvent.currentTarget).send(Skin.getFixedEvent(domEvent))
           };
 
-          Skin.addEventListener($skin, type, action.listener, useCapture);
+          Skin.addEventListener($skin, type, action.listener, action.useCapture);
         } else {
           action.listener = null;
         }
       },
 
-      removeEventListenerFor: function (shadow, type, useCapture) {
+      removeEventListener: function(shadow, action, type) {
         var $skin = shadow.$skin;
+
         if (!$skin) { return; }
 
-        var action = shadow._actions[type];
-
         if (action.listener && Skin.mayDispatchEvent($skin, type)) {
-          Skin.removeEventListener($skin, type, action.listener, useCapture);
+          Skin.removeEventListener($skin, type, action.listener, action.useCapture);
 
           delete action.listener;
         }
       }
-
     }
   });
 
@@ -3403,40 +2952,37 @@
 // src/core/shadows/Text.js
 //######################################################################################################################
 (function() {
-  'use strict';
 
   var Shadow = Exact.Shadow;
-  //var hasDirty = Exact.DirtyMarker.hasDirty;
 
   function Text(data) {
     Text.initialize(this, data);
   }
 
   Exact.defineClass({
-    constructor: Text,
-
-    extend: Shadow,
+    constructor: Text, extend: Shadow,
 
     statics: {
 
       create: function(data) {
-        var text = new Text();
-        text.set('data', data);//TODO: nodeValue, content
-
-        return text;
-      },
-
-      release: function release(text) {
-        Shadow.clean(text);
+        return new Text(data);
       },
 
       initialize: function(text, data) {
-        Shadow.initialize(text, {data: data}, '');
+        if ('development' === 'development') {
+          if (text.constructor !== Text) {
+            throw new TypeError('Text is final class and can not be extended');
+          }
+        }
+
+        Shadow.initialize(text, '', '');
+
+        text.set('data', data || '');
       }
     },
 
     toString: function() {
-      return '"' + this.data + '"(' + this.guid +')'; //TODO: content
+      return '"' + (this.data.length < 24 ? this.data : (this.data.slice(0, 21) + '...'))  + '"(' + this.guid +')';
     }
 
   });
@@ -3449,33 +2995,30 @@
 // src/core/shadows/Element.js
 //######################################################################################################################
 (function () {
-  'use strict';
 
   var Shadow = Exact.Shadow;
   var Watcher = Exact.Watcher;
-
 
   function Element(props, tag, ns) {
     Element.initialize(this, props, tag, ns);
   }
 
   Exact.defineClass({
-    constructor: Element,
-
-    extend: Shadow,
+    constructor: Element, extend: Shadow,
 
     mixins: [Watcher.prototype],
 
     statics: {
-      fullName: 'Element',
-      /**
-       * Destroy the element. Remove event listeners, and //TODO:
-       *
-       * @param {Element} element
-       */
-      release: function release(element) {
-        element.off();
-        Shadow.clean(element);
+      initialize: function initialize(element, props, tag, ns) {
+        if ('development' === 'development') {
+          if (element.constructor !== Element) {
+            throw new TypeError('Element is final class and can not be extended');
+          }
+        }
+
+        Shadow.initialize(element, tag, ns || '');
+
+        element.save(props);
       },
 
       /**
@@ -3487,9 +3030,9 @@
        * @returns {Element}
        */
       create: function create(tag, ns, props) {
-        if (ns && typeof ns === 'object') { // create(tag, props)
-          props = ns;
-        } // else create(tag) or create(tag, ns) or create(tag, ns, props)
+        //if (ns && typeof ns === 'object') { // create(tag, props)
+        //  props = ns;
+        //} // else create(tag) or create(tag, ns) or create(tag, ns, props)
 
         return new Element(props, tag, ns);
       }
@@ -3505,63 +3048,66 @@
 //######################################################################################################################
 (function () {
 
-  'use strict';
+  var assign = Exact.assign;
+  var Shadow = Exact.Shadow;
 
   var Watcher = Exact.Watcher;
-  var Updater = Exact.Updater;
+  var Accessor = Exact.Accessor;
   var Validator = Exact.Validator;
+  var DirtyMarker = Exact.DirtyMarker;
 
-  var Text = Exact.Text;
-  var Shadow = Exact.Shadow;
-  var Element = Exact.Element;
+  //var base = Shadow.prototype;
+  
+  var emptyDesc = {};
 
-  //var HTMXTemplate = Exact.HTMXTemplate;
-  //var ExpressionUtil = Exact.ExpressionUtil;
+  function applyDescriptorsAndDefaults(prototype, descriptors, defaults) {
+    if (Array.isArray(descriptors)) {
+      var i, n, names = descriptors;
+      for (i = 0, n = names.length; i < n; ++i) {
+        descriptors[names[i]] = emptyDesc;
+      }
+    }
 
-  var Shadow_set = Shadow.set;
-  var Skin_isElement = Exact.Skin.isElement;
-  var Validator_validate = Validator.validate;
+    descriptors = assign({}, prototype.__descriptors__, descriptors);
 
-  var base = Shadow.prototype;
+    var key, desc;
 
+    if (defaults) { // merge defaults into descriptors
+      for (key in defaults) {
+        if (defaults.hasOwnProperty(key) && !descriptors.hasOwnProperty(key)) {
+          descriptors[key] = emptyDesc;
+        }
+      }
+    }
+
+    for (key in descriptors) { // define getter/setter for each key
+      if (descriptors.hasOwnProperty(key) && !prototype.hasOwnProperty(key)) {
+        Accessor.define(prototype, key);
+        desc = descriptors[key] || emptyDesc;
+        descriptors[key] = typeof desc !== 'object' ? {type: desc} : desc;
+      }
+    }
+
+    Object.defineProperty(prototype, '__descriptors__', {value: descriptors});
+  }
 
   function Component(props) {
-    //Register necessary properties for this component.
     this.register();
 
-    //Initialize this component
     Component.initialize(this, props);
 
-    //This component is ready
     this.ready();
   }
 
-  //TODO: bindable = true
-
   Exact.defineClass({
-    constructor: Component,
+    constructor: Component, extend: Shadow,
 
-    extend: Shadow,
+    mixins: [Watcher.prototype, Accessor.prototype],
 
-    mixins: [Watcher.prototype],
+    __descriptors__: { contents: emptyDesc },
 
     statics: {
-      fullName: 'Component',
-      /**
-       * Set the prop of the component by given key.
-       *
-       * @param {Component} component
-       * @param {string} key
-       * @param {*} val
-       * @param {*} old
-       * @param {Object} descriptors
-       * @returns {boolean}
-       */
-      set: function set(key, val, old, component, descriptors) { // TODO: params
-        if (!Validator_validate(component, key, val, descriptors)) { return false; }
-
-        return Shadow_set.call(this, key, val, old, component, descriptors);
-      },
+      //descriptors: { contents: null },
 
       /**
        * Factory method for creating a component
@@ -3570,74 +3116,102 @@
        * @param {Object} props
        * @returns {Component}
        */
-      create: function create(ClassRef, props) { // TODO: build
+      create: function create(ClassRef, props) {
         return new ClassRef(props);
       },
 
       /**
-       * Release the component and its children
-       *
-       * @param {Component} component
-       */
-      release: function release(component) {
-        var i, children = component._children;
-        if (children) {
-          for (i = children.length - 1; i >= 0; --i) {
-            Shadow.release(children[i]);
-          }
-        }
-
-        var binding, _bindings = component._bindings; //
-        if (_bindings) {
-          for (i = _bindings.length - 1; i >= 0; --i) {
-            binding = _bindings[i];
-            binding.constructor.clean(binding); // TODO: Binding.clean()
-          }
-        }
-
-        component.off();
-        Shadow.clean(component);
-      },
-
-      /**
-       * Initialize this element and its parts, and initParams.
+       * Initialize this component, using template.
        *
        * @param {Component} component
        * @param {Object} props
        */
       initialize: function initialize(component, props) {
-        var HTMXTemplate = Exact.HTMXTemplate;
+        var constructor = component.constructor, prototype = constructor.prototype, _template = constructor._template,
+          resources = constructor.resources, descriptors = constructor.descriptors, defaults = constructor.defaults;
 
-        var constructor = component.constructor, template = constructor.template, $template;
+        if (!_template) {
+          var template = constructor.template;
 
-        if (!template) {
-          $template = constructor.$template;
-
-          if ($template && (typeof $template === 'string' || Skin_isElement($template))) {
-            template = HTMXTemplate.parse(constructor.$template, constructor.resources);
-          } else if (!($template instanceof  HTMXTemplate)) {
-            template = HTMXTemplate.parse('<div></div>', constructor.resources);
-          } else {
-            template = $template;
+          if (template) {
+            _template = Exact.HTMXParser.parse(template, resources);
           }
 
-          constructor.template = template;
-        } else if (!(template instanceof HTMXTemplate)) {
-          throw new TypeError('The template must be instance of Exact.HTMXTemplate');
+          if (_template) {
+            constructor._template = _template;
+          } else {
+            throw new TypeError('The template must be legal HTML string or DOM element');
+          }
         }
 
-        //TODO: check component.render()
+        Shadow.initialize(component, _template.tag, _template.ns);
+        
+        defaults = typeof defaults === 'function' ? defaults() : null;
 
-        //props.tag = template.tag;
+        if (!prototype.hasOwnProperty('__descriptors__')) {
+          applyDescriptorsAndDefaults(prototype, descriptors, defaults); //
+        }
 
-        Shadow.initialize(component, props, template.tag, template.ns);
+        component.save(props ? assign({}, defaults, props) : defaults);
 
-        HTMXTemplate.compile(template, component);
+        Exact.HTMXCompiler.compile(_template, component);
 
-        component._secrets.final = true;
-        component.send('initialized');
+        //component.send('initialized');
       }
 
+    },
+
+    //bindable: true,
+
+    get: function(key) {
+      var props = this._props, descriptors = this.__descriptors__;
+      var desc = descriptors[key], get = desc.get;
+
+      return get ? get.call(this, props) : props[key];
+    },
+
+    set: function set(key, val) {
+      var props = this._props, descriptors = this.__descriptors__;
+
+      var old, desc = descriptors[key];
+      
+      if (desc) {
+        if (!Validator.validate(this, key, val, desc)) { return; }
+
+        var coerce = desc.coerce, get = desc.get, set = desc.set;
+
+        old = get ? get.call(this) : props[key];
+
+        if (coerce) {
+          val = coerce.call(this, val);
+        }
+
+        if (val !== old) {
+          if (set) {
+            set.call(this, val);
+          } else {
+            props[key] = val;
+          }
+
+          if (desc.native) {
+            DirtyMarker.check(this, key, val, old);
+          }
+
+          this.send('changed.' + key, val, old);
+
+          this.invalidate();//TODO:
+        }
+      } else {
+        old = props[key];
+
+        if (val !== old) {
+          props[key] = val;
+
+          DirtyMarker.check(this, key, val, old);
+
+          this.invalidate();
+        }
+      }
     },
 
     /**
@@ -3650,14 +3224,6 @@
      */
     ready: function ready() {},
 
-    //update: function update() { //TODO: enumerable = false
-    //  base.update.call(this);
-    //
-    //  if (this.isInvalidated) {
-    //    this.send('refreshed');//TODO: beforeRefresh, refreshing
-    //  }
-    //},
-
     /**
      * @abstract
      */
@@ -3666,25 +3232,7 @@
     /**
      * @abstract
      */
-    release: function release() {},
-
-    invalidate: function(key, val, old) {
-      base.invalidate.call(this, key, val, old);
-      //var isInvalidated = this.isInvalidated;
-      //
-      //if (!isInvalidated /*&& this.isDirty()*/) {
-      //  this.isInvalidated = true;
-      //  console.log('invalidate', this.toString());
-      //}
-
-      if (key) {
-        this.send('changed.' + key, val, old);
-      }
-
-      //if (!isInvalidated) {
-      //  Updater.add(this);
-      //}
-    }
+    release: function release() {}
 
   });
 
@@ -3693,253 +3241,168 @@
 })();
 
 //######################################################################################################################
-// src/core/shadows/List.js
-//######################################################################################################################
-(function() {
-  'use strict';
-
-  var Component = Exact.Component;
-
-  function checkAdapterOf(list) {
-    var itemAdapter = list.itemAdapter, itemTemplate = list.itemTemplate;
-
-    if (!itemAdapter) {
-      if (itemTemplate) {
-        itemAdapter = Exact.defineClass({
-          extend: Component,
-          statics: {
-            //resources: {},
-            template: list.itemTemplate//this.contents[0].$skin
-          }
-        });
-
-        list.itemAdapter = itemAdapter;
-      } /*else {
-        itemAdapter = Exact.defineClass({
-          extend: Component,
-          statics: {
-            resources: {},
-            //$template: "`item`"
-            $template: '<span>`${$.item}`</span>'
-          }
-        });
-      }*/
-
-      //list.itemAdapter = itemAdapter;
-    }
-
-  }
-
-  function List() {
-    Component.call(this, arguments);
-  }
-
-  Exact.defineClass({
-    constructor: List, extend: Component,
-
-    statics: {
-      fullName: 'List',
-      //resources: {},
-      $template: '<ul></ul>'
-    },
-
-    register: function() {
-      //this.refresh = this.refresh.bind(this);
-    },
-
-    ready: function() {
-      //this.on('change.items', this.invalidate);
-      //this.once('changed.itemAdapter', function() {
-      //  console.log('change.itemAdapter');
-      //});
-      //this.on('refresh', this.refresh.bind(this));
-    },
-
-    refresh: function() {
-      var i, n, m, item, items = this.items, itemAdapter, child, children = this.children, contents = [], removed = [];
-
-      if (!items) { return; }
-
-      n = items.length;
-      m = children.length;
-
-      checkAdapterOf(this);
-
-      itemAdapter = this.itemAdapter;
-
-      if (!itemAdapter) {return;}
-
-      for (i = 0; i < n; ++i) {
-        item = items[i];
-        item._fromIndex = -1;
-      }
-
-      for (i = 0; i < m; ++i) {
-        item = children[i].item;
-        if ('_fromIndex' in item) {
-          item._fromIndex = i;
-        } else {
-          removed.push(children[i]);
-        }
-      }
-
-      for (i = 0; i < n; ++i) {
-        item = items[i];
-
-        if (item._fromIndex >= 0 ) {
-          child = children[item._fromIndex];
-          contents.push(child);
-        } else {
-          var content = new itemAdapter({item: item});
-          contents.push(content);
-          this.send('itemAdded', item, content);
-        }
-
-        delete item._fromIndex;
-      }
-
-      for (i = 0; i < n; ++i) {
-        if (i < m) {
-          children.set(i, contents[i]);
-        } else {
-          children.push(contents[i]);
-        }
-      }
-
-      if (m > n) {
-        children.splice(n);
-        n = removed.length;
-        if (n) {
-          for (i = 0; i < n; ++i) {
-            content = removed[i];
-            item = content.item;
-            delete item._fromIndex;
-            this.send('itemRemoved', item, content);
-          }
-        }
-      }
-
-    }
-  });
-
-  Exact.List = List;
-
-  Exact.RES.register('List', List);
-
-})();
-
-//######################################################################################################################
 // src/core/bindings/Binding.js
 //######################################################################################################################
 (function() {
 
-  'use strict';
-
-  var RES = Exact.RES;
-  var PathUtil = Exact.PathUtil;
-  var EvaluatorUtil = Exact.EvaluatorUtil;
-  var EvaluatorUtil_applyEvaluator = EvaluatorUtil.applyEvaluator;
-  //var ObjectUtil_assign = Exact.ObjectUtil.assign;
-  var ObjectUtil_defineProp = Exact.ObjectUtil.defineProp;
-
-  var MODES = { ONE_TIME: 0, ONE_WAY: 1, TWO_WAY: 2 };
-
-  function Binding(props) {
-    this.mode = props.mode;
-    this.scope = props.scope;
-    this.local = props.local;
-    this.target = props.target;
-    //this.life = options.life;
-    this.source = props.source;
-    
-    this.evaluator = props.evaluator;
-    this.converters = props.converters;
-
-    this.targetProp = props.targetProp;
-    this.sourceProp = props.sourceProp;
-
-    this.scopeEvent = props.scopeEvent;
-    this.scopePaths = props.scopePaths;
-    this.localPaths = props.localPaths;
-
-    this.exec = this.exec.bind(this);
-  }
+  function Binding() {}
 
   Exact.defineClass({
     constructor: Binding,
 
     statics: {
+      assign: function assign(target, key, val) {
+        if (target.set) {
+          target.set(key, val);
+        } else {
+          target[key] = val;
+        }
+      },
+
+      record: function record(target, binding) {
+        var _bindings = target._bindings;
+
+        if (_bindings) {
+          _bindings.push(binding);
+        } else {
+          Object.defineProperty(target, '_bindings', {
+            value: [binding], writable: false, enumerable: false, configurable: true
+          });
+        }
+      },
+
+      remove: function remove(target, binding) {
+        var _bindings = target._bindings;
+
+        _bindings.splice(_bindings.lastIndexOf(binding), 1);
+      }
+    }
+  });
+
+  Exact.Binding = Binding;
+
+})();
+
+//######################################################################################################################
+// src/core/bindings/DataBinding.js
+//######################################################################################################################
+(function() {
+
+  var RES = Exact.RES;
+  var Binding = Exact.Binding;
+  var PathUtil = Exact.PathUtil;
+  var Evaluator = Exact.Evaluator;
+  var Collection = Exact.Collection;
+
+  var MODES = { ONE_TIME: 0, ONE_WAY: 1, TWO_WAY: 2 };
+
+  function DataBinding(
+    mode,
+
+    context,
+    locals,
+    target,
+    source,
+
+    evaluator,
+    converters,
+
+    targetProp,
+    sourceProp,
+
+    event,
+    paths
+  ) {
+    this.mode = mode;
+
+    this.context = context;
+    this.locals = locals;
+    this.target = target;
+    this.source = source;
+
+    this.evaluator = evaluator;
+    this.converters = converters;
+
+    this.targetProp = targetProp;
+    this.sourceProp = sourceProp;
+
+    this.event = event;
+    this.paths = paths;
+
+    this.exec = this.exec.bind(this); // TODO: use different exec in different mode
+
+    if (mode === MODES.TWO_WAY) {
+      this.back = this.back.bind(this);
+    }
+  }
+
+  Exact.defineClass({
+    constructor: DataBinding, //extend: Binding,
+
+    statics: {
 
       MODES: MODES,
 
-      build: function(targetProp, target, scope, local, options) {
-        var mode = options.mode,
-          localPaths = options.localPaths, //variables = options.variables,
-          scopePaths = options.scopePaths,
-          scopeEvent = options.scopeEvent,
-          converters = options.converters,
-          evaluator = options.evaluator;
-        // TODO:unique scopePaths
+      compile: function(template, targetProp, target, context, locals) {
+        var mode = template.mode,
+          paths = template.paths,
+          event = template.event,
+          evaluator = template.evaluator,
+          converters = template.converters;
+
+        locals = locals || [];
+
         if (mode === MODES.TWO_WAY) {
           var i, source, sourceProp, path;
 
-          if (!options.origin) {
-            path = scopePaths[0];
-            i = path.length - 1;
-            sourceProp = path[i];
-            source = RES.search(path.slice(0, i), scope, true);
-          } else {
-            path = localPaths[0];
-            i = path.length - 1;
-            sourceProp = path[i];
-            source = RES.search(path.slice(0, i), local, true);
-          }
+          path = paths[0];
+          i = path.length - 1;
+          sourceProp = path[i];
+          source = RES.search(path.slice(0, i), locals[path.origin], true);
         }
 
-        var binding = new Binding({
-          mode: mode,
-          //life: life,
-          scope: scope,
-          local: local,
-          target: target,
-          source: source,
+        var binding = new DataBinding(
+          mode,
 
-          evaluator: evaluator,
-          converters: converters,
-          
-          targetProp: targetProp,
-          sourceProp: sourceProp,
-          
-          scopeEvent: scopeEvent,
-          scopePaths: scopeEvent ? null : scopePaths,
-          localPaths: scopeEvent ? null : localPaths
-        });
+          context,
+          locals,
+          target,
+          source,
 
-        binding.exec({dispatcher: source});
-        //console.log(targetProp, target, options);
-        //
+          evaluator,
+          converters,
+
+          targetProp,
+          sourceProp,
+
+          event,
+          event ? null : paths
+        );
+        // TODO: use different exec in different mode
+
+        //var collection = Exact.Dep.begin(binding);
+        binding.exec();
+        //Exact.Dep.end();
+        //console.log(collection);
+
         var flag;
 
-        if (mode === MODES.ONE_TIME) {
-          eye('once', scopePaths, scope, binding.exec);
-          eye('once', localPaths, local, binding.exec);
-        } else if (!scopeEvent) {
-          flag = eye('on', scopePaths, scope, binding.exec) | eye('on', localPaths, local, binding.exec);
-        } else if (scope.on) {
-          scope.on(scopeEvent, binding.exec);
+        var method = mode === MODES.ONE_TIME ? 'once' : 'on';
+
+        if (!event) {
+          flag = eye(method, paths, locals, binding.exec);
+        } else {
+          context.on(event, binding.exec);
           flag = 1;
         }
 
         if (flag) {
-          record(target, binding);
+          Binding.record(target, binding);
         }
 
-        if (mode === MODES.TWO_WAY) {
-          //eye('on', [prop], target, source, binding);
-          flag = eye('on', [[targetProp]], target, binding.exec);
-          if (flag) {
-            record(source, binding);
-          }
+        if (mode === MODES.TWO_WAY && target.on) {
+          target.on('changed.' + targetProp, binding.back);
+          //record(source, binding);
         }
 
         return binding;
@@ -3948,73 +3411,70 @@
       clean: function(binding) {
         var flag,
           mode = binding.mode,
-          scope = binding.scope,
-          local = binding.local,
-          source = binding.source, 
           target = binding.target,
-          localPaths = binding.localPaths, 
-          scopePaths = binding.scopePaths, 
-          targetProp = binding.targetProp;
+          locals = binding.locals,
+          context = binding.context;
 
         if (mode === MODES.ONE_TIME) { return; }
 
-        if (!binding.scopeEvent) {
-          flag = eye('off', scopePaths, scope, binding.exec) | eye('off', localPaths, local, binding.exec);
-        } else if (scope.off) {
-          scope.off(binding.scopeEvent, binding.exec);
+        if (!binding.event) {
+          flag = eye('off', binding.paths, locals, binding.exec);
+        } else if (context.off) {
+          context.off(binding.event, binding.exec);
           flag = 1;
         }
-        
+
         if (flag) {
-          remove(target, binding);
+          Binding.remove(target, binding);
         }
-        
-        if (binding.mode === MODES.TWO_WAY)  {
-          flag = eye('off', [[targetProp]], target, binding.exec);
-          if (flag) {
-            remove(source, binding);
-          }
+
+        if (binding.mode === MODES.TWO_WAY && target.off)  {
+          target.off('changed.' + binding.targetProp, binding.back);
+          //remove(binding.source, binding);
         }
       }
     },
 
-    exec: function(event) {
+    exec: function() { // TODO: back()
       var value,
-        scope = this.scope,
-        local = this.local,
+
+        locals = this.locals,
         evaluator = this.evaluator,
         converters = this.converters,
 
-        source = this.source, target = this.target,
-        sourceProp = this.sourceProp, targetProp = this.targetProp;
+        //source = this.source, sourceProp = this.sourceProp,
+        target = this.target, targetProp = this.targetProp;
 
-      if (this.mode !== MODES.TWO_WAY) {
-        value = EvaluatorUtil_applyEvaluator(evaluator, scope, local, event, 'exec');
-        if (converters) {
-          value = applyConverters(converters, scope, local, event, 'exec', value);
-        }
-        assign(target, targetProp, value);
-      } else if (event.dispatcher !== target) {
-        value = source[sourceProp];
-        if (converters) {
-          value = applyConverters(converters, scope, local, event, 'exec', value);
-        }
-        assign(target, targetProp, value);
-      } else {
-        value = target[targetProp];
-        if (converters) {
-          value = applyConverters(converters, scope, local, event, 'back', value);
-        }
-        assign(source, sourceProp, value);
+      value = Evaluator.activate(evaluator, 'exec', locals);
+      if (converters) {
+        value = applyConverters(converters, 'exec', locals, value);
       }
+      Binding.assign(target, targetProp, value);
 
       if (this.mode === MODES.ONE_TIME) {
-        Binding.clean(this);
+        DataBinding.clean(this);
       }
+    },
+
+    back: function back() {
+      var value,
+
+        locals = this.locals,
+        //evaluator = this.evaluator,
+        converters = this.converters,
+
+        source = this.source, sourceProp = this.sourceProp,
+        target = this.target, targetProp = this.targetProp;
+
+      value = target[targetProp];
+      if (converters) {
+        value = applyConverters(converters, 'back', locals, value);
+      }
+      Binding.assign(source, sourceProp, value);
     }
   });
 
-  function applyConverters(converters, scope, local, event, name, value) {
+  function applyConverters(converters, name, locals, value) {
     var i, begin, end, step, evaluator;//, exec, rest, args;
 
     if (!converters.length) { return value; }
@@ -4023,7 +3483,7 @@
       begin = 0;
       step = +1;
       end = converters.length;
-    } else { // name = 'back';
+    } else { // name === 'back';
       begin = converters.length - 1;
       step = -1;
       end = -1;
@@ -4031,29 +3491,23 @@
 
     for (i = begin; i !== end; i += step) {
       evaluator = converters[i];
-      value = EvaluatorUtil_applyEvaluator(evaluator, scope, local, event, name, value);
+      value = Evaluator.activate(evaluator, name, locals, value);
     }
 
     return value;
   }
 
-  function assign(target, key, val) {
-    if (target.set) {
-      target.set(key, val);
-    } else {
-      target[key] = val;
-    }
-  }
+  function dep(i, prop, paths, source, origin) {
+    var descriptors = source.__descriptors__;
 
-  function dep(i, prop, paths, source) {
-    var descriptors = source.constructor._descriptors_;
     var desc = descriptors && descriptors[prop];
 
     if (desc && desc.depends) {
       var j, n, path, depends = desc.depends;
 
       for (j = 0, n = depends.length; j < n; ++j) {
-        path = PathUtil.split(depends[j]); //TODO:
+        path = PathUtil.parse(depends[j]); //TODO:
+        path.origin = origin;
         paths.push(path);
       }
 
@@ -4063,208 +3517,170 @@
     }
   }
 
-  function eye(method, paths, origin, handler) {
-    if (!origin || !paths || !paths.length) { return 0; }
+  function eye(method, paths, locals, handler) {
+    if (!locals || !paths || !paths.length) { return 0; }
 
-    var i, j, path, prop, flag = 0, source;
+    var i, j, path, prop, flag = 0, local, source;
 
     for (i = 0; i < paths.length; ++i) {
       path = paths[i];
 
-      if (!path) {
-        continue;
-      }
+      if (!path) { continue; }
 
       j = path.length - 1;
+      local = locals[path.origin];
       prop = path[j];
-      source = j < 1 ? origin : RES.search(path.slice(0, j), origin, true);
+      source = j < 1 ? local : RES.search(path.slice(0, j), local, true);
 
-      if (method === 'on' && dep(i, prop, paths, source)) {
+      if (method === 'on' && dep(i, prop, paths, source, path.origin)) {
         continue;
       }
 
-      if (source && source[method]) {
-        source[method]('changed.' + prop, handler);// TODO: binding.invalidate
+      if (source && source[method] /*&& source.bindable*/) {
+        source[method]('changed.' + prop, handler);
+        // TODO:
+        //if (i === 0) { // Check if the first variable is a collection. It is important for `x-for` expression.
+        //  source.on('changed.' + prop, function(event, target, old) {
+        //    if (old && old instanceof Collection) {
+        //      old.off('changed', handler);
+        //    }
+        //    if (target && target instanceof Collection) {
+        //      target[method]('changed', handler);
+        //    }
+        //  });
+        //
+        //  var target = source[prop];
+        //  if (target && target instanceof Collection) {
+        //    target[method]('changed', handler);
+        //  }
+        //}
+
         flag = 1;
+      } else {
+        paths[i] = null;
       }
     }
 
     return flag;
   }
 
-  function record(target, binding) {
-    var _bindings = target._bindings;
-
-    if (_bindings) {
-      _bindings.push(binding);
-    } else {
-      //target._bindings = [binding];
-      ObjectUtil_defineProp(target, '_bindings', {value: [binding]});
-    }
-  }
-
-  function remove(target, binding) {
-    var _bindings = target._bindings;
-
-    _bindings.splice(_bindings.lastIndexOf(binding), 1);
-  }
-
-  Exact.Binding = Binding;
+  Exact.DataBinding = DataBinding;
 
 })();
 
-//######################################################################################################################
-// src/core/templates/BindingTemplate.js
-//######################################################################################################################
+//##############################################################################
+// src/core/bindings/TextBinding.js
+//##############################################################################
 (function() {
 
-  'use strict';
-
+  var Container = Exact.Container;
   var Binding = Exact.Binding;
+  var Expression = Exact.Expression;
+  var DataBinding = Exact.DataBinding;
+  var DirtyMarker = Exact.DirtyMarker;
 
-  function BindingTemplate() {
-    this.mode = 0;
-    this.origin = null;
-    this.evaluator = null; //this.expressions = null;
-    this.converters = null;
-    this.localPaths = null;
-    this.scopePaths = null;
-    this.scopeEvent = null;
+  var Array$join = Array.prototype.join;
+
+  function TextBinding(property, target, context, container) {
+    this.exec = this.exec.bind(this);
+
+    this.property = property;
+    this.target = target;
+    this.context = context;
+    this.container = container;
   }
 
-  BindingTemplate.compile = function(template, property, target, scope, local) {
-    Binding.build(property, target, scope, local, template);
-  };
+  Exact.defineClass({
+    constructor: TextBinding, //extend: Binding,
 
-  Exact.BindingTemplate = BindingTemplate;
+    statics: {
+      /**
+       *
+       * @param {Array} template - pieces of strings and expressions
+       * @param {string} property
+       * @param {Object} target
+       * @param {Object} context
+       * @param {Object} locals
+       */
+      compile: function(template, property, target, context, locals) {
+        var i, n, piece, container = Container.create(null, context.invalidate);
+
+        for (i = 0, n = template.length; i < n; ++i) {
+          piece = template[i];
+
+          if (piece instanceof Expression) {
+            Expression.activate(piece, i, container, context, locals);
+          } else {
+            container[i] = piece;
+          }
+        }
+
+        container.length = n;
+
+        var binding = new TextBinding(property, target, context, container);
+        Binding.record(target, binding);
+        binding.exec();
+
+        context.on('updated', binding.exec);
+      },
+
+      clean: function clean(binding) {
+        binding.context.off('updated', binding.exec);
+
+        var bindings = binding.container._bindings;
+
+        if (bindings) {
+          for (var i = bindings.length - 1; i >= 0; --i) {
+            DataBinding.clean(bindings[i]);
+          }
+        }
+
+        Binding.remove(binding.target, binding);
+      }
+    },
+
+    exec: function exec() {
+      var container = this.container;
+
+      if (!container.hasDirty()) { return; }
+
+      Binding.assign(this.target, this.property, Array$join.call(container, ''));
+
+      DirtyMarker.clean(container);
+    }
+  });
+
+  Exact.TextBinding = TextBinding;
 
 })();
 
 //######################################################################################################################
-// src/core/templates/HandlerTemplate.js
+// src/core/bindings/EventBinding.js
 //######################################################################################################################
 (function() {
 
-  'use strict';
+  var Evaluator = Exact.Evaluator;
 
-  var EvaluatorUtil = Exact.EvaluatorUtil;
-
-  function HandlerTemplate() {
+  function EventBinding() {
     this.evaluator = null;
     this.handler = '';
   }
 
-  HandlerTemplate.compile = function(template, type, target, scope, local) {
+  EventBinding.compile = function(template, type, target, context, locals) {
     var handler = template.handler, evaluator = template.evaluator;
 
     if (handler) {
-      target.on(type, scope[handler]/*.bind(scope)*/);
+      target.on(type, context[handler]/*.bind(context)*/);
     } else {
+      locals = [null].concat(locals || []);
       target.on(type, function(event) {
-        EvaluatorUtil.applyEvaluator(evaluator, scope, local, event, 'exec');
+        locals[0] = event; // TODO: if emit, event should be ignored
+        Evaluator.activate(evaluator, 'exec', locals);
       });
     }
   };
 
-  Exact.HandlerTemplate = HandlerTemplate;
-
-})();
-
-//##############################################################################
-// src/core/models/TextTemplate.js
-//##############################################################################
-(function() {
-  'use strict';
-  
-  var Cache = Exact.Cache;
-  var DirtyMarker = Exact.DirtyMarker;
-  var ExpressionUtil = Exact.ExpressionUtil;
-
-  var Array$join = Array.prototype.join;
-  
-  
-  function Fragment() {
-    Cache.apply(this, arguments);
-  }
-  
-  Exact.defineClass({
-    constructor: Fragment,
-    extend: Cache,
-    mixins: [DirtyMarker.prototype],
-    toString: function() {
-      return Array$join.call(this, '');
-    }
-  });
-
-  function TextTemplate() {
-    this.pieces = null;
-    this.scopeEvent = '';
-    //this.push.apply(this, arguments);
-  }
-  
-  Exact.defineClass({
-    constructor: TextTemplate, //extend: Array,
-    statics: {
-      compile: function(template, property, target, scope) {
-        var i, n, expression, fragment = new Fragment(), pieces = template.pieces;
-        
-        for (i = 0, n = pieces.length; i < n; i += 2) {
-          fragment[i] = pieces[i];
-
-          expression = pieces[i+1];
-
-          if (expression) {
-            ExpressionUtil.applyExpression(expression, scope, fragment, i+1);
-          }
-        }
-        
-        if (i === n) {
-          fragment[n-1] = pieces[n-1];
-        }
-
-        fragment.length = n;
-
-        function exec() {
-          if (!fragment.hasDirty()) { return; }
-
-          if (target.set) {
-            target.set(property, fragment.toString());
-          } else {
-            target[property] = fragment.toString();
-          }
-        }
-
-        exec();
-
-        target.on(template.scopeEvent, exec);
-
-        fragment.onChange = target.invalidate;
-      }
-    }
-  });
-
-  Exact.TextTemplate = TextTemplate;
-
-})();
-
-//######################################################################################################################
-// src/core/templates/DataTemplate.js
-//######################################################################################################################
-(function() {
-
-  'use strict';
-
-  var ObjectUtil_assign = Exact.ObjectUtil.assign;
-  var ObjectUtil_defineProp = Exact.ObjectUtil.defineProp;
-
-  function DataTemplate(literals, expressions) {
-    //ObjectUtil_assign(this, literals);
-    //ObjectUtil_defineProp(this, 'expressions', {
-    //  value: expressions, writable: true, enumerable: false, configurable: true
-    //});
-  }
-
-  Exact.DataTemplate = DataTemplate;
+  Exact.EventBinding = EventBinding;
 
 })();
 
@@ -4272,258 +3688,441 @@
 // src/core/templates/HTMXTemplate.js
 //######################################################################################################################
 (function() {
-  'use strict';
-// TODO: �ϲ�������
+
+  function HTMXTemplate() {
+    this.ns = '';
+    this.tag = '';
+    this.type = null;
+
+    this.key = '';
+    this.ref = '';
+
+    this.props = null;
+    this.attrs = null;
+    this.style = null;
+    this.classes = null;
+    this.actions = null;
+    this.directs = null;
+    this.children = null;
+
+    this.actual = false; // if prop value is actual
+  }
+
+  /**
+   * e.g. create('div', null, [
+   *        create('h1', null, 'title'),
+   *        create('ul', null,
+   *          create('a', {
+   *              'href@': 'link.url',
+   *              classes: {link: true, 'active@': 'link.active'},
+   *              directs: {'for': 'link of $.links', key: 'link.url'}
+   *            },
+   *            ['tip: @{ link.tip }']
+   *          )
+   *        ),
+   *        create(Button, { label: 'OK', 'click+': '$.onClick' })
+   *      ])
+   *
+   * @param {string|Function} tagOrType
+   * @param {Object} params
+   * @param {string|Array|HTMXTemplate} children
+   * @returns {HTMXTemplate}
+   */
+  function create(tagOrType, params, children) {
+    var template = new HTMXTemplate();
+    // if there is no expression for prop, the value assigned to the prop must be actual,
+    // e.g. { score: 10 } instead of { score: '10' } if `score` is number
+    template.actual = true;
+
+    if (typeof tagOrType === 'string') {
+      template.tag = tagOrType;
+    } else if (typeof tagOrType === 'function') {
+      template.type = tagOrType;
+    } else {
+      throw new TypeError('');
+    }
+
+    if (params) {
+      if (!template.type) {
+        template.ns = params.ns || '';
+      }
+
+      template.key = params.key;    // not for string or DOM template
+      template.actions = params.on; // not for string or DOM template
+
+      template.ref = params.ref;
+      template.style = params.style;
+      template.attrs = params.attrs;
+      template.classes = params.classes;
+      template.directs = params.directs;
+
+      var props = template.props = {};
+
+      for (var key in params) {
+        if (params.hasOwnProperty(key) && !template.hasOwnProperty(key)) {
+          props[key] = params[key];
+        }
+      }
+    }
+
+    if (children != null && !Array.isArray(children)) {
+      children = [children];
+    }
+
+    template.children = children;
+
+    return template;
+  }
+
+  HTMXTemplate.create = create;
+  //HTMXTemplate.parse = null;
+
+  Exact.HTMXTemplate = HTMXTemplate;
+
+})();
+//######################################################################################################################
+// src/core/compilers/HTMXCompiler.js
+//######################################################################################################################
+(function() {
+  
   var Text = Exact.Text;
   var Shadow = Exact.Shadow;
   var Element = Exact.Element;
   var Component = Exact.Component;
 
-  var ObjectUtil = Exact.ObjectUtil;
-  var ExpressionUtil = Exact.ExpressionUtil;
+  var RES = Exact.RES;
+  var Collection = Exact.Collection;
+  var Container = Exact.Container;
 
-  var DataTemplate = Exact.DataTemplate;
-
-  function HTMXTemplate() {
-    this.ns = '';         // namespace
-    //this.as = '';         //string, key of target
-    this.uid = '';         //string, local id
-    //this.key = '';         //string, key in list
-    this.tag = '';        //string, tag name
-    this.type = null;     //Function, constructor
-    //this.stay = false;    //boolean
-    this.props = null;
-    this.attrs = null;    //Object like {literals: {title: 'Hi'}, expressions: {'data-msg': {...}}}
-    this.style = null;    //Object like {literals: {color: 'red'}, expressions: {fontSize: {...}}}
-    this.classes = null;  //Object like {literals: {highlight: true}, expressions: {active: {...}}}
-    this.children = null; //Array like []
-    //this.actions = null;  // for update
-    //this.indices = null;  // for update
-    //this.directives = null;
-  }
+  var Evaluator = Exact.Evaluator;
+  var Expression = Exact.Expression;
+  var DirtyMarker = Exact.DirtyMarker;
 
   var emptyObject = {}, emptyArray = [];
 
-  var specials = {
-    uid: true, attrs: true, style: true, classes: true, actions: true
-  };
-
-  function create(type, params, children) {
-    var template = new HTMXTemplate();
-    
-    if (typeof type === 'string') {
-      template.tag = type;
-    } else {
-      template.type = type;
-    }
-
-    if (params) {
-      if (!Array.isArray(params)) {
-        template.uid = params.uid;
-        template.attrs = params.attrs;
-        template.style = params.style;
-        template.classes = params.classes;
-        template.actions = params.actions;
-
-        var flag, props = {};
-
-        for (var key in params) {
-          if (params.hasOwnProperty(key) && !specials[key]) {
-            props[key] = params[key];
-            flag = true;
-          }
-        }
-
-        if (flag) {
-          template.props = props;
-        }
-      } else {
-        children = params;
-      }
-    }
-
-    template.children = children || [];
-
-    return template;
-  }
-
-  //HTMXTemplate.parse = null; // Interface,
-
-  function initStyle(target, scope, style) {
-    //var styleString = template.literals.style;//TODO: warn in HTMLTemplate
-    if (style) {
-      initProps(target.style, scope, style);
-    }
-  }
-
-  function initAttrs(target, scope, attrs) {
-    if (attrs) {
-      initProps(target.attrs, scope, attrs);
-    }
-  }
-
-  function initProps(target, scope, props) {
+  function initProps(props, target, context, locals, todos) {
     if (!props) { return; }
 
     var expressions = props.expressions;
 
-    if (props) {
-      target.save(props);
-    }
+    target.save(props);
 
     if (expressions) {
-      scope._todos.push({target: target, expressions: expressions});
+      todos.push({target: target, locals: locals, expressions: expressions});
     }
   }
 
-  function initClasses(target, scope, classes, template) {
-    //if ((template.expressions && template.expressions.className) && template.classes) {
-    //  console.warn('ignore'); //TODO: warn in HTMXParser, class="`btn &{$.active? 'active':''}`"
-    //}
-//TODO: do this in HTMXParser
-    var i, names, props = template.props, className = props ? props.className : '';
+  function initContainer(props, target, context, locals, todos) {
+    if (!props) { return; }
 
-    if (className) {
-      //classes = template.classes;
+    var expressions = props.expressions;
 
-      if (!classes) {
-        classes = template.classes = new DataTemplate(); //TODO: defineProp
-        // new Exact.StyleXTemplate();
-      }
+    target.save(props);
 
-      names = className.split(/\s/);
-      for (i = 0; i < names.length; ++i) {
-        classes[names[i]] = true;
-      }
+    if (expressions) {
+      todos.push({target: target, locals: locals, expressions: expressions});
     }
+  }
 
+  function initAttrs(attrs, target, context, locals, todos) {
+    if (attrs) {
+      initContainer(attrs, target.attrs, context, locals, todos);
+    }
+  }
+
+  function initStyle(style, target, context, locals, todos) {
+    if (style) {
+      initContainer(style, target.style, context, locals, todos);
+    }
+  }
+
+  function initClasses(classes, target, context, locals, todos) {
     if (classes) {
-      initProps(target.classes, scope, classes);
+      initContainer(classes, target.classes, context, locals, todos);
     }
   }
 
-  function initActions(target, actions) {
+  function initActions(actions, target, context, locals, todos) {
     if (actions) {
       target.on(actions);
+
+      var expressions = actions.expressions;
+
+      if (expressions) {
+        todos.push({target: target, locals: locals, expressions: expressions});
+      }
     }
   }
 
-  function initSelf(scope, target, template) {
-    initProps(target, scope, template.props);
-    initAttrs(target, scope, template.attrs);
-    initStyle(target, scope, template.style);
-    initClasses(target, scope, template.classes, template);
-    initActions(target, template.actions);
+  function initSelf(template, target, context, locals, todos) {
+    initProps(template.props, target, context, locals, todos);
+    initAttrs(template.attrs, target, context, locals, todos);
+    initStyle(template.style, target, context, locals, todos);
+    initClasses(template.classes, target, context, locals, todos);
+    initActions(template.actions, target, context, locals, todos);
   }
 
-  function initChildrenOrContents(scope, target, template) {
-    var i, n, uid, tag, type, child, content, contents = [], children = template.children;
+  function initChildrenOrContents(template, target, context, locals, todos) {
+    var i, n, tag, type, child, content, dynamic, contents = [], children = template.children;
 
-    if (!children) { return; }
+    if (!children || !children.length) { return; }
 
     for (i = 0, n = children.length; i < n; ++i) {
       child = children[i];
 
-      if (typeof child === 'string') {
-        content = Text.create(child);
-      } else if (ExpressionUtil.isExpression(child)) {
-        content = Text.create('');
-        scope._todos.push({target: content, expressions: {data: child}}); // TODO: collectExpressions
-      } else if (child instanceof Object) {
-        uid = child.uid;
-        tag = child.tag;
+      tag = child.tag;
+
+      if (!tag) {
+        if (child instanceof Expression) { // like "hello, @{ $.name }..."
+          content = Text.create('');
+          todos.push({target: content, locals: locals, expressions: {data: child}}); // TODO: collectExpressions
+        } else {
+          content = Text.create(child);
+        }
+      } else if (!child.directs) {
         type = child.type;
-        //literals = child.literals; //TODO:
 
         if (!type) {
-          child.ns = child.ns || template.ns;
-          content = Element.create(tag, child.ns);
+          if (!child.ns) {
+            child.ns = template.ns;
+          }
+          content = Element.create(tag, child.ns/* || template.ns*/);
         } else {
           content = Component.create(type);
         }
-        //TODO: collect contents/slots, scope._todos.push({target: content, expressions: {placeholder: {}}});
-        initSelfAndChildrenOrContents(scope, content, child);
 
-        if (uid) {
-          scope[uid] = content; //TODO: addPart
-        }
+        initialize(child, content, context, locals, todos);
 
-        if (tag === 'slot' /*&& target !== scope*/) {
-          scope._slots[content.name || '*'] = {
-            target: target, offset: i, collection: []
-          };
-        }
-      }
-
-      contents.push(content);
-    }
-
-    if (!template.type || target === scope) {
-      target.children.reset(contents); //TODO: replace, reset
-    } else {
-      target.set('contents', contents);
-      initSlots(target);
-    }
-  }
-
-  function initSlots(component) {
-    var slots = component._slots, contents = component.contents;
-    var i, n, name, slot, content, children, collection;
-
-    for (i = 0, n = contents.length; i < n; ++i) {
-      content = contents[i];
-      name = content.slot || '*';
-      slot = slots[name];
-      if (slot) {
-        collection = slot.collection;
-        collection.push(content);
-      }
-    }
-
-    for (name in slots) {
-      if (slots.hasOwnProperty(name)) {
-        slot = slots[name];
-        children = slot.target.children;
-        children.splice.apply(children, [slot.offset, 1].concat(slot.collection));
-      }
-    }
-
-    var list = [];
-
-    for (name in slots) {
-      if (!slots.hasOwnProperty(name)) {
-        continue;
-      }
-
-      slot = slots[name];
-      //slot.name = name;
-      if (list.length) {
-        for (i = list.length - 1; i >= 0; --i) {
-          if (slot.offset > list[i].offset) {
-            list.splice(i + 1, 0, slot);
-          }
+        if (child.ref) {
+          context[child.ref] = content; //TODO: addPart
         }
       } else {
-        list.push(slot);
+        content = processDirects(child, context, locals, todos);
+        dynamic = true;
+      }
+
+      if (content) {
+        contents.push(content);
+        content = null;
       }
     }
 
-    for (i = list.length - 1; i >= 0; --i) {
-      slot = list[i];
-      children = slot.target.children;
-      children.splice.apply(children, [slot.offset, 1].concat(slot.collection));
+    if (!dynamic) {
+      if (!template.type || target === context) {
+        target.children.reset(contents);
+      } else {
+        target.set('contents', contents);
+      }
+    } else {
+      collectChildrenOrContents(contents, template, target, context, locals);
     }
-
-    //delete component._slots;
   }
 
-  function initExpressions(component) {
-    var i, n, queue = component._todos, item, key, target, expression, expressions;
+  function processDirects(template, context, locals, todos) {
+    var directs = template.directs;
 
-    for (i = 0, n = queue.length; i < n; ++i) {
-      item = queue[i];
-      target = item.target;
-      expressions = item.expressions;
+    var container = Container.create({
+      mode: 0,
+      active: true,   // x-if
+      results: null,  // x-for
+      keyEval: null,  // x-key
+      slotName: '',   // slot
+      contents: null,
+      fragment: null,
+      template: template
+    });
+
+    if (directs.xIf) {
+      container.active = false;
+      todos.push({target: container, locals: locals, expressions: {active: directs.xIf.expression}});
+    }
+
+    if (directs.xFor) { // TODO:
+      var expression = directs.xFor.expression;
+      var path = expression.template.evaluator.args[0]; // $.items in x-for="item of $.items | filter"
+
+      if (Array.isArray(path)) {
+        container.mode = 1;
+        
+        var local = locals[path.origin];
+        var prop = path[path.length - 1];
+        var src = path.length < 2 ? local : RES.search(path.slice(0, path.length - 1), local, true);
+
+        if (src && src.on) {
+          var handler = function() {
+            src.send('changed.' + prop, src[prop], src[prop]);
+          };
+          
+          var dst = src[prop];
+          if (dst && dst instanceof Collection) {
+            dst.on('changed', handler);
+          }
+
+          src.on('changed.' + prop, function(event, dst, old) {
+            if (old && old instanceof Collection) {
+              old.off('changed', handler);
+            }
+            if (dst && dst instanceof Collection) {
+              dst.on('changed', handler);
+            }
+          });
+        }
+      }
+
+      todos.push({target: container, locals: locals, expressions: {results: expression}});
+
+      if (directs.xKey) {
+        container.keyEval = directs.xKey.evaluator;
+      }
+    } else if (directs.xSlot) {
+      container.mode = 2;
+      container.slotName = directs.xSlot.name || '';
+
+      context.on('changed.contents', function() {
+        container.set('contents', context.contents);
+      });
+    }
+
+    return container;
+  }
+
+  function collectChildrenOrContents(containers, template, target, context, locals) {
+    for (var i = 0,  n = containers.length; i < n; ++i) {
+      var container = containers[i];
+
+      if (container instanceof Container) {
+        container.onChange = context.invalidate;
+      }
+    }
+
+    context.on('updated', arrange);
+
+    arrange();
+
+    function arrange() {
+      var collection = [], fragment, container;
+
+      for (var i = 0, n = containers.length; i < n; ++i) {
+        container = containers[i];
+
+        if (container instanceof Shadow) {
+          collection.push(container);
+        } else if (container.active) {
+          switch (container.mode) {
+            case 0:
+              if (container.hasDirty('active')) {
+                DirtyMarker.clean(container, 'active');
+                container.fragment = getFragmentOnCondition(container.template, context, locals);
+              }
+              break;
+            case 1:
+              if (container.hasDirty('results')) {
+                DirtyMarker.clean(container, 'results');
+                container.fragment = getFragmentFromResults(container.template, container.results, container.keyEval, container.fragment, context, locals); // fragment the contents
+              }
+              break;
+            case 2:
+              if (container.hasDirty('contents')) {
+                DirtyMarker.clean(container, 'contents');
+                container.fragment = getFragmentFromSlot(container.slotName, container.contents);
+              }
+              break;
+          }
+
+          fragment = container.fragment;
+
+          if (fragment && fragment.length) {
+            collection.push.apply(collection, fragment);
+          }
+
+          DirtyMarker.clean(container);
+        }
+      }
+
+      if (!template.type || target === context) {
+        target.children.reset(collection);
+      } else {
+
+        target.set('contents', collection);
+      }
+    }
+  }
+
+  function getFragmentOnCondition(template, context, locals) {
+    var content = template.type ? Component.create(template.type) : Element.create(template.tag, template.ns);
+    compile(template, content, context, locals);
+    return  [content];
+  }
+
+  function getFragmentFromResults(template, results, keyEval, oldFrag, context, locals) {
+    var fragment = [], indices = {}, index, content, temp, item, key, n, i;
+
+    oldFrag = oldFrag || emptyArray;
+    results = results || emptyArray;
+
+    for (i = 0, n = oldFrag.length; i < n; ++i) {
+      key = oldFrag[i].key;
+      if (key) {
+        indices[key] = i;
+      }
+    }
+
+    if ('development' === 'development') {
+      if (Object.keys(indices).length < oldFrag.length) {
+        //console.warn('');
+      }
+    }
+
+    for (i = 0, n = results.length; i < n; ++i) {
+      content = null;
+      item = results[i];
+      temp = locals.concat([item]);
+
+      if (keyEval) {
+        key = Evaluator.activate(keyEval, 'exec', temp);
+        index = indices[key];
+
+        if (index != null) {
+          content = oldFrag[index];
+          oldFrag[index] = null;
+        }
+      }
+
+      if (!content) {
+        content = template.type ? Component.create(template.type) : Element.create(template.tag, template.ns);
+        compile(template, content, context, temp);
+      }
+
+      content.key = key;
+      fragment.push(content);
+    }
+
+    return fragment;
+  }
+
+  function getFragmentFromSlot(name, contents) {
+    var fragment = [];
+
+    if (contents) {
+      for (var i = 0, n = contents.length; i < n; ++i) {
+        var content = contents[i];
+        if (name === (content.props.slot || '')) {
+          fragment.push(content);
+        }
+      }
+    }
+
+    return fragment;
+  }
+
+  function complete(context, todos) {
+    var i, n, todo, key, target, locals, expression, expressions;
+
+    for (i = 0, n = todos.length; i < n; ++i) {
+      todo = todos[i];
+      target = todo.target;
+      locals = todo.locals;
+      expressions = todo.expressions;
 
       for (key in expressions) {
         if (!expressions.hasOwnProperty(key)) {
@@ -4533,254 +4132,106 @@
         expression = expressions[key];
 
         if (expression) {
-          ExpressionUtil.applyExpression(expression, component, target, key);
+          Expression.activate(expression, key, target, context, locals); // TODO: locals = [component, null, ]
         }
       }
     }
-
-    delete component._todos;
+  }
+  // TODO: initialize, update, build, write, patch
+  function initialize(template, target, context, locals, todos) {
+    initSelf(template, target, context, locals, todos);
+    initChildrenOrContents(template, target, context, locals, todos);
   }
 
-  function initSelfAndChildrenOrContents(scope, target, template) {
-    initSelf(scope, target, template);
-    initChildrenOrContents(scope, target, template);
-  }
+  function compile(template, target, context, locals) { // TODO: host, data, event
+    context = context || target;
 
-  function compile(template, component) {
-    component._slots = [];
-    component._todos = [];
-
-    initSelfAndChildrenOrContents(component, component, template);
-
-    initExpressions(component);
-
-    //delete component._todos;
-    //delete component._slots;
-
-    component._template = template;
-  }
-
-  function resetProps(target, props, _props) {
-    if (target.defaults) {
-      var defaults = target.defaults();
+    if (context === target) {
+      locals = [context];
     }
 
-    var all = ObjectUtil.assign({}, defaults, props);
+    var todos = [];
 
-    if (_props) {
-      for (var key in _props) {
-        if (_props.hasOwnProperty(key) && !all.hasOwnProperty(key)) {
-          all[key] = undefined;
-        }
-      }
-    }
+    initialize(template, target, context, locals, todos);
 
-    //target.set(all);
-    target.save(all);
+    complete(context, todos); // TODO: later
+
+    context._template = template;
   }
 
-  function resetAttrs(target, props, _props) {
-    if (!props && !_props) { return; }
-
-    resetProps(target.attrs, props, _props);
-  }
-
-  function resetStyle(target, props, _props) {
-    if (!props && !_props) { return; }
-
-    resetProps(target.style, props, _props);
-  }
-
-  function resetClasses(target, props, _props) {
-    if (!props && !_props) { return; }
-
-    resetProps(target.classes, props, _props);
-  }
-
-  function resetActions(target, actions, _actions) {
-    if (!actions && !_actions) { return; }
-
-    if (actions.off) {
-      target.off();
-    } else if (_actions) {
-      target.off(_actions);
-    }
-
-    delete actions.off;
-
-    target.on(actions);
-  }
-
-  function resetSelf(target, template) {
-    var _template = target._template || emptyObject;
-
-    resetProps(target, template.props, _template.props);
-    resetAttrs(target, template.attrs, _template.attrs);
-    resetStyle(target, template.style, _template.style);
-    resetClasses(target, template.classes, _template.classes);
-
-    resetActions(target, template.actions, _template.actions);
-  }
-
-  function resetChildrenOrContents(scope, target, template) {
-    var i, m, n, key, child, 
-      existed, content, olIndices, newIndices,
-      _template = target._template || emptyObject, 
-      existeds = _template.children || emptyArray, 
-      contents = template.children /*|| emptyArray*/;
-
-    var oldContents, newContents = [];
-    if (!(target instanceof Component) || scope === target) {
-      oldContents = target.children || emptyArray;
-    } else {
-      oldContents = target.contents || emptyArray;
-      existeds = emptyArray;
-    }
-
-    olIndices = _template.indices || emptyObject;
-
-    //m = existeds.length;
-    n = contents.length;
-//console.log(existeds, contents);
-    for (i = 0; i < n; ++i) {
-      existed = existeds[i];
-      content = contents[i];
-
-      if (content instanceof Shadow) {
-        newContents.push(content);
-        continue;
-      }
-
-      key = content.key;
-
-      if (key) {
-        newIndices = newIndices || {};
-        newIndices[key] = i;
-
-        if ('development' === 'development' && key in newIndices) {
-          console.warn('key should not be duplicate, but "' + key +'" is duplicate');
-        }
-
-        if (/*olIndices && */key in olIndices) {
-          child = oldContents[olIndices[content.key]];
-
-          resetSelfAndChildrenOrContents(scope, child, content);
-
-          newContents.push(child);
-          continue;
-        }
-      }
-
-      if (content.type) {
-        if (existed && content.type === existed.type) {
-          child = oldContents[i];
-          resetSelfAndChildrenOrContents(scope, child, content);
-        } else {
-          child = Component.create(content.type);
-          initSelfAndChildrenOrContents(scope, child, content);
-        }
-      } else if (content.tag) {
-        if (existed && !existed.type && existed.tag === content.tag) {
-          child = oldContents[i];
-          resetSelfAndChildrenOrContents(scope, child, content);
-        } else {
-          child = Element.create(content.tag, content.ns);
-          initSelfAndChildrenOrContents(scope, child, content);
-        }
-      } else {
-        if (existed && !existed.tag && !existed.type) {//TODO: maybe expression
-          child = oldContents[i]; // text
-          child.set('data', content);
-        } else {
-          child = Text.create(content);
-        }
-      }
-
-      if (content.uid) {
-        scope[uid] = child;
-      }
-
-      if (content.tag === 'slot' /*&& target !== scope*/) {
-        scope._slots[child.name || '*'] = {
-          target: target, offset: i, collection: []
-        };
-      }
-
-      newContents.push(child);
-    }
-
-    if (!(target instanceof Component) || scope === target) {
-      target.children.reset(newContents);
-    } else {
-      target.set('contents', newContents);
-      console.log(target);
-      initSlots(target);
-    }
-    
-    template.indices = newIndices;
-  }
-  
-  function resetSelfAndChildrenOrContents(scope, target, template) {
-    resetSelf(target, template);
-    resetChildrenOrContents(scope, target, template);
-  }
-
-  function update(target, template) {
-    target._slots = {};
-    //var _template = target._template; //TODO: _secrets
-    resetSelfAndChildrenOrContents(target, target, template);
-
-    target._template = template;
-
-    return target;
-  }
-
-  HTMXTemplate.update = update;
-  HTMXTemplate.create = create;
-  HTMXTemplate.compile = compile;
-
-  Exact.HTMXTemplate = HTMXTemplate; //HTMXTemplate
+  Exact.HTMXCompiler = {
+    initialize: initialize,
+    compile: compile
+  };
 
 })();
 
 //######################################################################################################################
-// src/htmx/parsers/EvaluatorParser.js
+// src/core/parsers/EvaluatorParser.js
 //######################################################################################################################
 (function() {
-  'use strict';
-  
+
   var RES = Exact.RES;
 
   var PathUtil = Exact.PathUtil;
-  var ObjectUtil = Exact.ObjectUtil;
   var StringUtil = Exact.StringUtil;
   var LiteralUtil = Exact.LiteralUtil;
-  var EvaluatorUtil = Exact.EvaluatorUtil;
 
-  var makeEvaluator = EvaluatorUtil.makeEvaluator;
-  var makeGetEvaluator = EvaluatorUtil.makeGetEvaluator;
-  var makeNotEvaluator = EvaluatorUtil.makeNotEvaluator;
-  var ARGUMENT_FLAGS = EvaluatorUtil.ARGUMENT_FLAGS;
+  var Evaluator = Exact.Evaluator;
 
-  var PATH_REGEXP = /^[\w\$]+((\[|\]?\.)[\w\$]+)*$/; //a[0].b.c, path
-  var PATH_FUNC_REGEXP = /^!?[\w\$]+((\[|\]?\.)[\w\$]+)*(\(.*\))?$/; //!$.a[0].b.c(), path or func
+  var ARGUMENT_FLAGS = Evaluator.ARGUMENT_FLAGS;
 
-  var PARAM_FLAGS = {
-    $: ARGUMENT_FLAGS.SCOPE_PATH, 
-    item: ARGUMENT_FLAGS.LOCAL_PATH, 
-    event: ARGUMENT_FLAGS.EVENT_PATH
-  };
-  
-  var PARAM_LIST = ['$', 'item', 'event'];
+  var PATH_REGEXP = /^[\w\$]+((\[|\]?\.)[\w\$]+)*$/;                  // a[0].b.c, path
+  var PATH_FUNC_REGEXP = /^!?[\w\$]+((\[|\]?\.)[\w\$]+)*(\(.*\))?$/;  // !$.a[0].b.c(), path or func
 
-  function parseArgs(args, resources) { //TODO: 1, $.b, red, exec(), $.f()
-    var arg, flag, flags, res;
+  //function $get(val) { return val; }
+  function $get(val) { return arguments[arguments.length - 1]; }
+  function $not(val) { return !val; }
 
-    flags = args.flags;
+  function makeEvaluator(exec, args, back) {
+    return Evaluator.create(exec, args, back);
+  }
+
+  function makeGetEvaluator(args) {
+    return Evaluator.create($get, args);
+  }
+
+  function makeNotEvaluator(args) {
+    return Evaluator.create($not, args);
+  }
+
+  function makeExpressionEvaluator(expr, identifiers) { // TODO: EvaluatorParser.parse
+    var n = identifiers.length;
+    
+    var args = [], flags = [];
+    
+    for (var i = 0; i < n; ++i) {
+      args.push({origin: i});
+      flags.push(ARGUMENT_FLAGS.LOCAL_PATH);
+    }
+
+    args.flags = flags;
+
+    var body = makeFunctionBody(expr);
+
+    var exec = Function.apply(null, identifiers.concat([body]));
+
+    return Evaluator.create(exec, args);
+  }
+
+  function makeFunctionBody(expr) {
+    if ('development' === 'development') {
+      return 'try { return ' + expr + '; } catch (error) { console.error("the expression `' + expr + '` is illegal"); throw error; }';
+    } else {
+      return 'return ' + expr + ';';
+    }
+  }
+
+  function parseArgs(args, resources, identifiers) { //TODO: 1, $.b, red, exec(), $.f()
+    var arg, path, flag, flags, index, res;
 
     for (var i = 0, n = args.length; i < n; ++i) {
       arg = args[i];
-      
       res = undefined;
       flag = ARGUMENT_FLAGS.INVARIABLE;
 
@@ -4788,81 +4239,85 @@
 
       if (res === undefined) {
         if (PATH_REGEXP.test(arg)) { //TODO
-          var path = PathUtil.split(arg);
-          if (path[0] in PARAM_FLAGS) {
-            flag = PARAM_FLAGS[path[0]];
-            res = path.length > 1 ? path.slice(1) : null;
-          } else {
+          path = PathUtil.parse(arg);
+          index = identifiers.indexOf(path[0]);
+          if (index < 0) {
             res = RES.search(path, resources);
+          } else {
+            res = path;
+            path.shift();
+            path.origin = index;
+            flag = ARGUMENT_FLAGS.LOCAL_PATH;
           }
         } else {
           flag = ARGUMENT_FLAGS.EVALUATOR;
-          res = parseEvaluator(arg, resources);
+          res = parseEvaluator(arg, resources, identifiers);
         }
       }
 
       args[i] = res;
 
       if (flag) {
-        if (!flags) {
-          flags = args.flags = [];
-        }
-
+        flags = flags || [];
         flags[i] = flag;
       }
     }
 
+    args.flags = flags;
+
     return args;
   }
 
-  function parseEvaluator(expr, resources) {
-    var i, j, k, res, path, args, flags, evaluator;
+  function parseEvaluator(expr, resources, identifiers) {
+    var i, j, k, res, path, args, flags, index, evaluator;
 
     if (PATH_FUNC_REGEXP.test(expr)) {
       i = expr.indexOf('!');
       j = expr.indexOf('(');
 
-      k = i < 0 ? 0 : 1;
-
       if (j < 0) { // path, not function
-        args = [];
-        path = expr.slice(k);
+        path = expr.slice(i !== 0 ? 0 : 1);
 
         res = LiteralUtil.parse(path); // true or false
 
         if (res === undefined) {
-          path = PathUtil.split(path);
-          if (path[0] in PARAM_FLAGS) {
-            res = path.length > 1 ? path.slice(1) : null;
-            flags = [PARAM_FLAGS[path[0]]];
-          } else {
+          path = PathUtil.parse(path);
+          index = identifiers.indexOf(path[0]);
+          if (index < 0) {
             res = RES.search(path, resources);
+          } else {
+            res = path;
+            path.shift();
+            path.origin = index;
+            flags = [ARGUMENT_FLAGS.LOCAL_PATH];
           }
         }
 
-        args.push(res);
+        args = [res];
         args.flags = flags;
 
         evaluator = i !== 0 ? makeGetEvaluator(args) : makeNotEvaluator(args);
-      } else { // function, possible but maybe illegal
-        //} else if (StringUtil_isClosed(expr, l, expr.length, '()')) { // function, possible but maybe illegal
+      } else { // function, possibly
         var range = StringUtil.range(expr, j, '', '()');
 
         if (range && range[1] === expr.length) {
           path = expr.slice(i < 0 ? 0 : 1, j);
           args = StringUtil.split(expr.slice(j + 1, expr.length - 1), ',', '()');
-          args = args.length ? parseArgs(args, resources) : null;
+          args = args.length ? parseArgs(args, resources, identifiers) : null;
 
-          if (path) {
-            path = PathUtil.split(path);
-            if (path.length > 1 && path[0] in PARAM_FLAGS) {
+          //if (path) {
+            path = PathUtil.parse(path);
+            index = identifiers.indexOf(path[0]);
+            if (path.length > 1 && index >= 0) {
+              path.origin = index;
+              path.shift();
+
               evaluator = {
-                path: path.slice(1),
-                flag: PARAM_FLAGS[path[0]],
+                path: path,
                 args: args
               }
             } else {
-              res = RES.search(path, resources);
+              res = RES.search(path, resources); // TODO: but maybe x-for="f of fs", @{f()}
 
               if (!res) {
                 throw new Error('can not find such resource `' + path + '`');
@@ -4878,39 +4333,22 @@
               args.flags = [ARGUMENT_FLAGS.EVALUATOR]; //TODO: EvaluatorUtil.setFlag(args, index, EvaluatorUtil.FLAG_EVAL)
               evaluator = makeNotEvaluator(args);
             }
-          } else { // @{ (1, 2, $.title) } will return $.title
-            evaluator = i !== 0 ? makeGetEvaluator(args) : makeNotEvaluator(args);
-          }
+          //} else { // @{ (1, 2, $.title) } will return $.title
+          //  evaluator = i !== 0 ? makeGetEvaluator(args) : makeNotEvaluator(args);
+          //}
         }
 
       }
     }
 
     if (!evaluator) {
-      evaluator = makeExpressionEvaluator(expr);
+      evaluator = makeExpressionEvaluator(expr, identifiers);
     }
 
     return evaluator;
   }
 
-  function makeExpressionEvaluator(expr) { // TODO: EvaluatorParser.parse
-    var args = [null, null, null];
-    args.flags = [
-      PARAM_FLAGS[PARAM_LIST[0]],
-      PARAM_FLAGS[PARAM_LIST[1]],
-      PARAM_FLAGS[PARAM_LIST[2]]
-    ];
-
-    var body = 'return ' + expr + ';';
-
-    var exec = Function.apply(null, PARAM_LIST.concat([body]));
-
-    return makeEvaluator(exec, args);
-  }
-
-
   Exact.EvaluatorParser = {
-    PARAM_LIST: PARAM_LIST,
     /**
      * @param {string} expr
      * @param {Object} resources
@@ -4922,128 +4360,126 @@
 })();
 
 //######################################################################################################################
-// src/htmx/parsers/HandlerParser.js
+// src/core/parsers/EventBindingParser.js
 //######################################################################################################################
 (function() {
 
-  'use strict';
-
-  //var EvaluatorUtil = Exact.EvaluatorUtil;
-  var ExpressionUtil = Exact.ExpressionUtil;
-
+  var Expression = Exact.Expression;
+  var EventBinding = Exact.EventBinding;
   var EvaluatorParser = Exact.EvaluatorParser;
 
-  var HandlerTemplate = Exact.HandlerTemplate;
+  /* /^\$\.[\w\$]+$/ */
+  var HANDLER_REGEXP = new RegExp('^\\' + Exact.CONTEXT_SYMBOL + '\\.[\\w\\$]+$');
 
-  var HANDLER_REGEXP = /^\$\.[\w\$]+$/;
-
-  function parse(expr) {
+  function parse(expr, resources, identifiers) {
     expr = expr.trim();
 
-    var template = new HandlerTemplate();
+    var template = {};
 
     if (HANDLER_REGEXP.test(expr)) {
       template.handler = expr.slice(2); // TODO:
     }  else {
-      template.evaluator = EvaluatorParser.parse(expr);
+      template.evaluator = EvaluatorParser.parse(expr, resources, ['event'].concat(identifiers));
     }
 
-    return ExpressionUtil.makeExpression(HandlerTemplate, template);
+    return Expression.create(EventBinding, template);
   }
 
-  Exact.HandlerParser = {
+  Exact.EventBindingParser = {
     parse: parse
   };
 
 })();
 
 //######################################################################################################################
-// src/htmx/parsers/BindingParser.js
+// src/core/parsers/DataBindingParser.js
 //######################################################################################################################
 (function() {
-  'use strict';
 
   var PathUtil = Exact.PathUtil;
   var StringUtil = Exact.StringUtil;
-  var ExpressionUtil = Exact.ExpressionUtil;
-  var BindingTemplate = Exact.BindingTemplate;
+
+  var Expression = Exact.Expression;
+  var DataBinding = Exact.DataBinding;
+
   var EvaluatorParser = Exact.EvaluatorParser;
 
+  var EVENT_OPERATOR = Exact.EVENT_OPERATOR;//'*';
 
-  var EVENT_ANYWAY = 'updated';
+  var BINDING_OPERATORS = Exact.BINDING_OPERATORS;
 
-  var BINDING_MODES = Exact.Binding.MODES;
+  var DATA_BINDING_MODES = DataBinding.MODES;
 
-  var BINDING_OPERATORS = {
-    ONE_TIME: '&', ONE_WAY: '@', TWO_WAY: '#', HANDLER: '+', TEXT: '?'
-  };
-  //var BINDING_OPERATORS_REGEXP = /[\&\@\#\+\?]/;
-  var BINDING_OPERATORS_REGEXP = new RegExp(
-    '[\\' + BINDING_OPERATORS.ONE_TIME +
-      '\\' + BINDING_OPERATORS.ONE_WAY +
-      '\\' + BINDING_OPERATORS.TWO_WAY +
-      '\\' + BINDING_OPERATORS.HANDLER +
-      '\\' + BINDING_OPERATORS.TEXT + ']'
-  );
+  /* /\*(\w(\.\w+)?)*[ ]*$/ */
+  var EVENT_REGEXP = new RegExp('\\' + EVENT_OPERATOR + '(\\w(\\.\\w+)?)*[ ]*$');
 
-  var SCOPE_EVENT_SYMBOL = '*';
+  var PATH_REGEXP = /^[\w\$]+((\[|\]?\.)[\w\$]+)+$/;
 
-  var SCOPE_EVENT_REGEXP = /\*(\w(\.\w+)?)*[ ]*$/;
+  var PATH_FUNC_REGEXP = /[\w\$]+((\[|\]?\.)[\w\$]+)+\(?/g;
 
-  var SCOPE_PATH_REGEXP = new RegExp(
-    '\\' + EvaluatorParser.PARAM_LIST[0] + '((\\[|\\]?\\.)[\\w\\$]+)+(?!\\()',
-    'g'
-  );
+  function collectPaths(expr, paths, identifiers) {
+    var matches, match, path;//, paths = [];
 
-  var LOCAL_PATH_REGEXP = new RegExp(
-    '\\' + EvaluatorParser.PARAM_LIST[1] + '((\\[|\\]?\\.)[\\w\\$]+)+(?!\\()',
-    'g'
-  );
+    matches = expr.match(PATH_FUNC_REGEXP);
 
-  function collectPaths(expr, regexp, paths) {
-    var matches = expr.match(regexp);
+    if (!matches) { return; }
 
-    if (matches) {
-      for (var i = 0, n = matches.length; i < n; ++i) {
-        paths.push(PathUtil.split(matches[i]).slice(1));
+    for (var i = 0, n = matches.length; i < n; ++i) {
+      match = matches[i];
+
+      path = PathUtil.parse(match);
+
+      if (match[match.length - 1] === '(') {
+        path.pop();
+      }
+
+      if (path.length < 2) { continue; }
+
+      for (var j = 0, m = identifiers.length; j < m; ++j) {
+        if (path[0] === identifiers[j]) {
+          path.shift();
+          path.origin = j;
+          paths.push(path);
+        }
       }
     }
   }
 
   /**
    *
-   * @param {string} expr
    * @param {string} operator
+   * @param {string} expr
    * @param {Object} resources
+   * @param {Array} identifiers
    * @returns {*}
    */
-  function parse(expr, operator, resources) { //TODO: parse(operator, expression, resources)
-    var mode = -1, tail = '', scopeEvent, i, j;
+  function parse(operator, expr, resources, identifiers) { //TODO: parse(operator, expression, resources)
+    var mode = -1, tail = '', event, i, j;
 
     switch (operator) {
       case BINDING_OPERATORS.ONE_TIME:
-        mode = BINDING_MODES.ONE_TIME;
+        mode = DATA_BINDING_MODES.ONE_TIME;
         break;
       case BINDING_OPERATORS.ONE_WAY:
-        mode = BINDING_MODES.ONE_WAY;
+        mode = DATA_BINDING_MODES.ONE_WAY;
         break;
       case BINDING_OPERATORS.TWO_WAY:
-        mode = BINDING_MODES.TWO_WAY;
+        mode = DATA_BINDING_MODES.TWO_WAY;
         break;
       default :
         return null;
     }
 
-    if (SCOPE_EVENT_REGEXP.test(expr)) {
-      i = expr.lastIndexOf(SCOPE_EVENT_SYMBOL);
+    if (EVENT_REGEXP.test(expr)) {
+      i = expr.lastIndexOf(EVENT_OPERATOR);
 
       tail = expr.slice(i + 1);
       expr = expr.slice(0, i);
 
-      scopeEvent = tail.trim();
+      event = tail.trim();
 
-      if (!scopeEvent) {
-        scopeEvent = EVENT_ANYWAY;// TODO: updated, not here
+      if (!event) {
+        event = 'updated';
       }
     }
 
@@ -5051,25 +4487,15 @@
 
     piece = pieces[0].trim();
 
-    if (!scopeEvent) {
-      var scopePaths = [];
-      var localPaths = [];
-      //TODO: collect paths from evaluator and converters
-      collectPaths(piece, SCOPE_PATH_REGEXP, scopePaths);
-      collectPaths(piece, LOCAL_PATH_REGEXP, localPaths);
+    if (mode === DATA_BINDING_MODES.TWO_WAY && !PATH_REGEXP.test(piece)) {
+      throw new Error('Illegal two-way binding expression `' + expr + '`');
     }
 
+    evaluator = EvaluatorParser.parse(piece, resources, identifiers);
 
-    if (mode < BINDING_MODES.TWO_WAY) {
-      evaluator = EvaluatorParser.parse(piece, resources);
-    } else {
-      if (SCOPE_PATH_REGEXP.test(piece)) {
-        var origin = 0;
-      } else if (LOCAL_PATH_REGEXP.test(piece)) { //TODO:
-        origin = 1;
-      } else {
-        throw new Error('Illegal two-way binding expression `' + expr + '`');
-      }
+    if (!event) {
+      var paths = [];
+      collectPaths(piece, paths, identifiers);
     }
 
     if (pieces.length > 1) {
@@ -5082,72 +4508,70 @@
           piece += '()';
         }
 
-        if (!scopeEvent) {
-          collectPaths(expr, SCOPE_PATH_REGEXP, scopePaths);
-          collectPaths(expr, LOCAL_PATH_REGEXP, localPaths);
+        if (!event) {
+          collectPaths(piece, paths, identifiers);
         }
 
-        converters.push(EvaluatorParser.parse(piece, resources));
+        converters.push(EvaluatorParser.parse(piece, resources, identifiers));
+      }
+
+      if ('development' === 'development') {
+        if (n > 2) {
+          console.warn(expr, 'better not use converters more than 2');
+        }
       }
     }
 
-    var template = new BindingTemplate();
+    var template = {
+      mode: mode,
+      event: event,
+      paths: paths,
+      evaluator: evaluator,
+      converters: converters
+    };
 
-    template.mode = mode;
-    template.origin = origin;
-    template.evaluator = evaluator;
-    template.converters = converters;
-    template.scopeEvent = scopeEvent;
-    template.scopePaths = scopeEvent ? null : scopePaths;
-    template.localPaths = scopeEvent ? null : localPaths;
-
-    return ExpressionUtil.makeExpression(BindingTemplate, template);
+    return Expression.create(DataBinding, template);
   }
 
-  Exact.BindingParser = {
-    BINDING_OPERATORS_REGEXP: BINDING_OPERATORS_REGEXP,
-    BINDING_OPERATORS: BINDING_OPERATORS,
-    EVENT_ANYWAY: EVENT_ANYWAY,
+  Exact.DataBindingParser = {
     parse: parse
   }
 
 })();
 
 //######################################################################################################################
-// src/htmx/parsers/TextParser.js
+// src/core/parsers/TextBindingParser.js
 //######################################################################################################################
 (function() {
-  'use strict';
 
-  var TextTemplate = Exact.TextTemplate;
-
-  var BindingParser = Exact.BindingParser;
-  var ExpressionUtil = Exact.ExpressionUtil;
-
-  var BINDING_OPERATORS = BindingParser.BINDING_OPERATORS;
-  var BINDING_BRACKETS = '{}';//BindingParser.BINDING_BRACKETS;
-
-  var StringUtil_range = Exact.StringUtil.range;
+  var StringUtil = Exact.StringUtil;
+  var Expression = Exact.Expression;
+  var TextBinding = Exact.TextBinding;
+  var DataBindingParser = Exact.DataBindingParser;
+  var BINDING_OPERATORS = Exact.BINDING_OPERATORS;
+  
+  var DATA_BINDING_BRACKETS = Exact.DATA_BINDING_BRACKETS;//'{}';//
 
   var BINDING_LIKE_REGEXP = new RegExp(
     '['+ BINDING_OPERATORS.ONE_TIME + BINDING_OPERATORS.ONE_WAY + BINDING_OPERATORS.TWO_WAY +']\\'
-    + BINDING_BRACKETS[0]// + '.+\\' + BINDING_BRACKETS[1]
+    + DATA_BINDING_BRACKETS[0]// + '.+\\' + DATA_BINDING_BRACKETS[1]
   );
 
-  Exact.TextParser = {
+  Exact.TextBindingParser = {
     like: function like(expr) {
       return BINDING_LIKE_REGEXP.test(expr);
     },
     /**
      * @param {string} expr
      * @param {Object} resources
+     * @param {Array} parameters
      * @returns {*}
      */
-    parse: function(expr, resources) { //TODO:
-      var i, j, indices = [0], pieces = [], piece, expression;
+    parse: function(expr, resources, parameters) { //TODO:
+      var i, j, indices = [0], template = [], piece;
 
-      var range0 = StringUtil_range(expr, -1, BINDING_OPERATORS.ONE_TIME, BINDING_BRACKETS);
-      var range1 = StringUtil_range(expr, -1, BINDING_OPERATORS.ONE_WAY, BINDING_BRACKETS);
+      var range0 = StringUtil.range(expr, -1, BINDING_OPERATORS.ONE_TIME, DATA_BINDING_BRACKETS);
+      var range1 = StringUtil.range(expr, -1, BINDING_OPERATORS.ONE_WAY, DATA_BINDING_BRACKETS);
 
       if (!range0 && !range1) { return null; }
 
@@ -5156,21 +4580,21 @@
           if (range0 && range0[0] < range1[0]) {
             i = range0[0];
             j = range0[1];
-            range0 = StringUtil_range(expr, j, BINDING_OPERATORS.ONE_TIME, BINDING_BRACKETS);
+            range0 = StringUtil.range(expr, j, BINDING_OPERATORS.ONE_TIME, DATA_BINDING_BRACKETS);
           } else {
             i = range1[0];
             j = range1[1];
-            range1 = StringUtil_range(expr, j, BINDING_OPERATORS.ONE_WAY, BINDING_BRACKETS);
+            range1 = StringUtil.range(expr, j, BINDING_OPERATORS.ONE_WAY, DATA_BINDING_BRACKETS);
           }
         } else {
           if (range1 && range1[0] < range0[0]) {
             i = range1[0];
             j = range1[1];
-            range1 = StringUtil_range(expr, j, BINDING_OPERATORS.ONE_WAY, BINDING_BRACKETS);
+            range1 = StringUtil.range(expr, j, BINDING_OPERATORS.ONE_WAY, DATA_BINDING_BRACKETS);
           } else {
             i = range0[0];
             j = range0[1];
-            range0 = StringUtil_range(expr, j, BINDING_OPERATORS.ONE_TIME, BINDING_BRACKETS);
+            range0 = StringUtil.range(expr, j, BINDING_OPERATORS.ONE_TIME, DATA_BINDING_BRACKETS);
           }
         }
 
@@ -5183,672 +4607,707 @@
         piece = expr.slice(indices[i], indices[i+1]);
 
         if (i % 2) {
-          pieces[i] = BindingParser.parse(piece.slice(2, piece.length - 1), piece[0], resources);
+          template[i] = DataBindingParser.parse(piece[0], piece.slice(2, piece.length - 1), resources, parameters);
         } else {
-          pieces[i] = piece;
+          template[i] = piece;
         }
       }
 
-      var template = new TextTemplate();
-      template.scopeEvent = BindingParser.EVENT_ANYWAY; // TODO:
-      template.pieces = pieces;
-
-      return ExpressionUtil.makeExpression(TextTemplate, template);
+      return Expression.create(TextBinding, template);
     }
   };
 
 })();
 
 //######################################################################################################################
-// src/htmx/parsers/DataParser.js
+// src/core/parsers/HTMLParser.js
 //######################################################################################################################
 (function() {
-  'use strict';
-
-  //var StringUtil = Exact.StringUtil;
-  var ObjectUtil = Exact.ObjectUtil;
-  var LiteralUtil = Exact.LiteralUtil;
-
-  var DataTemplate = Exact.DataTemplate;
-
-  var BindingParser = Exact.BindingParser;
-  var TextParser = Exact.TextParser;
-
-  var BINDING_OPERATORS_REGEXP = BindingParser.BINDING_OPERATORS_REGEXP;
-
-  //var Skin = Exact.Skin;
-
-  //var BINDING_BRACKETS = BindingParser.BINDING_BRACKETS;
-
-  function getExpressions(template) {
-    if (!template.expressions) {
-      ObjectUtil.defineProp(template, 'expressions', {value: {}});
-    }
-
-    return template.expressions;
-  }
-
-  function parseBindingFromExpr(template, key, operator, expr, resources) {
-    var expressions = getExpressions(template);
-    expressions[key] = BindingParser.parse(expr, operator, resources);
-  }
-
-  function parseTextFromExpr(template, key, expr, resources) {
-    var expressions = getExpressions(template);
-    expressions[key] = TextParser.parse(expr, resources);
-  }
-
-  function parsePropFromExpr(template, key, expr, type) {
-    if (type && expr) {
-      template[key] = LiteralUtil.parse(expr, type);
-    } else {
-      template[key] = expr;
-    }
-  }
-
-  Exact.DataParser = {
-    /**
-     * @example
-     *    <div x-style="color: red; backgroundColor&: $.bgColor | hex2rgb; fontSize?: @{$.fontSize}px">
-     *      <div x-class="btn: true; active@: $.a > $.b"></div>
-     *    </div>
-     *
-     * @param {string} expr
-     * @param {Object} resources
-     * @param {string} type
-     * @returns {DataTemplate}
-     */
-    parse: function(expr, resources, type) {// + target type, target prop
-      var i, j, n, key, piece, operator;
-
-      //var pieces = StringUtil.split(expr, ';', BINDING_BRACKETS);
-      var pieces = expr.split(/;/g);
-
-      var template = new DataTemplate();
-
-      for (i = 0, n = pieces.length; i < n; ++i) {
-        piece = pieces[i];
-
-        j = piece.indexOf(':');
-
-        if (j < 0 ) { continue; }
-
-        operator = piece[j - 1];
-        expr = piece.slice(j + 1);
-
-        if (BINDING_OPERATORS_REGEXP.test(operator)) { // TODO:
-          key = piece.slice(0, j - 1).trim();//Skin.toCamelCase(piece.slice(0, j - 1));
-          if (operator !== '?') {
-            parseBindingFromExpr(template, key, operator, expr, resources);
-          } else {
-            parseTextFromExpr(template, key, expr, resources);
-          }
-        } else {
-          key = piece.slice(0, j).trim();
-          parsePropFromExpr(template, key, expr, type);
-        }
-      }
-
-      return template;
-    }
-  };
-
-})();
-
-//######################################################################################################################
-// src/htmx/parsers/HTMXParser.js
-//######################################################################################################################
-(function() {
-
   var RES = Exact.RES;
   var Skin = Exact.Skin;
-
-  var ObjectUtil = Exact.ObjectUtil;
-  var LiteralUtil = Exact.LiteralUtil;
-
   var HTMXTemplate = Exact.HTMXTemplate;
 
-  var DataParser = Exact.DataParser;
-  var TextParser = Exact.TextParser;
-  var BindingParser = Exact.BindingParser;
-  var HandlerParser = Exact.HandlerParser;
-  //var ExpressionParser = Exact.ExpressionParser;
+  function parseData(expr) {
+    var pieces = expr.split(/;/g), piece, data = {}, name, key, n, i, j;
 
-  var ObjectUtil_defineProp = ObjectUtil.defineProp;
+    for (i = 0, n = pieces.length; i < n; ++i) {
+      piece = pieces[i];
 
-  //var PROP_POSTFIX_CODE = '?'.charCodeAt(0);
+      j = piece.indexOf(':');
 
-  var BINDING_OPERATORS_REGEXP = BindingParser.BINDING_OPERATORS_REGEXP;
-  var BLANK_REGEXP = /[\n\r\t]/g;
+      if (j > 0 ) {
+        expr = piece.slice(j + 1).trim();
+        name = piece.slice(0, j).trim();
 
-  var COMMON_TYPES = {
-    'number': 'number', 'boolean': 'boolean', 'string': 'string', 'json':'json', 'contents': 'contents'
-  };
+        key = Skin.toCamelCase(name);
 
-  var SPECIAL_KEYS  = { //TODO: x-call="insert(1)" => insert(value, 1)
-    'x-as': 'as',
-    'x-id': 'uid',
-    //'x-on': 'actions', //TODO: remove
-    'x-type': 'type',
-    'x-attrs': 'attrs',
-    'x-style': 'style',
-    'x-class': 'classes'
-  };
-
-  function getProps(node) {
-    if (!node.props) {
-      node.props = {};
-    }
-
-    return node.props;
-  }
-
-  function getExpressions(node) {
-    var props = getProps(node);
-
-    if (!props.expressions) {
-      ObjectUtil_defineProp(props, 'expressions', {value: {}});
-    }
-    
-    return props.expressions;
-  }
-
-  function getSpecials($template) {
-    var key, x_key, specials = {};
-
-    for (x_key in SPECIAL_KEYS) {
-      if (!SPECIAL_KEYS.hasOwnProperty(x_key)) { continue; }
-
-      key = SPECIAL_KEYS[x_key];
-
-      if (Skin.hasAttr($template, x_key)) {
-        specials[key] = Skin.getAttr($template, x_key);
-        //Skin.removeAttr($template, x_key);
+        data[key] = expr;
       }
     }
 
-    return specials;
+    return data;
   }
 
-  function getContents($child, resources) {
-    var i, n , contents = [], $contents = Skin.getChildrenCopy($child);
+  function parseSelf(template, $template, resources) {
+    template.ns = Skin.getNameSpace($template);
+    template.tag = Skin.getTagName($template);
 
-    for (i = 0, n = $contents.length; i < n; ++i) {
-      contents.push(parse($contents[i], resources));
+    var type = Skin.toCamelCase(template.tag);
+    template.type = RES.search(type[0].toUpperCase() + type.slice(1), resources);
+
+    var $attrs = Skin.getAttrs($template);
+
+    if (!$attrs) { return; }
+
+    if ($attrs['x-attrs']) {
+      template.attrs = parseData($attrs['x-attrs']);
+      delete $attrs['x-attrs'];
     }
 
-    return contents;
-  }
-
-  function parseSpecials(node, $template, resources) {
-    var specials = getSpecials($template);
-
-    if (specials.attrs) {
-      ObjectUtil_defineProp(node, 'attrs', {value: DataParser.parse(specials.attrs, resources, '')});
+    if ($attrs['x-style']) {
+      template.style = parseData($attrs['x-style']);
+      delete $attrs['x-style'];
     }
 
-    if (specials.style) {
-      ObjectUtil_defineProp(node, 'style', {value: DataParser.parse(specials.style, resources, '')});
+    if ($attrs['x-class']) {
+      template.classes = parseData($attrs['x-class']);
+      delete $attrs['x-class'];
     }
 
-    if (specials.classes) {
-      ObjectUtil_defineProp(node, 'classes', {value: DataParser.parse(specials.classes, resources, 'boolean')});
-    }
+    if ($attrs['x-type']) {
+      //template.attrs = template.attrs || {};
+      //template.attrs['x-ref'] = $attrs['x-type'];
 
-    if (specials.as) {
-      node.as = specials.as;
-    }
+      template.type = RES.search($attrs['x-type'], resources);
+      delete $attrs['x-type'];
 
-    if (specials.uid) {
-      node.uid = specials.uid;
-
-      node.attrs = node.attrs || {};
-      node.attrs['x-id'] = specials.uid;
-    }
-
-    if (specials.type) {
-      var type = specials.type;
-
-      if (!(type in COMMON_TYPES)) {
-        type = RES.search(type, resources);
-
-        if (!type) {
-          throw new TypeError('can not find such type `' + specials.type + '`');
-        }
-      }
-
-      ObjectUtil_defineProp(node, 'type', {value: type}); //TODO: node.type = type, freeze node at last.
-
-      node.attrs = node.attrs || {};
-      node.attrs['x-type'] = specials.type;
-    }
-  }
-  
-  function parseBindingFromExpr(node, key, operator, expr, resources) {
-    var expressions = getExpressions(node);
-    expressions[key] = BindingParser.parse(expr, operator, resources);
-  }
-
-  function parseHandlerFromExpr(node, key, expr, resources) {
-    var expressions = getExpressions(node);
-    expressions[key] = HandlerParser.parse(expr, resources);
-  }
-  
-  function parseTextFromExpr(node, key, expr, resources) {
-    var expressions = getExpressions(node);
-    expressions[key] = TextParser.parse(expr, resources);
-  }
-
-  function parsePropFromExpr(node, key, expr, type) {
-    var prop, props = getProps(node);
-
-    if (node.type && expr) {
-      prop = LiteralUtil.parse(expr, type);
-    }
-
-    props[key] = type ? prop : (prop || expr);
-  }
-
-  function parseSelf(node, $template, resources) {
-    node.ns = Skin.getNameSpace($template);
-    node.tag = Skin.getProp($template, 'tagName').toLowerCase(); //TODO: toLowerCase
-
-    parseSpecials(node, $template, resources);
-
-    if (!Skin.hasAttrs($template)) { return; }
-
-    var attrs = Skin.getAttrs($template), operator, expr, name, key, n;
-
-    for (name in attrs) {
-      if (attrs.hasOwnProperty(name) && !SPECIAL_KEYS.hasOwnProperty(name)) {
- 
-        n = name.length - 1;
-        operator = name[n];
-        expr = attrs[name];
-        
-        //if (/[\+\?\&\@\#]/.test(operator)) { // TODO:
-        if (BINDING_OPERATORS_REGEXP.test(operator)) { // TODO:
-          key = Skin.toCamelCase(name.slice(0, n));
-          if (operator === '+') {
-            parseHandlerFromExpr(node, key, expr, resources);
-          } else if (operator !== '?') {
-            parseBindingFromExpr(node, key, operator, expr, resources);
-          } else {
-            parseTextFromExpr(node, key, expr, resources);
-          }
-        } else {
-          parsePropFromExpr(node, Skin.toCamelCase(name), expr)
-        }
-        
+      if (!template.type) {
+        throw new TypeError('can not find such type `' + $attrs['x-type'] + '`');
       }
     }
+
+    if ($attrs['x-ref']) {
+      template.ref = $attrs['x-ref'];
+      delete  $attrs['x-ref'];
+
+      //template.attrs = template.attrs || {};
+      //template.attrs['x-ref'] = template.ref;
+    }
+
+    var directs = {}, flag;
+
+    if ($attrs['x-if']) {
+      directs.xIf = $attrs['x-if'];
+      delete $attrs['x-if'];
+      flag = true;
+    }
+
+    if ($attrs['x-for']) {
+      directs.xFor = $attrs['x-for'];
+      delete $attrs['x-for'];
+      flag = true;
+    }
+
+    if ($attrs['x-key']) {
+      directs.xKey = $attrs['x-key'];
+      delete $attrs['x-key'];
+      flag = true;
+    }
+
+    if (flag) {
+      template.directs = directs;
+    }
+
+    // props and events
+    var props = {}, name, key;
+
+    for (name in $attrs) {
+      if ($attrs.hasOwnProperty(name)) {
+        key = Skin.toCamelCase(name);
+        props[key] = $attrs[name];
+      }
+    }
+
+    template.props = props;
   }
 
-  function parseChildren(node, $template, resources) {
-    //Skin.normalize($template);
-    var i, n, key, tag, type, text = '', stay, expression, props,// = node.props,
-      $child, $children = Skin.getChildrenCopy($template), child, children = [];
+  function parseChildren(template, $template, resources) {
+    var $children = Skin.getChildren($template);
 
-    for (i = 0, n = $children.length; i < n; ++i) {
+    var $child, children = [], i, n;
+
+    for (i = 0,  n = $children.length; i < n; ++i) {
       $child = $children[i];
 
       if (Skin.isComment($child)) { continue; }
 
-      if (Skin.isText($child)) { // TODO: normalize text nodes
-        text += Skin.getProp($child, 'data');
-        continue;
-      } else if (text) {
-        text = text.replace(BLANK_REGEXP, '').trim();
+      if (Skin.isElement($child)) {
+        var child = new HTMXTemplate();
 
-        if (TextParser.like(text)) {
-          expression = TextParser.parse(text, resources);
-        }
-
-        children.push(expression || text);
-
-        expression = null;
-        text = '';
-      }
-
-      child = new HTMXTemplate();
-
-      parseSelf(child, $child, resources);
-
-      key = child.as;
-      tag = child.tag;
-      type = child.type;
-
-      if (node.type && key) { //TODO:
-        if (tag !== 'value') { //TODO: <value x-as="price" x-type="number">123</value>
-          props = getProps(node);
-          props[key] = child;
-        } /*else if (type === 'contents') { //TODO: fistChild is not text
-          props = getProps(node);
-          props[key] = getContents($child, resources);
-        } */else if (!type || type in COMMON_TYPES) {
-          text = Skin.getProp($child, 'textContent');
-          parsePropFromExpr(node, key, text, type);
-          text = '';
-        } else {
-          /*if (operator === '+') {
-            parseHandlerFromExpr(node, key, expr, resources);
-          } else */if (type !== '?') {
-            parseBindingFromExpr(node, key, type, text, resources);
-          } else {
-            parseTextFromExpr(node, key, text, resources);
-          }
-        }
-      }
-
-      parseChildren(child, $child, resources);
-
-      if (!key) {
-        if (tag === 'value') { // TODO: <value>1</value> as a content
-          text = Skin.getProp($child, 'textContent');
-          child = LiteralUtil.parse(text, type) || text;
-        }
+        parseSelf(child, $child, resources);
+        parseChildren(child, $child, resources);
 
         children.push(child);
+      } else if (Skin.isText($child)) {
+        children.push(Skin.getProp($child, 'data'));
       }
     }
 
-    if (text) { //TODO: as function
-      text = text.replace(BLANK_REGEXP, '').trim();
-
-      if (TextParser.like(text)) { // TODO: TextParser.like(text)
-        expression = TextParser.parse(text, resources);
-      }
-
-      children.push(expression || text);
+    if (children.length) {
+      template.children = children;
     }
-
-    node.children = children;
   }
 
   function parse($template, resources) {
-    var host = new HTMXTemplate();
-
     resources = resources || {};
 
     if (typeof $template === 'string') {
       $template = Skin.parse($template.trim())[0];
     }
 
-    //if (typeof $template === 'string') {
-    //  var $nodes = Skin.parse($template.trim());
-    //  for (var i = 0; i < $nodes.length; ++i) {
-    //    if (Skin.isElement($nodes[i])) { break; } // TODO: maybe comment
-    //  }
-    //  $template = $nodes[i];
-    //}
+    if (!Skin.isElement($template)) {
+      throw new TypeError('template must be HTMXTemplate, DOM element or HTML string');
+    }
 
-    if (!Skin.isElement($template)) { return; }
+    var template = new HTMXTemplate();
 
-    parseSelf(host, $template, resources);
-    parseChildren(host, $template, resources);
+    parseSelf(template, $template, resources);
 
-    return host;
+    parseChildren(template, $template, resources);
+
+    return template;
   }
 
-  HTMXTemplate.parse = parse;
+  Exact.HTMLParser = {
+    parse: parse
+  };
+
+  //Exact.HTMXTemplate.parse = parse;
+
+})();
+//######################################################################################################################
+// src/core/parsers/HTMXParser.js
+//######################################################################################################################
+(function() {
+  var LiteralUtil = Exact.LiteralUtil;
+
+  var HTMXTemplate = Exact.HTMXTemplate;
+
+  var HTMLParser = Exact.HTMLParser;
+  var EvaluatorParser = Exact.EvaluatorParser;
+  var DataBindingParser = Exact.DataBindingParser;
+  var TextBindingParser = Exact.TextBindingParser;
+  var EventBindingParser = Exact.EventBindingParser;
+
+  var CONTEXT_SYMBOL = Exact.CONTEXT_SYMBOL;
+  var BINDING_OPERATORS = Exact.BINDING_OPERATORS;
+
+  /* /[\&\@\#\+\?]/ */
+  var BINDING_OPERATORS_REGEXP = new RegExp(
+    '[\\' + BINDING_OPERATORS.ONE_TIME +
+    '\\' + BINDING_OPERATORS.ONE_WAY +
+    '\\' + BINDING_OPERATORS.TWO_WAY +
+    '\\' + BINDING_OPERATORS.EVENT +
+    '\\' + BINDING_OPERATORS.TEXT + ']'
+  );
+
+  var BLANK_REGEXP = /^ *\r?\n *$/;///[\f\n\r\t\v]/g; // TODO: how about <pre>
+
+  var ARRAY_COPY_EVAL = Exact.Evaluator.create(function(items) {
+    return items ? items.slice(0) : [];
+  });
+
+  function getData(template, key) {
+    var data = template[key];
+
+    if (!data) {
+      data = template[key] = {};
+    }
+
+    return data;
+  }
+
+  function getExpressions(data) {
+    if (!data.expressions) {
+      Object.defineProperty(data, 'expressions', {
+        value: {}
+      });
+    }
+
+    return data.expressions;
+  }
+
+  function toClasses(className) {
+    var i, names, classes = {};
+
+    names = className.split(/\s+/);
+
+    for (i = 0; i < names.length; ++i) {
+      classes[names[i]] = true;
+    }
+
+    return classes;
+  }
+
+  function parseText(text, resources, identifiers) {
+    if (!text || BLANK_REGEXP.test(text)) { return; }
+
+    if (TextBindingParser.like(text)) {
+      var expression = TextBindingParser.parse(text, resources, identifiers);
+    }
+
+    return expression || text;
+  }
+
+  function parseHandlerFromExpr(actions, key, expr, resources, identifiers) {
+    var expressions = getExpressions(actions);
+    expressions[key] = EventBindingParser.parse(expr, resources, identifiers);
+  }
+
+  function parseBindingFromExpr(props, key, operator, expr, resources, identifiers) {
+    var expression, expressions = getExpressions(props);
+
+    if (operator !== BINDING_OPERATORS.TEXT) { // TODO:
+      expression = DataBindingParser.parse(operator, expr, resources, identifiers);
+    } else {
+      expression = TextBindingParser.parse(expr, resources, identifiers);
+    }
+
+    expressions[key] = expression;//DataBindingParser.parse(expr, operator, resources);
+  }
+
+  /**
+   *
+   * @param {Object} props
+   * @param {string} key
+   * @param {string} expr
+   * @param {string} type '' - no parsing, '*' - any type, else given type
+   */
+  function parsePropFromExpr(props, key, expr, type) {
+    if (type && expr) {
+      type = type !== '*' ? type : '';
+      var prop = LiteralUtil.parse(expr, type);
+      props[key] = prop != null ? prop : (type ? prop : expr);
+    } else {
+      props[key] = expr; // TODO: boolean, like `checked` ...
+    }
+  }
+
+  function parseDirects(_template, directs, resources) {
+    if (!directs) { return; }
+
+    var _directs = getData(_template, 'directs'), identifiers = _template.identifiers;
+
+    if (directs.xIf) {
+      _directs.xIf = {
+        expression: DataBindingParser.parse(BINDING_OPERATORS.ONE_WAY, directs.xIf, resources, identifiers)
+      };
+    }
+
+    if (directs.xFor) {
+      if (directs.xSlot) {
+        throw new Error('You should not use x-for on <slot>');
+      }
+
+      var expr = directs.xFor;
+
+      var matches = expr.match(/[ ]*([\w\_]+)[ ]+of[ ]+(.+)/); //TODO:
+
+      if (!matches) {
+        throw new Error('x-for="' + expr + '" is illegal');
+      }
+
+      var expression = DataBindingParser.parse(BINDING_OPERATORS.ONE_WAY, matches[2] /*+ ' *'*/, resources, identifiers);
+
+      if (expression) {
+        var converters = expression.template.converters;
+        if (!converters) {
+          expression.template.converters = converters = []
+        }
+        converters.push(ARRAY_COPY_EVAL);
+        _directs.xFor = {
+          //itemsPath: expression.template.evaluator.args[0],
+          expression: expression
+        };
+      }
+
+      identifiers = identifiers.concat([matches[1]]);
+      _template.identifiers = identifiers;
+
+      if (directs.xKey) {
+        _directs.xKey = {
+          evaluator: EvaluatorParser.parse(directs.xKey, resources, identifiers)
+        };
+      }
+    }
+
+    if (directs.xSlot != null) {
+      _directs.xSlot = {
+        name: directs.xSlot
+      };
+    }
+  }
+
+  function parseParams(_template, parameters, resources, name, actual) {
+    if (!parameters) { return; }
+    
+    var identifiers = _template.identifiers, operator, expr, key, n_1;
+    
+    for (key in parameters) {
+      if (!parameters.hasOwnProperty(key)) { continue; }
+
+      n_1 = key.length - 1;
+      operator = key[n_1];
+      expr = parameters[key];
+
+      if (BINDING_OPERATORS_REGEXP.test(operator)) {
+        key = key.slice(0, n_1);
+
+        if (operator === BINDING_OPERATORS.EVENT) {
+          parseHandlerFromExpr(
+            getData(_template, 'actions'), key, expr, resources, identifiers
+          );
+        } else {
+          parseBindingFromExpr(
+            getData(_template, name), key, operator, expr, resources, identifiers
+          );
+        }
+      } else if (!actual) {
+        parsePropFromExpr(
+          getData(_template, name), key, expr, '*'
+        );
+      } else {
+        getData(_template, name)[key] = expr;
+      }
+    }
+  }
+
+  function optimize(_template, template) {
+    var _attrs, _props = _template.props;
+
+    if (template.ref) { // x-ref
+      _attrs = getData(_template, 'attrs');
+      _attrs['x-ref'] = template.ref;
+      _template.ref = template.ref;
+    }
+
+    if (!_props) { return; }
+
+    if (_props.className) { // merge into classes
+      var className = _props.className;
+      var names = toClasses(className);
+
+      var classes = _template.classes || {};
+
+      for (var name in names) {
+        if (names.hasOwnProperty(name) && !(classes.hasOwnProperty(name))) {
+          classes[name] = true;
+        }
+      }
+
+      _template.classes = classes;
+
+      delete _props.className;
+    }
+
+    if (_props.style) {
+      _attrs = getData(_template, 'attrs');
+
+      _attrs.style = _props.style;
+
+      delete _props.style;
+    }
+
+    var expressions = _props.expressions;
+
+    if (!expressions) { return; }
+
+    if (expressions.className) {
+      _attrs = getData(_template, 'attrs');
+
+      getExpressions(_attrs)['class'] = expressions.className;
+
+      delete expressions.className;
+    }
+
+    if (expressions.style) {
+      _attrs = getData(_template, 'attrs');
+
+      getExpressions(_attrs)['style'] = expressions.style;
+
+      delete expressions.style;
+    }
+  }
+
+  function parseSelf(_template, template, resources) {
+    _template.ns = template.ns;
+    _template.tag = template.tag;
+    _template.type = template.type;
+
+    if (template.tag === 'slot') {
+      getData(template, 'directs').xSlot = (template.props && template.props.name) || '';
+    }
+
+    parseDirects(_template, template.directs, resources);
+
+    parseParams(_template, template.props, resources, 'props', template.actual);
+    parseParams(_template, template.style, resources, 'style', false);
+    parseParams(_template, template.attrs, resources, 'attrs', false);
+    parseParams(_template, template.classes, resources, 'classes', true);
+
+    optimize(_template, template);
+  }
+
+  function parseChildren(_template, template, resources) {
+    var i, n, text = '', _child, _children = [], child, children = template.children, identifiers = _template.identifiers;
+
+    if (!children || !children.length) { return; }
+
+    for (i = 0, n = children.length; i < n; ++i) {
+      child = children[i];
+
+      if (typeof child === 'string') { // TODO: normalize text nodes
+        text += child;
+        continue;
+      } else if (text) {
+        _child = parseText(text, resources, identifiers);
+        if (_child) {
+          _children.push(_child);
+        }
+        text = '';
+      }
+
+      _child = new HTMXTemplate();
+
+      _child.identifiers = identifiers;
+
+      parseSelf(_child, child, resources);
+
+      parseChildren(_child, child, resources);
+
+      _children.push(_child);
+    }
+
+    if (text) {
+      _child = parseText(text, resources, identifiers);
+      if (_child) {
+        _children.push(_child);
+      }
+    }
+
+    _template.children = _children;
+  }
+
+  function parse(template, resources) {
+    resources = resources || {};
+
+    if (!(template instanceof HTMXTemplate)) {
+      template = HTMLParser.parse(template, resources);
+    }
+
+    var _template = new HTMXTemplate();
+
+    _template.identifiers = [CONTEXT_SYMBOL];
+
+    parseSelf(_template, template, resources); // TODO: identifiers
+
+    parseChildren(_template, template, resources);
+
+    return _template;
+  }
 
   Exact.HTMXParser = {
     parse: parse
   };
-  
+
 })();
 
 //######################################################################################################################
-// src/more/inputs/Input.js
+// src/core/compilers/HTMXCompiler.js
 //######################################################################################################################
 (function() {
 
-  'use strict';
-
-  var Skin = Exact.Skin;
+  var Text = Exact.Text;
+  var Element = Exact.Element;
   var Component = Exact.Component;
-  // TODO: add validator to value. min, max, pattern...
-  function Input() {
-    Component.apply(this, arguments);
-  }
 
-  Exact.defineClass({
-    constructor: Input, extend: Component,
+  var HTMXTemplate = Exact.HTMXTemplate;
+  var HTMXCompiler = Exact.HTMXCompiler;
 
-    statics: {
-      $template: '<input>'
-    },
+  var emptyObject = {}, emptyArray = [];
 
-    register: function() {
-      this.trigger = 'change';
-      this.onChange = this.onChange.bind(this);
-    },
+  function resetProps(target, props, _props) {
+    var defaults = target.constructor.defaults;
 
-    ready: function() {
-      var self = this;
+    props = Exact.assign({}, typeof defaults === 'function' ? defaults() : null, props);
 
-      this.on(this.trigger, this.onChange);
-
-      this.on('changed.trigger', function(evt, val, old) {
-        self.off(old, self.onChange);
-        self.on(val, self.onChange);
-      });
-    },
-
-    onChange: function() {
-      this.set('value', Skin.getProp(this.$skin, 'value'));
-    }
-  });
-
-  Exact.Input = Input;
-
-  Exact.RES.register('Input', Input);
-
-})();
-
-//######################################################################################################################
-// src/more/inputs/TextBox.js
-//######################################################################################################################
-(function() {
-
-  'use strict';
-
-  var Input = Exact.Input;
-
-  function TextBox() {
-    Input.apply(this, arguments);
-  }
-
-  Exact.defineClass({
-    constructor: TextBox, extend: Input,
-
-    statics: {
-      $template: '<input type="text">'
-    }
-  });
-
-  Exact.TextBox = TextBox;
-
-  Exact.RES.register('TextBox', TextBox);
-
-})();
-
-//######################################################################################################################
-// src/more/inputs/CheckBox.js
-//######################################################################################################################
-(function() {
-
-  'use strict';
-
-  var Input = Exact.Input;
-
-  var base = Input.prototype;
-
-  function CheckBox() {
-    Input.apply(this, arguments);
-  }
-
-  Exact.defineClass({
-    constructor: CheckBox, extend: Input,
-
-    statics: {
-      $template: '<input type="checkbox">'
-    },
-
-    ready: function(props) {
-      base.ready.call(this, props);
-
-      this.onChoicesChanged = this.onChoicesChanged.bind(this);
-
-      var self = this;
-      this.on('changed.choices', function() {
-        self.choices.off('changed', self.onChoicesChanged);
-        self.onChoicesChanged();
-        self.choices.on('changed', self.onChoicesChanged);
-      });
-    },
-
-    toggle: function() {
-      this.set('checked', !this.checked);
-    },
-
-    onChoicesChanged: function() {
-      if (this.choices) {
-        this.set('checked', this.choices.indexOf(this.value) >= 0);
+    for (var key in _props) {
+      if (_props.hasOwnProperty(key) && !props.hasOwnProperty(key)) {
+        target.unset(key);
+        //target.set(key, undefined);
+        //delete _props[key];
       }
-    },
+    }
 
-    onChange: function() {
-      this.toggle();
+    target.save(props);
+  }
 
-      if (this.choices) {
-        if (this.checked) {
-          this.choices.push(this.value);
-        } else {
-          this.choices.splice(this.choices.indexOf(this.value), 1);
+  function resetContainer(container, _container) {
+    container = container || {};
+
+    for (var key in _container) {
+      if (_container.hasOwnProperty(key) && !container.hasOwnProperty(key)) {
+        _container.set(key, undefined);
+        delete _container[key];
+      }
+    }
+
+    _container.save(container);
+  }
+
+  function resetActions(target, actions) {
+    //if (actions.off) {
+    //  target.off();
+    //  delete actions.off;
+    //}
+    //target.off();
+    target.on(actions);
+  }
+
+  function updateSelf(template, target) {
+    resetProps(target, template.props, target._props);
+
+    resetContainer(template.attrs, target.attrs);
+    resetContainer(template.style, target.style);
+    resetContainer(template.classes, target.classes);
+
+    resetActions(target, template.actions);
+  }
+
+  function isMatched(shadow, template) {
+    var type = template.type, tag = template.tag || '';
+    return shadow.key === template.key && (type ? type === shadow.constructor : tag === shadow.tag);
+  }
+
+  function createChild(template, context) {
+    var child;
+
+    if (template.type) {
+      child = Component.create(template.type);
+      HTMXCompiler.initialize(template, child, context);
+    } else if (template.tag) {
+      child = Element.create(template.tag, template.ns);
+      HTMXCompiler.initialize(template, child, context);
+    } else {
+      child = Text.create(template);
+    }
+
+    if (template.ref) {
+      context[template.ref] = child;
+    }
+
+    return child;
+  }
+
+  function updateChildrenOrContents(template, target, context) {
+    var _children = (target instanceof Component && target !== context) ? (target.contents || []) : target.children;
+
+    if (_children === template.children) { return; }
+
+    var children  = template.children || [],  contents = new Array(children.length), indices, key;
+
+    var oldBeginIndex = 0, oldEndIndex = _children.length - 1, newBeginIndex = 0, newEndIndex = children.length - 1;
+    var oldBeginChild = _children[oldBeginIndex];
+    var oldEndChild = _children[oldEndIndex];
+    var newBeginChild = children[newBeginIndex];
+    var newEndChild = children[newEndIndex];
+
+    while (oldBeginIndex <= oldEndIndex && newBeginIndex <= newEndIndex) {
+
+      if (oldBeginChild == null) {
+        oldBeginChild = _children[++oldBeginIndex]; // Vnode has been moved left
+      } else if (oldEndChild == null) {
+        oldEndChild = _children[--oldEndIndex];
+      } else if (isMatched(oldBeginChild, newBeginChild)) {
+        updateSelfAndChildrenOrContents(newBeginChild, oldBeginChild, context);
+        contents[newBeginIndex] = oldBeginChild;
+        oldBeginChild = _children[++oldBeginIndex];
+        newBeginChild = children[++newBeginIndex];
+      } else if (isMatched(oldEndChild, newBeginChild)) {
+        updateSelfAndChildrenOrContents(newBeginChild, oldEndChild, context);
+        contents[newEndIndex] = oldEndChild;
+        oldEndChild = _children[--oldEndIndex];
+        newEndChild = children[--newEndIndex];
+      } else if (isMatched(oldBeginChild, newEndChild)) {
+        updateSelfAndChildrenOrContents(newBeginChild, oldBeginChild, context);
+        contents[newEndIndex] = oldBeginChild;
+        oldBeginChild = _children[++oldBeginIndex];
+        newEndChild = children[--newEndIndex];
+      } else if (isMatched(oldEndChild, newBeginChild)) {
+        updateSelfAndChildrenOrContents(newBeginChild, oldEndChild, context);
+        contents[newBeginIndex] = oldEndChild;
+        oldEndChild = _children[--oldEndIndex];
+        newBeginChild = children[++newBeginIndex];
+      } else  {
+        if (!indices) {
+          indices = {};
+          for (var i = oldBeginIndex; i <= oldEndIndex; ++i) {
+            key = _children[oldBeginIndex].key;
+            if (key) {
+              indices[key] = i;
+            }
+          }
         }
-      }
 
-    }
-  });
+        key = newBeginChild.key;
+        i = key && indices[key];
 
-  Exact.CheckBox = CheckBox;
+        if (i != null && isMatched(_children[i] || emptyObject, newBeginChild)) {
+          contents[newBeginIndex] = _children[i];
+        } else {
+          contents[newBeginIndex] = createChild(newBeginChild, context);
+        }
 
-  Exact.RES.register('CheckBox', CheckBox);
+        updateSelfAndChildrenOrContents(newBeginChild, contents[newBeginIndex], context);
 
-})();
-
-//######################################################################################################################
-// src/more/inputs/Radio.js
-//######################################################################################################################
-(function() {
-
-  'use strict';
-
-  var Input = Exact.Input;
-
-  var base = Input.prototype;
-
-  function Radio() {
-    Input.apply(this, arguments);
-  }
-
-  Exact.defineClass({
-    constructor: Radio, extend: Input,
-
-    statics: {
-      $template: '<input type="radio">'
-    },
-
-    ready: function(props) {
-      base.ready.call(this, props);
-
-      this.onChangedChoice = this.onChangedChoice.bind(this);
-      this.on('changed.choice', this.onChangedChoice);
-    },
-
-    toggle: function() {
-      this.set('checked', !this.checked);
-    },
-
-    onChangedChoice: function() {
-      this.set('checked',  this.choice === this.value);
-    },
-
-    onChange: function() {
-      this.toggle();
-      if (this.checked) {
-        this.set('choice', this.value);
+        newBeginChild = children[++newBeginIndex];
       }
     }
-  });
 
-  Exact.Radio = Radio;
-
-  Exact.RES.register('Radio', Radio);
-
-})();
-
-//######################################################################################################################
-// src/more/inputs/Select.js
-//######################################################################################################################
-(function() {
-
-  'use strict';
-
-  var List = Exact.List;
-  var Input = Exact.Input;
-
-  var base = Input.prototype;
-
-  function Select() {
-    List.apply(this, arguments);
-  }
-
-  Exact.defineClass({
-    constructor: Select, extend: List,
-
-    statics: {
-      $template: '<select></select>'
-    },
-
-    onChange: base.onChange,
-
-    register: base.register,
-
-    ready: base.ready
-  });
-
-  Exact.Select = Select;
-
-  Exact.RES.register('Select', Select);
-
-})();
-
-//######################################################################################################################
-// src/more/inputs/TextArea.js
-//######################################################################################################################
-(function() {
-
-  'use strict';
-
-  var Input = Exact.Input;
-
-  function TextArea() {
-    Input.apply(this, arguments);
-  }
-
-  Exact.defineClass({
-    constructor: TextArea, extend: Input,
-
-    statics: {
-      $template: '<textarea></textarea>'
+    if (oldBeginIndex > oldEndIndex) {
+      while (newBeginIndex <= newEndIndex) {
+        contents[newBeginIndex] = createChild(newBeginChild, context);
+        newBeginChild = children[++newBeginIndex];
+      }
     }
-  });
 
-  Exact.TextArea = TextArea;
+    if (!(target instanceof Component) /*|| !template.type*/ || target === context) {
+      target.children.reset(contents);
+    } else {
+      target.set('contents', contents);
+    }
 
-  Exact.RES.register('TextArea', TextArea);
+  }
+
+  function updateSelfAndChildrenOrContents(template, target, context) {
+    if (template instanceof HTMXTemplate) {
+      updateSelf(template, target);
+      updateChildrenOrContents(template, target, context);
+    } else {
+      target.set('data', template);
+    }
+  }
+
+
+  function update(target, data, children) {
+    var template = HTMXTemplate.create(target instanceof Component ? target.constructor : target.tag, data, children);
+    updateSelfAndChildrenOrContents(template, target, target);
+    return target;
+  }
+
+  Exact.HTMXUpdater = {
+    update: update
+  }
 
 })();
 
@@ -5858,14 +5317,16 @@
 //(function(global, module) {
 //  'use strict';
 //
-//  var Exact = { version: '0.0.6' };
+//  var Exact = { version: '0.0.8' };
+
+  global = global || window || {};
 
   if (module) {
     module.exports = Exact;
   } else {
-    global = global || window || {};
     global.Exact = Exact;
-    Exact.global = global;
   }
 
-})(typeof global !== 'undefined' ? global : undefined, typeof module !== 'undefined' ? module : undefined);
+  Exact.global = global;
+
+})(typeof global !== 'undefined' ? global : null, typeof module !== 'undefined' ? module : null);

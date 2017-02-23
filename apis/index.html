@@ -18,9 +18,9 @@
     <h3 class="brand"><a href="../" class="logo">Exact</a></h3>
     <a class="menu-btn"></a>
     <ul class="menu-bar">
-      <li><a href="../examples/todomvc.html" class="menu-item"> Examples </a></li>
+      <li><a href="../examples/color-palette.html" class="menu-item"> Examples </a></li>
       <li><a href="../downloads/index.html" class="menu-item"> Downloads </a></li>
-      <li><a href="#" class="menu-item"> Documents </a></li>
+      <li><a href="../documents/index.html" class="menu-item"> Documents </a></li>
       <li><a href="#" class="menu-item active"> APIs </a></li>
       <li><a href="#" class="menu-item"> GitHub </a></li>
     </ul>
@@ -31,71 +31,83 @@
     <div class="card">
       <h4>top</h4>
       <ul class="list">
-        <li><a href="#" class="link">defineClass</a></li>
+        <li><a href="#" class="link">functions</a></li>
+        <!--<li><a href="#" class="link">assign</a></li>-->
+        <!--<li><a href="#" class="link">defineClass</a></li>-->
+        <!--<li><a href="#" class="link">help</a></li>-->
         <li><a href="#" class="link">RES</a></li>
+        <!--<li><a href="#" class="link">setImmediate</a></li>-->
       </ul>
     </div>
     <div class="card">
       <h4>base</h4>
       <ul class="list">
-        <li><a href="#" class="link">Watcher</a></li>
-        <li><a href="#" class="link">Updater</a></li>
         <li><a href="#" class="link">Accessor</a></li>
-        <li><a href="#" class="link">Validator</a></li>
         <li><a href="#" class="link">DirtyMarker</a></li>
-      </ul>
-    </div>
-    <div class="card">
-      <h4>core/models</h4>
-      <ul class="list">
-        <li><a href="#" class="link">Cache</a></li>
-        <li><a href="#" class="link">Store</a></li>
-        <li><a href="#" class="link">Collection</a></li>
-      </ul>
-    </div>
-    <div class="card">
-      <h4>core/shadows</h4>
-      <ul class="list">
-        <li><a href="#" class="link">Shadow</a></li>
-        <li><a href="#" class="link">Element</a></li>
-        <li><a href="#" class="link">Component</a></li>
-        <li><a href="#" class="link">Text</a></li>
-        <li><a href="#" class="link">List</a></li>
+        <li><a href="#" class="link">Evaluator</a></li>
+        <li><a href="#" class="link">Expression</a></li>
+        <li><a href="#" class="link">Schedule</a></li>
+        <li><a href="#" class="link">Validator</a></li>
+        <li><a href="#" class="link">Watcher</a></li>
       </ul>
     </div>
     <div class="card">
       <h4>core/bindings</h4>
       <ul class="list">
         <li><a href="#" class="link">Binding</a></li>
+        <li><a href="#" class="link">DataBinding</a></li>
+        <li><a href="#" class="link">EventBinding</a></li>
+        <li><a href="#" class="link">TextBinding</a></li>
+      </ul>
+    </div>
+    <div class="card">
+      <h4>core/compilers</h4>
+      <ul class="list">
+        <li><a href="#" class="link">HTMXCompiler</a></li>
+      </ul>
+    </div>
+    <div class="card">
+      <h4>core/models</h4>
+      <ul class="list">
+        <li><a href="#" class="link">Collection</a></li>
+        <li><a href="#" class="link">Container</a></li>
+        <li><a href="#" class="link">Store</a></li>
+      </ul>
+    </div>
+    <div class="card">
+      <h4>core/parsers</h4>
+      <ul class="list">
+        <li><a href="#" class="link">DataBindingParser</a></li>
+        <li><a href="#" class="link">EvaluatorParser</a></li>
+        <li><a href="#" class="link">EventBindingParser</a></li>
+        <li><a href="#" class="link">HTMLParser</a></li>
+        <li><a href="#" class="link">HTMXParser</a></li>
+        <li><a href="#" class="link">TextBindingParser</a></li>
+      </ul>
+    </div>
+    <div class="card">
+      <h4>core/shadows</h4>
+      <ul class="list">
+        <li><a href="#" class="link">Component</a></li>
+        <li><a href="#" class="link">Element</a></li>
+        <li><a href="#" class="link">Shadow</a></li>
+        <li><a href="#" class="link">Text</a></li>
       </ul>
     </div>
     <div class="card">
       <h4>core/templates</h4>
       <ul class="list">
-        <li><a href="#" class="link">BindingTemplate</a></li>
-        <li><a href="#" class="link">HandlerTemplate</a></li>
-        <li><a href="#" class="link">TextTemplate</a></li>
-        <li><a href="#" class="link">DataTemplate</a></li>
         <li><a href="#" class="link">HTMXTemplate</a></li>
       </ul>
     </div>
-    <div class="card">
-      <h4>htmx/parsers</h4>
-      <ul class="list">
-        <li><a href="#" class="link">BindingParser</a></li>
-        <li><a href="#" class="link">HandlerParser</a></li>
-        <li><a href="#" class="link">TextParser</a></li>
-        <li><a href="#" class="link">DataParser</a></li>
-        <li><a href="#" class="link">HTMXParser</a></li>
-      </ul>
-    </div>
+
     <div class="card">
       <h4>skins</h4>
       <ul class="list">
         <li><a href="#" class="link">Skin</a></li>
       </ul>
     </div>
-    <div class="card">
+    <!--<div class="card">
       <h4>more/inputs</h4>
       <ul class="list">
         <li><a href="#" class="link">Input</a></li>
@@ -105,21 +117,20 @@
         <li><a href="#" class="link">Radio</a></li>
         <li><a href="#" class="link">Select</a></li>
       </ul>
-    </div>
+    </div>-->
     <div class="card">
       <h4>utils</h4>
       <ul class="list">
-        <li><a href="#" class="link">StringUtil</a></li>
-        <li><a href="#" class="link">ObjectUtil</a></li>
-        <li><a href="#" class="link">LiteralUtil</a></li>
         <li><a href="#" class="link">EvaluatorUtil</a></li>
-        <li><a href="#" class="link">ExpressionUtil</a></li>
+        <li><a href="#" class="link">LiteralUtil</a></li>
+        <li><a href="#" class="link">PathUtil</a></li>
+        <li><a href="#" class="link">StringUtil</a></li>
       </ul>
     </div>
   </aside>
   <a class="side-btn">&gt;</a>
   <article class="article">
-
+    <p>TODO...</p>
   </article>
 </div>
 <!--<footer class="footer">
