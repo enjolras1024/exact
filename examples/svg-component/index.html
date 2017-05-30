@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Exact | SVG Component</title>
+  <link rel="stylesheet" href="app.css">
+</head>
+<body>
+  <h1>SVG Component</h1>
+
+  <div id="app"></div>
+
+  <p>In this example, we create components based on SVG.</p>
+  <p>A SVG component can contain other SVG components.</p>
+
+  <div class="template">
+    <div class="app">
+      <svg xmlns="http://www.w3.org/2000/svg" version="1.1" width="300" height="200">
+        <rect transform?="translate(150, 100) rotate(@{ $.slider1.value }) scale(@{ $.slider2.value }, @{ $.slider3.value })"
+              width="20" height="20" x-style="fill: rgb(0,255,0);"></rect>
+        <circle cx="150" cy="100" r="2" x-style="fill: rgb(255,0,0)"></circle>
+        <g x-type="TextSlider" transform="translate(10, 10)" label="rotate" max="360" x-ref="slider1"></g>
+        <g x-type="TextSlider" transform="translate(10, 30)" label="scaleX" min="1.0" max="5.0" x-ref="slider2"></g>
+        <g x-type="TextSlider" transform="translate(10, 50)" label="scaleY" min="1.0" max="5.0" x-ref="slider3"></g>
+      </svg>
+    </div>
+  </div>
+
+  <svg class="template" xmlns="http://www.w3.org/2000/svg">
+    <g class="text-slider">
+      <text transform="translate(0, 10)">&{ $.label }</text>
+      <text transform="translate(50, 10)">: @{ $.value }</text>
+      <g x-type="Slider" x-ref="slider" transform="translate(120, 0)" max&="$.max" min&="$.min" value#="$.value"></g>
+    </g>
+  </svg>
+
+  <svg class="template" xmlns="http://www.w3.org/2000/svg">
+    <g class="slider">
+      <rect width="100" height="2" y="5" class="track"></rect>
+      <circle cx@="$.normalize($.value)" cy="6" r="6" class="button" x-ref="btn" mousedown+="$.onMouseChange"></circle>
+    </g>
+  </svg>
+
+  <script src="../../dist/exact-skin.js"></script>
+  <script src="../../dist/exact.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>

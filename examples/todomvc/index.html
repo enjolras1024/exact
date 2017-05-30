@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Exact | TodoMVC</title>
+  <link rel="stylesheet" href="base.css">
+  <link rel="stylesheet" href="index.css">
+  <link rel="stylesheet" href="app.css">
+</head>
+<body>
+  <section id="todoapp"></section>
+
+  <div class="template">
+    <section class="todoapp">
+      <header class="header">
+        <h1>todos</h1>
+        <input class="new-todo" placeholder="What needs to be done?" autofocus
+               keydown.enter+="$.onEnter" keyup+="$.onChange" value@="$.newTodo">
+      </header>
+      <section class="main" x-style="display@: $.todos.length ? '' : 'none';">
+        <input type="checkbox" class="toggle-all" id="toggle-all" checked@="$.allDone" change+="$.onToggle">
+        <label for="toggle-all">Mark all as complete</label>
+        <ul class="todo-list" x-ref="list">
+          <li x-type="TodoAdapter" x-for="todo of $.todos | filter($.status)" x-key="todo.id"
+              label#="todo.label" completed#="todo.completed" destroy+="$.removeTodo(todo)"></li>
+        </ul>
+      </section>
+      <footer class="footer" x-style="display@: $.todos.length | display;">
+        <span class="todo-count">
+          <strong x-ref="strong">@{ $.remainingCount }</strong> @{ $.remainingCount | pluralize('item') } left
+        </span>
+        <ul class="filters">
+          <li>
+            <a x-class="selected@: $.status === 'all'" href="#/">All</a>
+          </li>
+          <li>
+            <a x-class="selected@: $.status === 'active'" href="#/active">Active</a>
+          </li>
+          <li>
+            <a x-class="selected@: $.status === 'completed'" href="#/completed">Completed</a>
+          </li>
+        </ul>
+        <button class="clear-completed" click+="$.clearCompleted()"
+                x-style="display@: $.todos.length > $.remainingCount | display;" >Clear completed</button>
+      </footer>
+    </section>
+  </div>
+
+  <ul class="template">
+    <li class="todo-adapter" x-class="completed@: $.completed; editing@: $.editing;">
+      <div class="view">
+        <input type="checkbox" class="toggle" checked@="$.completed" change+="$.onToggle">
+        <label dblclick+="$.startEditing()">@{ $.label }</label>
+        <button class="destroy" click+="$.destroy()"></button>
+      </div>
+      <input class="edit" x-ref="editor" value@="$.text" change+="$.onChange"
+             keyup.escape+="$.cancelEditing()" keyup.enter+="$.doneEditing()" blur+="$.doneEditing()">
+    </li>
+  </ul>
+
+  <script src="../../dist/exact-skin.js"></script>
+  <script src="../../dist/exact.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>
