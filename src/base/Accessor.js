@@ -41,7 +41,7 @@
       define: function define(prototype, key) {
         descriptorShared.get = makeGetter(key);
         descriptorShared.set = makeSetter(key);
-        Object.defineProperty(prototype, key, descriptorShared);
+        Exact.defineProp(prototype, key, descriptorShared);
       }
     },
 
@@ -59,12 +59,13 @@
           this.set(key, props[key]);
         }
       }
-      //return this;
+      return this;
     },
 
     unset: function unset(key) {
       this.set(key, undefined);
       delete this[key];
+      return this;
     }
   });
 

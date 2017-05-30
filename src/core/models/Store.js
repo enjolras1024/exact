@@ -22,7 +22,7 @@
 
       initialize: function initialize(store, props) {
         if (!store._props) {
-          Object.defineProperty(store, '_props', {value: {}/*, configurable: true*/});
+          Exact.defineProp(store, '_props', {value: {}/*, configurable: true*/});
         }
 
         store.save(props);
@@ -46,11 +46,12 @@
       if (val !== old) {
         props[key] = val;
 
-        if ('__ENV__' === '<ES5') {
+        if (Exact.env === '<ES5') {
           this[key] = val;
         }
 
-        this.send('changed.' + key, val, old);
+        //this.send('changed.' + key, val, old);
+        this.send({type: 'changed', name: key}, val, old);
       }
     }
   });

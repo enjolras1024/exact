@@ -1,16 +1,16 @@
 //######################################################################################################################
-// src/core/compilers/HTMXCompiler.js
+// src/core/compilers/HTMXEngine.js
 //######################################################################################################################
 (function() {
-  
+
   var Text = Exact.Text;
   var Shadow = Exact.Shadow;
   var Element = Exact.Element;
   var Component = Exact.Component;
 
   var RES = Exact.RES;
-  var Collection = Exact.Collection;
   var Container = Exact.Container;
+  var Collection = Exact.Collection;
 
   var Evaluator = Exact.Evaluator;
   var Expression = Exact.Expression;
@@ -109,7 +109,7 @@
           content = Component.create(type);
         }
 
-        initialize(child, content, context, locals, todos);
+        build(child, content, context, locals, todos);
 
         if (child.ref) {
           context[child.ref] = content; //TODO: addPart
@@ -161,22 +161,25 @@
 
       if (Array.isArray(path)) {
         container.mode = 1;
-        
+
         var local = locals[path.origin];
         var prop = path[path.length - 1];
         var src = path.length < 2 ? local : RES.search(path.slice(0, path.length - 1), local, true);
 
-        if (src && src.on) {
+        if (src && src.on && src.send) {
           var handler = function() {
-            src.send('changed.' + prop, src[prop], src[prop]);
+            //src.send('changed.' + prop, src[prop], src[prop]);
+            src.send({type: 'changed', name: prop}, src[prop], src[prop]);
           };
-          
+
           var dst = src[prop];
+
           if (dst && dst instanceof Collection) {
             dst.on('changed', handler);
           }
 
           src.on('changed.' + prop, function(event, dst, old) {
+            if (dst === old) { return; }
             if (old && old instanceof Collection) {
               old.off('changed', handler);
             }
@@ -209,11 +212,11 @@
       var container = containers[i];
 
       if (container instanceof Container) {
-        container.onChange = context.invalidate;
+        container.onChange = arrange;//context.invalidate;
       }
     }
 
-    context.on('updated', arrange);
+    //context.on('updated', arrange);
 
     arrange();
 
@@ -268,7 +271,7 @@
 
   function getFragmentOnCondition(template, context, locals) {
     var content = template.type ? Component.create(template.type) : Element.create(template.tag, template.ns);
-    compile(template, content, context, locals);
+    start(template, content, context, locals);
     return  [content];
   }
 
@@ -302,16 +305,16 @@
 
         if (index != null) {
           content = oldFrag[index];
+          content.key = key;
           oldFrag[index] = null;
         }
       }
 
       if (!content) {
         content = template.type ? Component.create(template.type) : Element.create(template.tag, template.ns);
-        compile(template, content, context, temp);
+        start(template, content, context, temp);
       }
 
-      content.key = key;
       fragment.push(content);
     }
 
@@ -355,13 +358,13 @@
       }
     }
   }
-  // TODO: initialize, update, build, write, patch
-  function initialize(template, target, context, locals, todos) {
+  // TODO: build, update, build, write, patch
+  function build(template, target, context, locals, todos) {
     initSelf(template, target, context, locals, todos);
     initChildrenOrContents(template, target, context, locals, todos);
   }
 
-  function compile(template, target, context, locals) { // TODO: host, data, event
+  function start(template, target, context, locals) { // TODO: host, data, event
     context = context || target;
 
     if (context === target) {
@@ -370,16 +373,23 @@
 
     var todos = [];
 
-    initialize(template, target, context, locals, todos);
+    build(template, target, context, locals, todos);
 
     complete(context, todos); // TODO: later
 
-    context._template = template;
+    //context._template = template;
+    Exact.defineProp(context, '_template', {
+      value: template,
+      writable: true,
+      enumerable: false,
+      configurable: true
+    });
   }
 
-  Exact.HTMXCompiler = {
-    initialize: initialize,
-    compile: compile
+  Exact.HTMXEngine = {
+    start: start, // start to use the template
+    build: build, // build self and children or contents
+    parse: null   // parse template from HTML string or DOM element
   };
 
 })();

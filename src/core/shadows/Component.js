@@ -18,6 +18,7 @@
   function applyDescriptorsAndDefaults(prototype, descriptors, defaults) {
     if (Array.isArray(descriptors)) {
       var i, n, names = descriptors;
+      descriptors = {};
       for (i = 0, n = names.length; i < n; ++i) {
         descriptors[names[i]] = emptyDesc;
       }
@@ -43,7 +44,7 @@
       }
     }
 
-    Object.defineProperty(prototype, '__descriptors__', {value: descriptors});
+    Exact.defineProp(prototype, '__descriptors__', {value: descriptors});
   }
 
   function Component(props) {
@@ -59,7 +60,7 @@
 
     mixins: [Watcher.prototype, Accessor.prototype],
 
-    __descriptors__: { contents: emptyDesc },
+    __descriptors__: { contents: emptyDesc }, // TODO: __exact_descriptors__
 
     statics: {
       //descriptors: { contents: null },
@@ -89,7 +90,7 @@
           var template = constructor.template;
 
           if (template) {
-            _template = Exact.HTMXParser.parse(template, resources);
+            _template = Exact.HTMXEngine.parse(template, resources);
           }
 
           if (_template) {
@@ -109,7 +110,7 @@
 
         component.save(props ? assign({}, defaults, props) : defaults);
 
-        Exact.HTMXCompiler.compile(_template, component);
+        Exact.HTMXEngine.start(_template, component);
 
         //component.send('initialized');
       }
@@ -148,11 +149,16 @@
             props[key] = val;
           }
 
+          if (Exact.env === '<ES5') {
+            this[key] = val;
+          }
+
           if (desc.native) {
             DirtyMarker.check(this, key, val, old);
           }
 
-          this.send('changed.' + key, val, old);
+          //this.send('changed.' + key, val, old);
+          this.send({type: 'changed', name: key}, val, old);
 
           this.invalidate();//TODO:
         }
@@ -161,6 +167,10 @@
 
         if (val !== old) {
           props[key] = val;
+
+          if (Exact.env === '<ES5') {
+            this[key] = val;
+          }
 
           DirtyMarker.check(this, key, val, old);
 

@@ -32,11 +32,13 @@
     },
 
     toString: function() {
-      return '"' + (this.data.length < 24 ? this.data : (this.data.slice(0, 21) + '...'))  + '"(' + this.guid +')';
+      return (this.data == null) ? '' : '"' + (this.data.length < 24 ? this.data : (this.data.slice(0, 21) + '...'))  + '"(' + this.guid +')';
     }
 
   });
 
   Exact.Text = Text;
+
+  //Exact.RES.register('Text', Text);
 
 })();

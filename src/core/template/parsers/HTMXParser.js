@@ -1,5 +1,5 @@
 //######################################################################################################################
-// src/core/parsers/HTMXParser.js
+// src/core/template/parsers/HTMXParser.js
 //######################################################################################################################
 (function() {
   var LiteralUtil = Exact.LiteralUtil;
@@ -42,7 +42,7 @@
 
   function getExpressions(data) {
     if (!data.expressions) {
-      Object.defineProperty(data, 'expressions', {
+      Exact.defineProp(data, 'expressions', {
         value: {}
       });
     }
@@ -161,7 +161,7 @@
     }
   }
 
-  function parseParams(_template, parameters, resources, name, actual) {
+  function parseParams(_template, parameters, resources, name, virtual) {
     if (!parameters) { return; }
     
     var identifiers = _template.identifiers, operator, expr, key, n_1;
@@ -185,7 +185,7 @@
             getData(_template, name), key, operator, expr, resources, identifiers
           );
         }
-      } else if (!actual) {
+      } else if (virtual) {
         parsePropFromExpr(
           getData(_template, name), key, expr, '*'
         );
@@ -263,7 +263,7 @@
 
     parseDirects(_template, template.directs, resources);
 
-    parseParams(_template, template.props, resources, 'props', template.actual);
+    parseParams(_template, template.props, resources, 'props', template.virtual);
     parseParams(_template, template.style, resources, 'style', false);
     parseParams(_template, template.attrs, resources, 'attrs', false);
     parseParams(_template, template.classes, resources, 'classes', true);
@@ -332,5 +332,7 @@
   Exact.HTMXParser = {
     parse: parse
   };
+
+  Exact.HTMXEngine.parse = parse;
 
 })();

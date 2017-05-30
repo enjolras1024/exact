@@ -272,7 +272,7 @@
 
         flag = 1;
       } else {
-        paths[i] = null;
+        //paths[i] = null;
       }
     }
 

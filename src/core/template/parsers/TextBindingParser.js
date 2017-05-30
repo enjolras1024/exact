@@ -1,5 +1,5 @@
 //######################################################################################################################
-// src/core/parsers/TextBindingParser.js
+// src/core/template/parsers/TextBindingParser.js
 //######################################################################################################################
 (function() {
 
@@ -32,7 +32,7 @@
       var range0 = StringUtil.range(expr, -1, BINDING_OPERATORS.ONE_TIME, DATA_BINDING_BRACKETS);
       var range1 = StringUtil.range(expr, -1, BINDING_OPERATORS.ONE_WAY, DATA_BINDING_BRACKETS);
 
-      if (!range0 && !range1) { return null; }
+      //if (!range0 && !range1) { return null; } // maybe attrs: {'style?': 'red'}
 
       while (range1 || range0) {
         if (range1) {

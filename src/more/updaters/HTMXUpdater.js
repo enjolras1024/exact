@@ -1,5 +1,5 @@
 //######################################################################################################################
-// src/core/compilers/HTMXCompiler.js
+// src/more/updaters/HTMXUpdater.js
 //######################################################################################################################
 (function() {
 
@@ -7,8 +7,8 @@
   var Element = Exact.Element;
   var Component = Exact.Component;
 
+  var HTMXEngine = Exact.HTMXEngine;
   var HTMXTemplate = Exact.HTMXTemplate;
-  var HTMXCompiler = Exact.HTMXCompiler;
 
   var emptyObject = {}, emptyArray = [];
 
@@ -70,10 +70,10 @@
 
     if (template.type) {
       child = Component.create(template.type);
-      HTMXCompiler.initialize(template, child, context);
+      HTMXEngine.build(template, child, context);
     } else if (template.tag) {
       child = Element.create(template.tag, template.ns);
-      HTMXCompiler.initialize(template, child, context);
+      HTMXEngine.build(template, child, context);
     } else {
       child = Text.create(template);
     }
@@ -85,7 +85,7 @@
     return child;
   }
 
-  function updateChildrenOrContents(template, target, context) {
+  function updateChildrenOrContents(template, target, context) { // refer to Vue.js
     var _children = (target instanceof Component && target !== context) ? (target.contents || []) : target.children;
 
     if (_children === template.children) { return; }
@@ -101,7 +101,7 @@
     while (oldBeginIndex <= oldEndIndex && newBeginIndex <= newEndIndex) {
 
       if (oldBeginChild == null) {
-        oldBeginChild = _children[++oldBeginIndex]; // Vnode has been moved left
+        oldBeginChild = _children[++oldBeginIndex];
       } else if (oldEndChild == null) {
         oldEndChild = _children[--oldEndIndex];
       } else if (isMatched(oldBeginChild, newBeginChild)) {

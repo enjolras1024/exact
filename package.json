@@ -1,7 +1,7 @@
 {
   "name": "exact",
-  "version": "0.0.8",
-  "description": "An event-driven library for building web user interfaces with simple APIs in a flexible way.",
+  "version": "0.0.9",
+  "description": "An Event-driven JavaScript Library for Building User Interfaces with Simple APIs in a Flexible Way",
   "main": "index.html",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",

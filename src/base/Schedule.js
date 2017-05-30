@@ -5,34 +5,35 @@
 
   var setImmediate = Exact.setImmediate;
 
-  var pool = [], queue = [], cursor = 0, waiting = false, running = false;
+  var buffers = [[], []], updaters = [], cursor = 0, index = 0, waiting = false, running = false;
 
   function run() {
-
     cursor = 0;
     running = true;
 
     var target; //TODO: func, args
 
-    while (cursor < pool.length) {
-      target = pool[cursor];
-
+    while (cursor < updaters.length) {
+      target = updaters[cursor];
       target.update();
-
       ++cursor;
     }
 
-    for (var i = 0, n = queue.length; i < n; ++i) {
-      target = queue[i];
+    cursor = 0;
+    updaters.splice(0); //renderers.length = 0;
+    running = false;
+    waiting = false;
 
+    var renderers = buffers[index];
+    
+    index = index ? 0 : 1;
+
+    for (var i = 0, n = renderers.length; i < n; ++i) {
+      target = renderers[i];
       target.render();
     }
 
-    waiting = false;
-    running = false;
-    queue.splice(0); //queue.length = 0;
-    pool.splice(0); //pool.length = 0;
-    cursor = 0;
+    renderers.splice(0); //updaters.length = 0;
   }
 
   Exact.Schedule = {
@@ -42,22 +43,22 @@
      */
     insert: function(target) {
       //if (!target || !target.update) { return; }
-      var i, n = pool.length, id = target.guid;
+      var i, n = updaters.length, id = target.guid;
 
       if (!running) {
         i = n - 1;
-        while (i >= 0 && id < pool[i].guid) {
+        while (i >= 0 && id < updaters[i].guid) {
           --i;
         }
         ++i;
       } else {
-        i = cursor;
-        while (i < n && id >= pool[i].guid) {
+        i = cursor + 1;
+        while (i < n && id >= updaters[i].guid) {
           ++i;
         }
       }
 
-      pool.splice(i, 0, target);
+      updaters.splice(i, 0, target);
 
       if (!waiting) {
         waiting = true;
@@ -71,7 +72,8 @@
      */
     append: function(target) {
       //if (!target || !target.render) { return; }
-      queue.push(target);
+      var renderers = buffers[index];
+      renderers.push(target);
     }
   };
 

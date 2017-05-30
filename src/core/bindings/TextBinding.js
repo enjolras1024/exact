@@ -41,7 +41,7 @@
           if (piece instanceof Expression) {
             Expression.activate(piece, i, container, context, locals);
           } else {
-            container[i] = piece;
+            container.set(i, piece);
           }
         }
 

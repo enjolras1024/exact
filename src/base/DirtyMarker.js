@@ -27,7 +27,7 @@
         if (!_dirty) {
           _dirty = {};
 
-          Object.defineProperty(object, '_dirty', {
+          Exact.defineProp(object, '_dirty', {
               value: _dirty, enumerable: false, writable: true, configurable: true}
           );
         }

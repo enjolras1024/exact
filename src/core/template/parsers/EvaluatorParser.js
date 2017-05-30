@@ -1,5 +1,5 @@
 //######################################################################################################################
-// src/core/parsers/EvaluatorParser.js
+// src/core/template/parsers/EvaluatorParser.js
 //######################################################################################################################
 (function() {
 
@@ -53,9 +53,9 @@
 
   function makeFunctionBody(expr) {
     if ('__DEV__' === 'development') {
-      return 'try { return ' + expr + '; } catch (error) { console.error("the expression `' + expr + '` is illegal"); throw error; }';
+      return 'try { return ' + expr + ' } catch (error) { console.error("the expression `' + expr.replace(/('|")/g, '\\$1') + '` is illegal"); throw error; }';
     } else {
-      return 'return ' + expr + ';';
+      return 'return ' + expr;
     }
   }
 

@@ -11,35 +11,29 @@ Exact is an event-driven JavaScript library for building web user interfaces wit
 #### Overview
 An easiest Exact example looks like this:
 ```javascript
-var Component = Exact.Component;
-
 var App = Exact.defineClass({
-    extend: Component,
+    extend: Exact.Component,
     statics: {
       descriptors: ['what'], // or {what: null}, so `what` is bindable
       template: '<div><h1>Hello, @{ $.what }!</h1></div>'
     }
 }); 
 
-Component.create(App, {what: 'World'}).attach(document.getElementById('app'));
+Exact.Component.create(App, {what: 'World'}).attach(Exact.Skinquery('#app'));
 ```
 This example will render "Hello, World!" on the page. We use a declarative template which contanis contents and an one-way binding here for initialization. While you can create a same example in procudure with empty template and more code, just like this:
 ```javascript
-var Text = Exact.Text;
-var Element = Exact.Element;
-var Component = Exact.Component;
-
 var App = Exact.defineClass({
-    extend: Component,
+    extend: Exact.Component,
     statics: {
       descriptors: ['what'],
       template: '<div></div>'
     }
 });
 
-var app = Component.create(App);
-var h1 = Element.create('h1');
-var text = Text.create('');
+var app = Exact.Component.create(App);
+var h1 = Exact.Element.create('h1');
+var text = Exact.Text.create('');
 
 h1.children.insert(text);
 app.children.insert(h1);
@@ -50,10 +44,10 @@ app.on('changed.what', function() {
 
 app.save({what: 'World'});  // Or app.set('what', 'World'). It will dispatch event `changed.what`
 
-app.attach(document.getElementById('app'))
+app.attach(Exact.Skin.query('#app'))
 ```
 
 [Go here](https://enjolras1024.github.io/exact/examples/) to see more examples.
 
 #### License
-Released under the MIT license. Copyright ? 2017 Enjolras1024. All rights reserved.
+Released under the MIT license. Copyright © 2017 Enjolras1024. All rights reserved.

@@ -23,7 +23,7 @@
         if (_bindings) {
           _bindings.push(binding);
         } else {
-          Object.defineProperty(target, '_bindings', {
+          Exact.defineProp(target, '_bindings', {
             value: [binding], writable: false, enumerable: false, configurable: true
           });
         }

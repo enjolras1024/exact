@@ -3,12 +3,12 @@
 //######################################################################################################################
 (function() {
 
-  function HTMXTemplate() {
+  function HTMXTemplate(virtual) {
     this.ns = '';
     this.tag = '';
     this.type = null;
 
-    this.key = '';
+    //this.key = '';
     this.ref = '';
 
     this.props = null;
@@ -19,7 +19,7 @@
     this.directs = null;
     this.children = null;
 
-    this.actual = false; // if prop value is actual
+    this.virtual = virtual; // if prop value is virtual or actual
   }
 
   /**
@@ -43,10 +43,10 @@
    * @returns {HTMXTemplate}
    */
   function create(tagOrType, params, children) {
-    var template = new HTMXTemplate();
-    // if there is no expression for prop, the value assigned to the prop must be actual,
+    var template = new HTMXTemplate(false);
+    // if there is no expression for the prop, the value assigned to the prop must be actual, not virtual,
     // e.g. { score: 10 } instead of { score: '10' } if `score` is number
-    template.actual = true;
+    //template.virtual = false;
 
     if (typeof tagOrType === 'string') {
       template.tag = tagOrType;
@@ -61,8 +61,8 @@
         template.ns = params.ns || '';
       }
 
-      template.key = params.key;    // not for string or DOM template
-      template.actions = params.on; // not for string or DOM template
+      //template.key = params.key;    // not for string or DOM template
+      //template.actions = params.on; // not for string or DOM template
 
       template.ref = params.ref;
       template.style = params.style;
@@ -89,6 +89,7 @@
   }
 
   HTMXTemplate.create = create;
+  //HTMXTemplate.compile = null;
   //HTMXTemplate.parse = null;
 
   Exact.HTMXTemplate = HTMXTemplate;

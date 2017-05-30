@@ -14,7 +14,18 @@
     var handler = template.handler, evaluator = template.evaluator;
 
     if (handler) {
-      target.on(type, context[handler]/*.bind(context)*/);
+      var func = context[handler];
+      if (!func) {
+        throw new ReferenceError('no such handler named ' + handler + ' in ' + context);
+      }
+      //if (!func.__bound__to__) { // TODO: __exact__bound__
+      //  func = func.bind(context);
+      //  Exact.defineProp(func, '__bound__to__', {
+      //    value: context, writable: false, enumerable: false, configurable: true
+      //  });
+      //  context[handler] = func;
+      //}
+      target.on(type, func);
     } else {
       locals = [null].concat(locals || []);
       target.on(type, function(event) {

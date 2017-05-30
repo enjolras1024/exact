@@ -51,7 +51,7 @@
 
       for (key in source) {
         if (source.hasOwnProperty(key)) {
-          Object.defineProperty(target, key, Object.getOwnPropertyDescriptor(source, key));
+          Exact.defineProp(target, key, Object.getOwnPropertyDescriptor(source, key));
         }
       }
     }
@@ -107,7 +107,7 @@
       source = sources[i];
       for (var key in source) {
         if (source.hasOwnProperty(key)) {
-          Object.defineProperty(target, key, Object.getOwnPropertyDescriptor(source, key));
+          Exact.defineProp(target, key, Object.getOwnPropertyDescriptor(source, key));
         }
       }
     }
@@ -162,7 +162,7 @@
 
     defineProps(subClass.prototype, sources);
 
-    Object.defineProperty(subClass.prototype, 'constructor', {
+    Exact.defineProp(subClass.prototype, 'constructor', {
       value: subClass, enumerable: false, writable: true, configurable: true
     });
 

@@ -1,12 +1,25 @@
 //######################################################################################################################
 // src/exit.js
-//######################################################################################################################
+////######################################################################################################################
 //(function(global, module) {
 //  'use strict';
 //
-//  var Exact = { version: '0.0.8' };
-
-  global = global || window || {};
+//  global = global || window || {};
+//
+//  var Exact = { version: '0.0.9' };
+//
+//  try {
+//    Exact['env'] = '>=ES5';
+//    Exact.defineProp = Object.defineProperty;
+//    Exact.defineProp({}, 'x', {get: function() {}})
+//  } catch (e) {
+//    Exact['env'] = '<ES5';
+//    Exact.defineProp = function defineProp(target, property, descriptor) {
+//      target[property] = descriptor.value;
+//    };
+//  }
+//
+//  Exact.Skin = global && global.ExactSkin;
 
   if (module) {
     module.exports = Exact;
@@ -16,4 +29,7 @@
 
   Exact.global = global;
 
-})(typeof global !== 'undefined' ? global : null, typeof module !== 'undefined' ? module : null);
+})(
+  typeof global !== 'undefined' ? global : null,
+  typeof module !== 'undefined' ? module : null
+);

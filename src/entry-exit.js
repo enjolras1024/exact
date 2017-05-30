@@ -1,0 +1,35 @@
+//######################################################################################################################
+// src/entry.js
+//######################################################################################################################
+(function(global, module) {
+  'use strict';
+
+  global = global || window || {};
+
+  var Exact = { version: '0.0.9' };
+
+  try {
+    Exact['env'] = '>=ES5';
+    Exact.defineProp = Object.defineProperty;
+    Exact.defineProp({}, 'x', {get: function() {}})
+  } catch (e) {
+    Exact['env'] = '<ES5';
+    Exact.defineProp = function defineProp(target, property, descriptor) {
+      target[property] = descriptor.value;
+    };
+  }
+
+  Exact.Skin = global && global.ExactSkin;
+
+  if (module) {
+    module.exports = Exact;
+  } else {
+    global.Exact = Exact;
+  }
+
+  Exact.global = global;
+
+})(
+  typeof global !== 'undefined' ? global : null,
+  typeof module !== 'undefined' ? module : null
+);

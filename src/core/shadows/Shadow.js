@@ -3,7 +3,7 @@
 //######################################################################################################################
 (function() {
 
-  var Skin = Exact.Skin;
+  //var Skin = ExactSkin || Exact.Skin;
 
   var Container = Exact.Container;
   var Collection = Exact.Collection;
@@ -36,7 +36,7 @@
    */
   function getAttrs() {
     if (!this._attrs/* && this.tag*/) {
-      Object.defineProperty(this, '_attrs', {value: createContainer(this), configurable: true});
+      Exact.defineProp(this, '_attrs', {value: createContainer(this), configurable: true});
     }
     return this._attrs;
   }
@@ -48,7 +48,7 @@
    */
   function getProps() {
     //if (!this._props/* && this.tag*/) {
-    //  Object.defineProperty(this, '_props', {value: createContainer(this), configurable: true});
+    //  Exact.defineProp(this, '_props', {value: createContainer(this), configurable: true});
     //}
     return this._props;
   }
@@ -60,7 +60,7 @@
    */
   function getStyle() {
     if (!this._style/* && this.tag*/) {
-      Object.defineProperty(this, '_style', {value: createContainer(this), configurable: true});
+      Exact.defineProp(this, '_style', {value: createContainer(this), configurable: true});
     }
     return this._style;
   }
@@ -72,7 +72,7 @@
    */
   function getClasses() { // TODO: class ClassList extends Container { append, remove }
     if (!this._classes/* && this.tag*/) {
-      Object.defineProperty(this, '_classes', {value: createContainer(this), configurable: true});
+      Exact.defineProp(this, '_classes', {value: createContainer(this), configurable: true});
     }
     return this._classes;
   }
@@ -84,7 +84,7 @@
    */
   function getChildren() {
     if (!this._children /*&& this.tag*/) {
-      Object.defineProperty(this, '_children', {value: createCollection(this), configurable: true});
+      Exact.defineProp(this, '_children', {value: createCollection(this), configurable: true});
     }
     return this._children;
   }
@@ -95,41 +95,41 @@
   // * @returns {Collection}
   // */
   //function getContents() {
-  //  if (!this._contents && Skin.isElement(this.$skin)) {
-  //    Object.defineProperty(this, '_contents', {value: createCollection(this), configurable: true});
+  //  if (!this._contents && ExactSkin.isElement(this.$skin)) {
+  //    Exact.defineProp(this, '_contents', {value: createCollection(this), configurable: true});
   //  }
   //  return this._contents;
   //}
 
   // lazy mode when getter is supported
   var defineMembersOf = function(shadow) {
-    Object.defineProperty(shadow, '_props', {
+    Exact.defineProp(shadow, '_props', {
       value: {}, writable: false, enumerable: false, configurable: false
     });
-    Object.defineProperty(shadow, 'props', {get: getProps});
+    Exact.defineProp(shadow, 'props', {get: getProps});
 
     if (shadow.tag) {
-      Object.defineProperty(shadow, 'attrs', {get: getAttrs});
-      Object.defineProperty(shadow, 'style', {get: getStyle});
-      Object.defineProperty(shadow, 'classes', {get: getClasses});
-      Object.defineProperty(shadow, 'children', {get: getChildren});
+      Exact.defineProp(shadow, 'attrs', {get: getAttrs});
+      Exact.defineProp(shadow, 'style', {get: getStyle});
+      Exact.defineProp(shadow, 'classes', {get: getClasses});
+      Exact.defineProp(shadow, 'children', {get: getChildren});
       //ObjectUtil.defineProperty(shadow, 'contents', {get: getContents});  //TODO: set('contents', []) is ok
     }
   };
 
-  if ('__ENV__' === '<ES5') {
+  if (Exact.env === '<ES5') {
     // immediate mode when getter is not supported
     defineMembersOf = function(shadow) {
-      Object.defineProperty(shadow, '_props', {
+      Exact.defineProp(shadow, '_props', {
         value: {}, writable: false, enumerable: false, configurable: false
       });
       shadow.props = shadow._props;
 
       if (shadow.tag) {
-        Object.defineProperty(shadow, 'attrs', {value: createContainer(shadow)});
-        Object.defineProperty(shadow, 'style', {value: createContainer(shadow)});
-        Object.defineProperty(shadow, 'classes', {value: createContainer(shadow)});
-        Object.defineProperty(shadow, 'children', {value: createCollection(shadow)});
+        Exact.defineProp(shadow, 'attrs', {value: createContainer(shadow)});
+        Exact.defineProp(shadow, 'style', {value: createContainer(shadow)});
+        Exact.defineProp(shadow, 'classes', {value: createContainer(shadow)});
+        Exact.defineProp(shadow, 'children', {value: createCollection(shadow)});
         //ObjectUtil_defineProp(shadow, 'contents', {value: createCollection(shadow)});
 
         shadow._attrs = shadow.attrs;
@@ -142,11 +142,11 @@
   }
 
   function initSkin(shadow, $skin) {
-    var ns = shadow.ns, tag = shadow.tag, _shadow;
+    var ns = shadow.ns, tag = shadow.tag, _shadow, Skin = Exact.Skin;
 
     if (!$skin || tag !== Skin.getTagName($skin) || ns !== Skin.getNameSpace($skin)
       || ((_shadow = $skin ? Skin.getShadow($skin) : null) && _shadow !== shadow)) {
-      $skin = tag ? Skin.createElement(tag, ns) : Skin.createText('');
+      $skin = tag ? Skin.createElement(ns, tag, shadow._props && shadow._props.type) : Skin.createText('');
     }
 
     shadow.attach($skin);
@@ -172,6 +172,7 @@
         this.isInvalidated = true;
         Schedule.insert(this);
       }
+      return this;
     },
 
     /**
@@ -184,9 +185,14 @@
         this.refresh();
       }
 
-      //this.send('updated');
+      this.send('updated');
 
       var $skin = this.$skin;
+
+      //if (!$skin) {
+      //  initSkin(this);
+      //  $skin = this.$skin;
+      //}
 
       if ($skin) {
         var child, children = this._children, $children;
@@ -195,20 +201,20 @@
           for (var i = 0, n = children.length; i < n; ++i) {
             child = children[i];
             if (!child.$skin) {
-              $children = $children || Skin.getChildren($skin);
+              $children = $children || Exact.Skin.getChildren($skin);
               initSkin(child, $children[i]);
             }
           }
         }
       } else {
-        initSkin(this);
+      //  initSkin(this);
       }
 
-      Schedule.append(this); //this.render(); TODO: immediate rendering is ok
+      Schedule.append(this); // this.render(); // TODO: immediate rendering is ok
 
       this.isInvalidated = false;
 
-      this.send('updated');
+      return this;
     },
 
     /**
@@ -218,6 +224,8 @@
       var $skin = this.$skin;
 
       if (!$skin) { return; }
+
+      var Skin = Exact.Skin;
 
       var dirty = this._dirty,
         props = this._props,
@@ -250,7 +258,7 @@
         if (children && (children.isInvalidated)) {
           if ('__DEV__' === 'development') {
             if (props.hasOwnProperty('innerHTML') && children.length) {
-              console.error("You'd better not use innerHTML and children together.");
+              console.error("You'd better not use innerHTML and children together for ", this); // TODO: check when parsing
             }
           }
 
@@ -270,8 +278,8 @@
           Collection.clean(children);
         }
       }
-
       //this.send('rendered');//TODO: beforeRefresh, refreshing
+      return this;
     },
 
     /**
@@ -279,8 +287,8 @@
      * @param {HTMLElement} $skin
      */
     attach: function attach($skin) {
+      var Skin = Exact.Skin;
       var shadow = Skin.getShadow($skin);
-
       // check
       if (shadow) {
         if (shadow === this) {
@@ -297,9 +305,8 @@
       if (this.ns !== Skin.getNameSpace($skin)) {
         throw new Error('a shadow can not attach a $skin that has a different namespace');
       }
-
       // define
-      Object.defineProperty(this, '$skin', {
+      Exact.defineProp(this, '$skin', {
         value: $skin,
         writable: true,
         enumerable: false,
@@ -309,7 +316,7 @@
       Skin.setShadow($skin, this);
 
       // finish
-      var type, action, actions = this._actions;
+      var type, event, action, actions = this._actions;
 
       if (actions) {
         for (type in actions) {
@@ -317,22 +324,26 @@
 
           action = actions[type];
 
+          event = Watcher.getFixedEvent(type);
+
           if (action) {
-            Shadow.addEventListener(this, action, type);
+            Shadow.addEventListener(this, action, event.type, event.capture);
           }
         }
       }
 
+      this.send('attached');
+
       this.invalidate();
-      //this.send('attached');
-      //return this;
+
+      return this;
     },
 
     /**
      *
      */
     detach: function detach() {
-      var type, action, actions = this._actions, $skin = this.$skin;
+      var type, event, action, actions = this._actions, $skin = this.$skin;
 
       if (actions) {
         for (type in actions) {
@@ -340,17 +351,21 @@
 
           action = actions[type];
 
+          event = Watcher.getFixedEvent(type);
+
           if (action) {
-            Shadow.removeEventListener(this, action, type);
+            Shadow.removeEventListener(this, action, event.type, event.capture);
           }
         }
       }
 
-      Skin.setShadow($skin, null);
+      Exact.Skin.setShadow($skin, null);
+
+      this.send('detached');
 
       this.$skin = null;
-      //this.send('detached');
-      //return this;
+
+      return this;
     },
 
     toString: function toString() {
@@ -362,18 +377,20 @@
       var $skin = this.$skin;
 
       $skin && setImmediate(function() {
-        Skin.call($skin, 'blur');
+        Exact.Skin.call($skin, 'blur');
       });
-      //return this;
+
+      return this;
     },
 
     focus: function focus() { //TODO: remove
       var $skin = this.$skin;
 
       $skin && setImmediate(function() {
-        Skin.call($skin, 'focus');
+        Exact.Skin.call($skin, 'focus');
       });
-      //return this;
+
+      return this;
     },
 
     get: function(key) {
@@ -388,7 +405,7 @@
       if (val !== old) {
         props[key] = val;
     
-        if ('__ENV__' === '<ES5') {
+        if (Exact.env === '<ES5') {
           this[key] = val;
         }
     
@@ -396,6 +413,8 @@
 
         this.invalidate();
       }
+
+      return this;
     },
 
     statics: {
@@ -407,15 +426,15 @@
       initialize: function initialize(shadow, tag, ns) {
         shadow.invalidate = shadow.invalidate.bind(shadow);
 
-        Object.defineProperty(shadow, 'guid', {
+        Exact.defineProp(shadow, 'guid', {
           value: ++guid, writable: false, enumerable: false, configurable: false
         });
 
-        Object.defineProperty(shadow, 'tag', {
+        Exact.defineProp(shadow, 'tag', {
           value: tag, writable: false, enumerable: false, configurable: false
         });
 
-        Object.defineProperty(shadow, 'ns', {
+        Exact.defineProp(shadow, 'ns', {
           value: ns, writable: false, enumerable: false, configurable: false
         });
 
@@ -451,28 +470,29 @@
       },
 
       addEventListener: function(shadow, action, type) {
-        var $skin = shadow.$skin;
+        var $skin = shadow.$skin, Skin = Exact.Skin;
 
         if (!$skin) { return; }
 
         if (Skin.mayDispatchEvent($skin, type)) { // TODO: No problem?
           action.listener = function (event) {
+            event.capture = action.capture;
             shadow.send(Skin.getFixedEvent(event)); // TODO: Shadow.getShadow(domEvent.currentTarget).send(Skin.getFixedEvent(domEvent))
           };
 
-          Skin.addEventListener($skin, type, action.listener, action.useCapture);
+          Skin.addEventListener($skin, type, action.listener, action.capture);
         } else {
           action.listener = null;
         }
       },
 
       removeEventListener: function(shadow, action, type) {
-        var $skin = shadow.$skin;
+        var $skin = shadow.$skin, Skin = Exact.Skin;
 
         if (!$skin) { return; }
 
         if (action.listener && Skin.mayDispatchEvent($skin, type)) {
-          Skin.removeEventListener($skin, type, action.listener, action.useCapture);
+          Skin.removeEventListener($skin, type, action.listener, action.capture);
 
           delete action.listener;
         }

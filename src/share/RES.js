@@ -46,9 +46,9 @@
       if (!res && !stop) {
         res = find(path, this);
 
-        //if (!res && Exact.global) {
-        //  res = find(path, Exact.global);
-        //}
+        if (!res && Exact.global) {
+          res = find(path, Exact.global);
+        }
       }
 
       return res;
@@ -91,7 +91,7 @@
         return false;
       }
 
-      Object.defineProperty(target, prop, {
+      Exact.defineProp(target, prop, {
         value: value, writable: false, enumerable: true, configurable: true
       });
 
