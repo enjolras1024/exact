@@ -93,12 +93,13 @@ ul > li {
   border-bottom: solid 2px #666;
 }
 
-.menu-item:active {
-  color: #fff;
-  border-bottom: solid 2px #0af;
-}
+/*.menu-item:active {*/
+  /*color: #fff;*/
+  /*border-bottom: solid 2px #0af;*/
+/*}*/
 
 .menu-item.active{
+  color: #fff;
   background-color: #222;
   border-bottom: solid 2px #0af;
 }

@@ -33,14 +33,15 @@
       <ul class="list">
         <li><a href="./index.html#setup" class="link">Setup</a></li>
         <li><a href="./index.html#hello-world" class="link">Hello World</a></li>
+        <li><a href="./index.html#composing" class="link">Composing</a></li>
       </ul>
     </div>
     <div class="card">
-      <h4>Events</h4>
+      <h4>Event</h4>
       <ul class="list">
         <li><a href="./event.html#on-off-once" class="link">On / Off / Once</a></li>
         <li><a href="./event.html#send-emit" class="link">Send / Emit</a></li>
-        <li><a href="./event.html#key-name-of-event" class="link">Key Name of Event</a></li>
+        <li><a href="./event.html#event-type-and-event-name" class="link">Event Type & Event Name</a></li>
       </ul>
     </div>
     <div class="card">
@@ -51,7 +52,7 @@
       </ul>
     </div>
     <div class="card">
-      <h4>Components</h4>
+      <h4>Component</h4>
       <ul class="list">
         <li><a href="./component.html#component-element-and-text" class="link">Component, Element and Text</a></li>
         <li><a href="./component.html#props-attrs-style-and-classes" class="link">Props, Attrs, Style and Classes</a></li>
@@ -64,7 +65,7 @@
       </ul>
     </div>
     <div class="card">
-      <h4>Template Syntax</h4>
+      <h4>Template</h4>
       <ul class="list">
         <li><a href="./template.html#event-handler" class="link">Event Handler</a></li>
         <li><a href="./template.html#data-binding" class="link">Data Binding</a></li>
@@ -90,7 +91,7 @@
   <a class="side-btn">&gt;</a>
   <article class="article">
     <a id="on-off-once"></a>
-    <h2>Events</h2>
+    <h2>Event</h2>
     <p>事件系统是Exact的基础，Watcher对象提供的实例方法，实现了监听、移除和派发任意类型事件的功能。Store、Element和Component等都混入了这些事件方法。</p>
     <h4 >On / Off / Once</h4>
     <p>用`on`方法来监听指定类型的事件，用`off`方法来移除相应类型的事件处理函数。用例如下：</p>
@@ -156,6 +157,13 @@
             <div class="CodeMirror-code"><pre class=" CodeMirror-line "><span style="padding-right: 0.1px;"><span class="cm-variable">watcher</span>.<span class="cm-property">once</span>(<span class="cm-string">'initialized'</span>, <span class="cm-keyword">function</span>(<span class="cm-def">event</span>) {</span></pre><pre class=" CodeMirror-line "><span style="padding-right: 0.1px;">  <span class="cm-variable">console</span>.<span class="cm-property">log</span>(<span class="cm-variable-2">event</span>.<span class="cm-property">type</span>);</span></pre><pre class=" CodeMirror-line "><span style="padding-right: 0.1px;">});</span></pre><pre class=" CodeMirror-line "><span style="padding-right: 0.1px;"><span cm-text="">​</span></span></pre><pre class=" CodeMirror-line "><span style="padding-right: 0.1px;"><span class="cm-variable">watcher</span>.<span class="cm-property">send</span>(<span class="cm-string">'initialized'</span>);<span class="cm-tab" role="presentation" cm-text="	">    </span><span class="cm-comment">// 输出："initialized"</span></span></pre><pre class=" CodeMirror-line "><span style="padding-right: 0.1px;"><span class="cm-variable">watcher</span>.<span class="cm-property">send</span>(<span class="cm-string">'initialized'</span>);<span class="cm-tab" role="presentation" cm-text="	">    </span><span class="cm-comment">// 没有新的输出</span></span></pre></div>
           </div>
         </div>
+      </div>
+    </div>
+
+    <p>对于DOM事件，默认监听的是冒泡阶段的事件。如果要监听捕获阶段的事件，请在事件类型前加一个`!`，像这样：</p>
+    <div class="code-box scroll">
+      <div class="CodeMirror cm-s-alice">
+        <div class="CodeMirror-code"><pre class=" CodeMirror-line "><span style="padding-right: 0.1px;"><span class="cm-variable">watcher</span>.<span class="cm-property">on</span>(<span class="cm-string">'!click'</span>, <span class="cm-keyword">function</span>() {});</span></pre></div>
       </div>
     </div>
 
@@ -225,18 +233,19 @@
         </div>
       </div>
     </div>
-    <a id="key-name-of-event"></a>
+    <a id="event-type-and-event-name"></a>
     <p>在Exact内部，默认使用send方法派发自定义事件和转发DOM事件，相应处理函数接受到的第一个参数始终是Event对象。</p>
 
-    <h4 >Key Name of Event</h4>
-    <p>通常在监听键盘事件时，我们会关心用户按下的键名。同样，当某个属性的值发生改变或验证失败时，我们会关心这个属性的名字。为此，Exact的事件系统特别照顾到了这种情况，使得事件的监听和移除方法更为灵活。</p>
+    <h4>Event Type & Event Name</h4>
+    <p>通常在监听键盘事件时，我们会关心用户按下的键名。同样，当某个属性的值发生改变或验证失败时，我们会关心这个属性的名字。
+      为此，Exact的事件系统特别照顾到了这种情况，允许同一类型的事件有不同的事件名，这使得事件的监听和移除方法更为灵活。</p>
     <div class="code-box scroll">
       <!--<pre class="code-behind js-mode">
   function onEnter(event) {
-    console.log('key `' + event.keyName + '` is pressed');
+    console.log('key `' + event.name + '` is pressed');
   }
   function onChanged(event) {
-    console.log('prop `' + event.keyName + '` is changed');
+    console.log('prop `' + event.name + '` is changed');
   }
   function onTitleChanged(event) {
     console.log('prop `title` is changed, really');
@@ -250,12 +259,12 @@
                                          // 输出：prop `title` is changed, really
   element.send('changed.other');         // 输出：prop `other` is changed
 
-  element.off('keypress.enter');         // 只移除了keyName为`enter`的keypress事件的处理函数
-  element.off('changed');                // 移除了所有changed事件的处理函数，无论keyName是什么</pre>-->
+  element.off('keypress.enter');         // 只移除了name为`enter`的keypress事件的处理函数
+  element.off('changed');                // 移除了所有changed事件的处理函数，无论name是什么</pre>-->
       <div class="CodeMirror cm-s-alice">
         <div class="CodeMirror-lines">
           <div style="position: relative; outline: none;">
-            <div class="CodeMirror-code"><pre class=" CodeMirror-line "><span style="padding-right: 0.1px;"><span class="cm-keyword">function</span> <span class="cm-def">onEnter</span>(<span class="cm-def">event</span>) {</span></pre><pre class=" CodeMirror-line "><span style="padding-right: 0.1px;">  <span class="cm-variable">console</span>.<span class="cm-property">log</span>(<span class="cm-string">'key `'</span> <span class="cm-operator">+</span> <span class="cm-variable-2">event</span>.<span class="cm-property">keyName</span> <span class="cm-operator">+</span> <span class="cm-string">'` is pressed'</span>);</span></pre><pre class=" CodeMirror-line "><span style="padding-right: 0.1px;">}</span></pre><pre class=" CodeMirror-line "><span style="padding-right: 0.1px;"><span class="cm-keyword">function</span> <span class="cm-def">onChanged</span>(<span class="cm-def">event</span>) {</span></pre><pre class=" CodeMirror-line "><span style="padding-right: 0.1px;">  <span class="cm-variable">console</span>.<span class="cm-property">log</span>(<span class="cm-string">'prop `'</span> <span class="cm-operator">+</span> <span class="cm-variable-2">event</span>.<span class="cm-property">keyName</span> <span class="cm-operator">+</span> <span class="cm-string">'` is changed'</span>);</span></pre><pre class=" CodeMirror-line "><span style="padding-right: 0.1px;">}</span></pre><pre class=" CodeMirror-line "><span style="padding-right: 0.1px;"><span class="cm-keyword">function</span> <span class="cm-def">onLabelChanged</span>(<span class="cm-def">event</span>) {</span></pre><pre class=" CodeMirror-line "><span style="padding-right: 0.1px;">  <span class="cm-variable">console</span>.<span class="cm-property">log</span>(<span class="cm-string">'prop `label` is changed, really'</span>);</span></pre><pre class=" CodeMirror-line "><span style="padding-right: 0.1px;">}</span></pre><pre class=" CodeMirror-line "><span style="padding-right: 0.1px;"><span cm-text="">​</span></span></pre><pre class=" CodeMirror-line "><span style="padding-right: 0.1px;"><span class="cm-variable">component</span>.<span class="cm-property">on</span>(<span class="cm-string">'keypress.enter'</span>, <span class="cm-variable">onEnter</span>);<span class="cm-comment">// 按下Enter键时，才会输出：key `enter` is pressed</span></span></pre><pre class=" CodeMirror-line "><span style="padding-right: 0.1px;"><span class="cm-variable">component</span>.<span class="cm-property">on</span>(<span class="cm-string">'changed'</span>, <span class="cm-variable">onChanged</span>);</span></pre><pre class=" CodeMirror-line "><span style="padding-right: 0.1px;"><span class="cm-variable">component</span>.<span class="cm-property">on</span>(<span class="cm-string">'changed.label'</span>, <span class="cm-variable">onLabelChanged</span>);</span></pre><pre class=" CodeMirror-line "><span style="padding-right: 0.1px;"><span cm-text="">​</span></span></pre><pre class=" CodeMirror-line "><span style="padding-right: 0.1px;"><span class="cm-variable">component</span>.<span class="cm-property">send</span>(<span class="cm-string">'changed.label'</span>);  <span class="cm-tab" role="presentation" cm-text="	">  </span><span class="cm-tab" role="presentation" cm-text="	">    </span><span class="cm-comment">// 输出：prop `label` is changed</span></span></pre><pre class=" CodeMirror-line "><span style="padding-right: 0.1px;">                                 <span class="cm-tab" role="presentation" cm-text="	">   </span><span class="cm-tab" role="presentation" cm-text="	">    </span><span class="cm-comment">// 输出：prop `label` is changed, really</span></span></pre><pre class=" CodeMirror-line "><span style="padding-right: 0.1px;"><span class="cm-variable">component</span>.<span class="cm-property">send</span>(<span class="cm-string">'changed.other'</span>);        <span class="cm-comment">// 输出：prop `other` is changed</span></span></pre><pre class=" CodeMirror-line "><span style="padding-right: 0.1px;"><span cm-text="">​</span></span></pre><pre class=" CodeMirror-line "><span style="padding-right: 0.1px;"><span class="cm-variable">component</span>.<span class="cm-property">off</span>(<span class="cm-string">'keypress.enter'</span>);        <span class="cm-comment">// 只移除了keyName为`enter`的keypress事件的处理函数</span></span></pre><pre class=" CodeMirror-line "><span style="padding-right: 0.1px;"><span class="cm-variable">component</span>.<span class="cm-property">off</span>(<span class="cm-string">'changed'</span>);               <span class="cm-comment">// 移除了所有changed事件的处理函数，无论keyName是什么</span></span></pre></div>
+            <div class="CodeMirror-code"><pre class=" CodeMirror-line "><span style="padding-right: 0.1px;"><span class="cm-keyword">function</span> <span class="cm-def">onEnter</span>(<span class="cm-def">event</span>) {</span></pre><pre class=" CodeMirror-line "><span style="padding-right: 0.1px;">  <span class="cm-variable">console</span>.<span class="cm-property">log</span>(<span class="cm-string">'key `'</span> <span class="cm-operator">+</span> <span class="cm-variable-2">event</span>.<span class="cm-property">name</span> <span class="cm-operator">+</span> <span class="cm-string">'` is pressed'</span>);</span></pre><pre class=" CodeMirror-line "><span style="padding-right: 0.1px;">}</span></pre><pre class=" CodeMirror-line "><span style="padding-right: 0.1px;"><span class="cm-keyword">function</span> <span class="cm-def">onChanged</span>(<span class="cm-def">event</span>) {</span></pre><pre class=" CodeMirror-line "><span style="padding-right: 0.1px;">  <span class="cm-variable">console</span>.<span class="cm-property">log</span>(<span class="cm-string">'prop `'</span> <span class="cm-operator">+</span> <span class="cm-variable-2">event</span>.<span class="cm-property">name</span> <span class="cm-operator">+</span> <span class="cm-string">'` is changed'</span>);</span></pre><pre class=" CodeMirror-line "><span style="padding-right: 0.1px;">}</span></pre><pre class=" CodeMirror-line "><span style="padding-right: 0.1px;"><span class="cm-keyword">function</span> <span class="cm-def">onLabelChanged</span>(<span class="cm-def">event</span>) {</span></pre><pre class=" CodeMirror-line "><span style="padding-right: 0.1px;">  <span class="cm-variable">console</span>.<span class="cm-property">log</span>(<span class="cm-string">'prop `label` is changed, really'</span>);</span></pre><pre class=" CodeMirror-line "><span style="padding-right: 0.1px;">}</span></pre><pre class=" CodeMirror-line "><span style="padding-right: 0.1px;"><span cm-text="">​</span></span></pre><pre class=" CodeMirror-line "><span style="padding-right: 0.1px;"><span class="cm-variable">component</span>.<span class="cm-property">on</span>(<span class="cm-string">'keypress.enter'</span>, <span class="cm-variable">onEnter</span>);<span class="cm-comment">// 按下Enter键时，才会输出：key `enter` is pressed</span></span></pre><pre class=" CodeMirror-line "><span style="padding-right: 0.1px;"><span class="cm-variable">component</span>.<span class="cm-property">on</span>(<span class="cm-string">'changed'</span>, <span class="cm-variable">onChanged</span>);</span></pre><pre class=" CodeMirror-line "><span style="padding-right: 0.1px;"><span class="cm-variable">component</span>.<span class="cm-property">on</span>(<span class="cm-string">'changed.label'</span>, <span class="cm-variable">onLabelChanged</span>);</span></pre><pre class=" CodeMirror-line "><span style="padding-right: 0.1px;"><span cm-text="">​</span></span></pre><pre class=" CodeMirror-line "><span style="padding-right: 0.1px;"><span class="cm-variable">component</span>.<span class="cm-property">send</span>(<span class="cm-string">'changed.label'</span>);  <span class="cm-tab" role="presentation" cm-text="	">  </span><span class="cm-tab" role="presentation" cm-text="	">    </span><span class="cm-comment">// 输出：prop `label` is changed</span></span></pre><pre class=" CodeMirror-line "><span style="padding-right: 0.1px;">                                 <span class="cm-tab" role="presentation" cm-text="	">   </span><span class="cm-tab" role="presentation" cm-text="	">    </span><span class="cm-comment">// 输出：prop `label` is changed, really</span></span></pre><pre class=" CodeMirror-line "><span style="padding-right: 0.1px;"><span class="cm-variable">component</span>.<span class="cm-property">send</span>(<span class="cm-string">'changed.other'</span>);        <span class="cm-comment">// 输出：prop `other` is changed</span></span></pre><pre class=" CodeMirror-line "><span style="padding-right: 0.1px;"><span cm-text="">​</span></span></pre><pre class=" CodeMirror-line "><span style="padding-right: 0.1px;"><span class="cm-variable">component</span>.<span class="cm-property">off</span>(<span class="cm-string">'keypress.enter'</span>);        <span class="cm-comment">// 只移除了name为`enter`的keypress事件的处理函数</span></span></pre><pre class=" CodeMirror-line "><span style="padding-right: 0.1px;"><span class="cm-variable">component</span>.<span class="cm-property">off</span>(<span class="cm-string">'changed'</span>);               <span class="cm-comment">// 移除了所有changed事件的处理函数，无论name是什么</span></span></pre></div>
           </div>
         </div>
       </div>

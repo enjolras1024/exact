@@ -1,5 +1,4 @@
 (function() {
-  var Skin = Exact.Skin;
   var Component = Exact.Component;
 
   function ChannelEditor() {
@@ -11,7 +10,7 @@
 
     statics: {
       descriptors: ['label', 'value'],
-      template: Skin.query(document, '.template .channel-editor')
+      template: Exact.Skin.query('.template .channel-editor')
     },
 
     register: function() {
@@ -52,7 +51,7 @@
     constructor: Palette, extend: Component,
 
     statics: {
-      template: Skin.query(document, '.template .palette'),
+      template: Exact.Skin.query('.template .palette'),
 
       resources: {
         ChannelEditor: ChannelEditor
@@ -105,5 +104,5 @@
     }
   });
 
-  Component.create(Palette).attach(Skin.query(document, '#palette'));
+  Component.create(Palette).attach(Exact.Skin.query('#palette'));
 })();

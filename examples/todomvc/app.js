@@ -1,5 +1,4 @@
 (function() {
-  var Skin = Exact.Skin;
   var Store = Exact.Store;
   var Component = Exact.Component;
   var Collection = Exact.Collection;
@@ -33,7 +32,7 @@
     extend: Component,
 
     statics: {
-      template: Skin.query(document, '.template .todo-adapter'),
+      template: Exact.Skin.query('.template .todo-adapter'),
 
       defaults: function() {
         return {
@@ -126,7 +125,7 @@
         TodoAdapter: ENJ.TodoAdapter
       },
 
-      template: Skin.query(document, '.template .todoapp')
+      template: Exact.Skin.query('.template .todoapp')
     },
 
     register: function() {
@@ -204,8 +203,9 @@
     app.set('status', status || STATUS.ALL);
   }
 
-  window.addEventListener('hashchange', onHashChange);
   onHashChange();
 
-  app.attach(Skin.query(document, '#todoapp'));
+  window.onhashchange = onHashChange;
+
+  app.attach(Exact.Skin.query('#todoapp'));
 })();

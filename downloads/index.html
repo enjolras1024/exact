@@ -14,25 +14,27 @@
     }
     .block {
       width: 100%;
-      height: 240px;
+      /*height: 160px;*/
       /*font-size: 2em;*/
     }
     .block:nth-child(odd) {
-      background-color: #eee;
+      background-color: #fff;
     }
     .block:nth-child(even) {
-      background-color: #ccc;
+      background-color: #eee;
     }
     .block h2 {
       color: #222;
       margin: 0;
-      padding: 20px 0;
+      padding: 20px 10px;
       font-size: 2.7em;
     }
 
     .desc {
+      width: 75%;
       margin: 0;
       color: #222;
+      font-size: 18px;
     }
   </style>
 </head>
@@ -55,28 +57,45 @@
     <div class="block">
       <div class="panel">
         <h2>exact</h2>
-        <p class="desc">It's for modern browser. It uses ES5 and HTML5 APIs. Coding in ES6 are recommended for development.</p>
-        <!--<a class="button">DOWNLOAD v0.0.4</a>-->
+        <p class="desc">It is based on ECMAScript 5.
+          In IE8, <a class="link-live">es5-shim</a> and <a class="link-live">es5-sham</a> are required,
+          but some features are not supported, especially getter and setter
+          (<a href="../documents/component.html#defaults-and-descriptors" class="link-live">See here</a>).</p>
+        <a href="exact-0.0.9.zip" class="button">DOWNLOAD v0.0.9</a>
       </div>
     </div>
 
     <div class="block">
       <div class="panel">
-        <h2>exact-jQuery</h2>
-        <p class="desc">It's for old browser. It uses jQuery to operate DOM.
-          Besides jQuery 1.x, es5-shim and es5-sham are also required.
-          It's important to note that some features are not supported in this edition. <a>See here.</a></p>
-        <!--<a class="button">DOWNLOAD v0.0.4</a>-->
+        <h2>exact-skin</h2>
+        <p class="desc">It's for modern browsers. It uses some HTML5 APIs, like `querySelector`. No dependency.</p>
+        <a href="exact-skin-0.0.9.zip" class="button">DOWNLOAD v0.0.9</a>
       </div>
     </div>
 
     <div class="block">
       <div class="panel">
-        <h2>exact-cheerio</h2>
-        <p class="desc">It's for server-side rendering. Thanks to cheerio.</p>
-        <!--<a class="button">DOWNLOAD v0.0.4</a>-->
+        <h2>exact-skin-jquery</h2>
+        <p class="desc">It's for old browsers, but still works in modern browsers. It depends on <a href="http://blog.jquery.com/2016/05/20/jquery-1-12-4-and-2-2-4-released/" class="link-live">jQuery</a> 1.9+ to operate DOM.
+          <a href="../examples/tiny-editor/index.html" class="link-live">Go here</a> to see an example.</p>
+        <a href="exact-skin-jquery-0.0.9.zip" class="button">DOWNLOAD v0.0.9</a>
       </div>
     </div>
+
+    <div class="block">
+      <div class="panel">
+        <h2>exact-skin-cheerio</h2>
+        <p class="desc">It's for server-side rendering. Thanks to <a href="https://github.com/cheeriojs/cheerio" class="link-live">cheerio</a>.
+          <a href="../examples/server-side-render.html" class="link-live">Go here</a> to see an example.</p>
+        <a href="exact-skin-cheerio-0.0.9.zip" class="button">DOWNLOAD v0.0.9</a>
+      </div>
+    </div>
+
+    <!--<div class="block">-->
+      <!--<div class="panel">-->
+        <!--<p class="desc">Maybe, more implements...</p>-->
+      <!--</div>-->
+    <!--</div>-->
   </div>
   <!--<footer class="footer">
     <p>Released under the MIT license<br>

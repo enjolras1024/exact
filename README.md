@@ -53,7 +53,7 @@ app.save({what: 'World'});  // Or app.set('what', 'World'). It will dispatch eve
 app.attach(document.getElementById('app'))
 ```
 
-[Go here](https://enjolras1024.github.io/exact/examples/) to see more examples.
+[Go here](https://enjolras1024.github.io/exact/examples/color-palette.html) to see more examples.
 
 #### License
 Released under the MIT license. Copyright ? 2017 Enjolras1024. All rights reserved.

@@ -4,9 +4,22 @@
 (function(global, module) {
   'use strict';
 
-  var Exact = { version: '0.0.8' };
-//
-//  global = global || window || {};
+  global = global || window || {};
+
+  var Exact = { version: '0.0.9' };
+
+  try {
+      Exact['env'] = '>=ES5';
+      Exact.defineProp = Object.defineProperty;
+      Exact.defineProp({}, 'x', {get: function() {}})
+    } catch (e) {
+      Exact['env'] = '<ES5';
+      Exact.defineProp = function defineProp(target, property, descriptor) {
+        target[property] = descriptor.value;
+      };
+    }
+
+  Exact.Skin = global && global.ExactSkin;
 //
 //  if (module) {
 //    module.exports = Exact;
@@ -16,7 +29,10 @@
 //
 //  Exact.global = global;
 //
-//})(typeof global !== 'undefined' ? global : null, typeof module !== 'undefined' ? module : null);
+//})(
+//  typeof global !== 'undefined' ? global : null,
+//  typeof module !== 'undefined' ? module : null
+//);
 
 //######################################################################################################################
 // src/utils/PathUtil.js
@@ -332,7 +348,7 @@
 
       for (key in source) {
         if (source.hasOwnProperty(key)) {
-          Object.defineProperty(target, key, Object.getOwnPropertyDescriptor(source, key));
+          Exact.defineProp(target, key, Object.getOwnPropertyDescriptor(source, key));
         }
       }
     }
@@ -388,7 +404,7 @@
       source = sources[i];
       for (var key in source) {
         if (source.hasOwnProperty(key)) {
-          Object.defineProperty(target, key, Object.getOwnPropertyDescriptor(source, key));
+          Exact.defineProp(target, key, Object.getOwnPropertyDescriptor(source, key));
         }
       }
     }
@@ -443,7 +459,7 @@
 
     defineProps(subClass.prototype, sources);
 
-    Object.defineProperty(subClass.prototype, 'constructor', {
+    Exact.defineProp(subClass.prototype, 'constructor', {
       value: subClass, enumerable: false, writable: true, configurable: true
     });
 
@@ -567,683 +583,13 @@
         return false;
       }
 
-      Object.defineProperty(target, prop, {
+      Exact.defineProp(target, prop, {
         value: value, writable: false, enumerable: true, configurable: true
       });
 
       return true;
     }
   };
-
-})();
-
-//######################################################################################################################
-// src/skins/Skin.js
-//######################################################################################################################
-(function() {
-
-  var MUST_USE_PROPERTY = 0x1;
-  var HAS_BOOLEAN_VALUE = 0x2;
-  // PROPERTIES, modified from React (https://facebook.github.io/react/)
-  var PROPERTIES = {
-    /**
-     * Standard Properties
-     */
-    accept: 0,
-    acceptCharset: 0,
-    accessKey: 0,
-    action: 0,
-    allowFullScreen: HAS_BOOLEAN_VALUE,
-    allowTransparency: 0,
-    alt: 0,
-    async: HAS_BOOLEAN_VALUE,
-    autoComplete: 0,
-    autoFocus: HAS_BOOLEAN_VALUE,
-    autoPlay: HAS_BOOLEAN_VALUE,
-    capture: HAS_BOOLEAN_VALUE,
-    cellPadding: 0,
-    cellSpacing: 0,
-    charSet: 0,
-    challenge: 0,
-    checked: MUST_USE_PROPERTY | HAS_BOOLEAN_VALUE,
-    cite: 0,
-    classID: 0,
-    className: 0,
-    cols: 0,//HAS_POSITIVE_NUMERIC_VALUE,
-    colSpan: 0,
-    content: 0,
-    contentEditable: 0,
-    contextMenu: 0,
-    controls: HAS_BOOLEAN_VALUE,
-    coords: 0,
-    crossOrigin: 0,
-    data: MUST_USE_PROPERTY, // For `<object />` acts as `src`, and TextNode.
-    dateTime: 0,
-    'default': HAS_BOOLEAN_VALUE,
-    defer: HAS_BOOLEAN_VALUE,
-    dir: 0,
-    disabled: HAS_BOOLEAN_VALUE,
-    download: 0,//HAS_OVERLOADED_BOOLEAN_VALUE,
-    draggable: 0,
-    encType: 0,
-    form: 0,
-    formAction: 0,
-    formEncType: 0,
-    formMethod: 0,
-    formNoValidate: HAS_BOOLEAN_VALUE,
-    formTarget: 0,
-    frameBorder: 0,
-    headers: 0,
-    height: 0,
-    hidden: HAS_BOOLEAN_VALUE,
-    high: 0,
-    href: 0,
-    hrefLang: 0,
-    htmlFor: 0,
-    httpEquiv: 0,
-    icon: 0,
-    id: 0,
-    // innerHTML
-    innerHTML: MUST_USE_PROPERTY,
-    inputMode: 0,
-    integrity: 0,
-    is: 0,
-    keyParams: 0,
-    keyType: 0,
-    kind: 0,
-    label: 0,
-    lang: 0,
-    list: 0,
-    loop: HAS_BOOLEAN_VALUE,
-    low: 0,
-    manifest: 0,
-    marginHeight: 0,
-    marginWidth: 0,
-    max: 0,
-    maxLength: 0,
-    media: 0,
-    mediaGroup: 0,
-    method: 0,
-    min: 0,
-    minLength: 0,
-    multiple: MUST_USE_PROPERTY | HAS_BOOLEAN_VALUE,
-    muted: MUST_USE_PROPERTY | HAS_BOOLEAN_VALUE,
-    name: 0,
-    nonce: 0,
-    noValidate: HAS_BOOLEAN_VALUE,
-    open: HAS_BOOLEAN_VALUE,
-    optimum: 0,
-    pattern: 0,
-    placeholder: 0,
-    poster: 0,
-    preload: 0,
-    profile: 0,
-    radioGroup: 0,
-    readOnly: HAS_BOOLEAN_VALUE,
-    referrerPolicy: 0,
-    rel: 0,
-    required: HAS_BOOLEAN_VALUE,
-    reversed: HAS_BOOLEAN_VALUE,
-    role: 0,
-    rows: 0,//HAS_POSITIVE_NUMERIC_VALUE,
-    rowSpan: 0,//HAS_NUMERIC_VALUE,
-    sandbox: 0,
-    scope: 0,
-    scoped: HAS_BOOLEAN_VALUE,
-    scrolling: 0,
-    seamless: HAS_BOOLEAN_VALUE,
-    selected: MUST_USE_PROPERTY | HAS_BOOLEAN_VALUE,
-    shape: 0,
-    size: 0,//HAS_POSITIVE_NUMERIC_VALUE,
-    sizes: 0,
-    span: 0,//HAS_POSITIVE_NUMERIC_VALUE,
-    spellCheck: 0,
-    src: 0,
-    srcDoc: 0,
-    srcLang: 0,
-    srcSet: 0,
-    start: 0,//HAS_NUMERIC_VALUE,
-    step: 0,
-    style: 0,
-    summary: 0,
-    tabIndex: 0,
-    target: 0,
-    title: 0,
-    type: 0,
-    useMap: 0,
-    value: MUST_USE_PROPERTY,
-    width: 0,
-    wmode: 0,
-    wrap: 0,
-
-    /**
-     * RDFa Properties
-     */
-    about: 0,
-    datatype: 0,
-    inlist: 0,
-    prefix: 0,
-    property: 0,
-    resource: 0,
-    'typeof': 0,
-    vocab: 0,
-
-    /**
-     * Non-standard Properties
-     */
-    autoCapitalize: 0,
-    autoCorrect: 0,
-    autoSave: 0,
-    color: 0,
-    itemProp: 0,
-    itemScope: HAS_BOOLEAN_VALUE,
-    itemType: 0,
-    itemID: 0,
-    itemRef: 0,
-    results: 0,
-    security: 0,
-    unselectable: 0
-  };
-
-  var JS_TO_HTML = (function(map) {
-    var key, cache = {};
-    for (key in map) {
-      if (map.hasOwnProperty(key)){
-        cache[key] = key.toLowerCase();
-      }
-    }
-    return cache;
-  })(PROPERTIES);
-
-  JS_TO_HTML.htmlFor = 'for';
-  JS_TO_HTML.cssFloat = 'float';
-  JS_TO_HTML.className = 'class';
-  JS_TO_HTML.innerHTML = 'inner-html';
-
-  var HTML_TO_JS = (function(map) {
-    var key, cache = {};
-    for (key in map) {
-      if (map.hasOwnProperty(key)){
-        cache[map[key]] = key;
-      }
-    }
-    return cache;
-  })(JS_TO_HTML);
-
-  var namespaceURIs = {
-    html: 'http://www.w3.org/1999/xhtml',
-    math: 'http://www.w3.org/1998/Math/MathML',
-    svg: 'http://www.w3.org/2000/svg',
-    xlink: 'http://www.w3.org/1999/xlink'
-  };
-
-  var CSSVendorPrefix, CSSVendorPrefixes = ['webkit', 'Webkit', 'Moz', 'ms', 'O'];
-
-  function checkCSSVendorPrefix($style, keyCapitalized) {
-    for (var i = 0; i < CSSVendorPrefixes.length; ++i) {
-      if ((CSSVendorPrefixes[i] + keyCapitalized) in $style) {
-        return CSSVendorPrefixes[i];
-      }
-    }
-  }
-
-  var doc = window.document;
-
-  var REGEXP_1 = /-([a-z])?/g;
-  var REGEXP_2 = /([A-Z])/g;
-
-  function toCamelCase(key) {
-    return HTML_TO_JS[key] || key.replace(REGEXP_1, function(match, char) {
-        return char ? char.toUpperCase() : '';
-      });
-  }
-
-  function toKebabCase(key) {
-    return JS_TO_HTML[key] || key.replace(REGEXP_2, function(match, char) {
-        return '-' + char.toLowerCase();
-      });
-  }
-
-  var Array$slice = Array.prototype.slice;
-
-  function Skin() {
-    var $skin = this, fn = arguments[0];
-
-    if (fn && $skin[fn]) {
-      return $skin[fn].apply($skin, Array$slice.call(arguments, 1));
-    }
-    //throw new Error('');
-  }
-
-  Exact.defineClass({
-    constructor: Skin,
-
-    statics: {
-      /**
-       * @required
-       */
-      toCamelCase: toCamelCase,
-
-      /**
-       * @required
-       * @internal
-       */
-      toKebabCase: toKebabCase,
-
-      /**
-       * @required
-       */
-      isText: function isText($skin) {
-        return $skin ? $skin.nodeType === 3 : false;
-      },
-
-      /**
-       * @required
-       */
-      isComment: function isComment($skin) {
-        return $skin ? $skin.nodeType === 8 : false;
-      },
-
-      /**
-       * @required
-       */
-      isElement: function isElement($skin) {
-        return $skin ? $skin.nodeType === 1 : false;
-      },
-
-      isFragment: function isFragment($skin) {
-        return $skin ? $skin.nodeType === 11 : false;
-      },
-
-      /**
-       * @required
-       */
-      createText: function createText(data) {
-        return doc.createTextNode(data);
-      },
-
-      /**
-       * @required
-       */
-      createElement: function createElement(tag, ns) {//TODO: cache, clone
-        return !ns /*|| !doc.createElementNS*/ ? doc.createElement(tag) : doc.createElementNS(namespaceURIs[ns], tag);
-      },
-
-      //createFragment: function createFragment() {
-      //  return doc.createDocumentFragment();
-      //},
-
-      /**
-       * @required
-       */
-      parse: function parse(html) {
-        var $parent, outerHtml;
-        var i = html.indexOf(' ');
-        var j = html.indexOf('>');
-        var tag = html.slice(1, j < i ? j : i);
-
-        i = html.lastIndexOf('xmlns', j);
-
-        if (i > 0) {
-          var nsURI = html.slice(i+7, html.indexOf('"', i+7));
-
-          if (tag !== 'svg' && nsURI === namespaceURIs.svg) {
-            outerHtml = '<svg xmlns="' + nsURI + '">' + html + '</svg>';
-          } else if (tag !== 'math' && nsURI === namespaceURIs.math) {
-            outerHtml = '<math xmlns="' + nsURI + '">' + html + '</math>';
-          }
-        }
-
-        if (outerHtml) {
-          $parent = PARENT_NODES.DIV;
-          $parent.innerHTML = outerHtml;
-          $parent = $parent.firstChild;
-        } else {
-          $parent = PARENT_NODES[CONTAINERS[tag] || 'DIV'];
-          $parent.innerHTML = html;
-        }
-
-        $parent.normalize();
-
-        return Skin.getChildren($parent);
-      },
-
-
-      /**
-       * @required
-       */
-      getTagName: function getTagName(skin) {
-        var tagName = skin.tagName; // Skin.getProp(skin, 'tagName');
-        return tagName ? tagName.toLowerCase() : '';
-      },
-
-      /**
-       * @required
-       */
-      getNameSpace: function getNameSpace($skin) {
-        if (Skin.isElement($skin)) {
-          var nsURI = $skin.namespaceURI || $skin.getAttribute('xmlns');
-
-          if (!nsURI || nsURI === namespaceURIs.html) {
-            return '';
-          } else if (nsURI === namespaceURIs.svg) {
-            return 'svg';
-          } else if (nsURI === namespaceURIs.math) {
-            return 'math';
-          }
-        }
-
-        return '';
-      },
-
-      /**
-       * @required
-       */
-      getAttrs: function getAttrs($skin) {
-        if (Skin.isElement($skin) && $skin.hasAttributes()) {
-          var attrs = {}, $attrs = $skin.attributes, $attr, name;
-
-          for (var i = 0, n = $attrs.length; i < n; ++i) {
-            $attr = $attrs[i];
-            name = $attr.name;
-            if (HTML_TO_JS.hasOwnProperty(name) && (PROPERTIES[HTML_TO_JS[name]] & HAS_BOOLEAN_VALUE)) {
-              attrs[name] = 'true';
-            } else {
-              attrs[name] = $attr.value;
-            }
-          }
-
-          return attrs;
-        }
-      },
-
-      /**
-       * @required
-       */
-      hasProp: function hasProp($skin, name) {
-        return name in $skin;
-      },
-
-      /**
-       * @required
-       */
-      getProp: function getProp($skin, name) {
-        return $skin[name];
-      },
-
-      ///**
-      // * @required
-      // * @internal
-      // */
-      //setProp: function setProp($skin, name, value) {
-      //  $skin[name] = value;
-      //},
-
-      //getComputedStyle: function getComputedStyle($skin) {
-      //  return window.getComputedStyle($skin);
-      //},
-
-      /**
-       * @required
-       */
-      getChildren: function getChildren($skin) { // include texts and comments, getChildrenCopy, getContents
-        var $copy = [], $children = $skin.childNodes;// Skin.getProp($skin, 'childNodes');
-
-        if ($children && $children.length) {
-          $copy.push.apply($copy, $children);
-        }
-
-        return $copy;
-      },
-
-      /**
-       * @required
-       */
-      getParent: function getParent($skin) {
-        return $skin.parentNode;
-      },
-
-      /**
-       * Get the shadow of the $skin
-       *
-       * @param {Node} $skin
-       * @returns {Shadow}
-       */
-      getShadow: function getShadow($skin) {
-        return $skin && $skin._shadow;
-      },
-
-      /**
-       * Set the shadow of the $skin
-       *
-       * @param {Node} $skin
-       * @param {Shadow} shadow
-       */
-      setShadow: function($skin, shadow) {
-        if (shadow) {
-          Object.defineProperty($skin, '_shadow', {
-            value: shadow,
-            writable: true,
-            enumerable: false,
-            configurable: true
-          });
-        } else {
-          delete $skin._shadow;
-        }
-      },
-
-      query: function query($skin, selector) {
-        return $skin.querySelector(selector);
-      },
-
-      //queryAll: function queryAll($skin, selector) {
-      //  return $skin.querySelectorAll(selector);
-      //},
-
-      /**
-       * @required
-       */
-      mayDispatchEvent: function mayDispatchEvent($skin, type) {
-        return ('on' + type) in $skin;
-      },
-
-      /**
-       * @required
-       */
-      getFixedEvent: function getFixedEvent(event) {
-        if (event.key) {
-          event.keyName = event.key[0].toLowerCase() + event.key.slice(1);
-        }
-
-        return event;
-      },
-
-      /**
-       * @required
-       */
-      addEventListener: function addEventListener($skin, type, listener, useCapture) {
-        $skin.addEventListener(type, listener, useCapture);
-      },
-
-      /**
-       * @required
-       */
-      removeEventListener: function removeEventListener($skin, type, listener, useCapture) {
-        $skin.removeEventListener(type, listener, useCapture);
-      },
-
-      /**
-       * @required
-       */
-      renderAttrs: function renderAttrs($skin, attrs, dirty) {
-        var key, value, index, nsURI;
-        //if (!dirty) { return; }
-        for (key in dirty) {
-          if (!dirty.hasOwnProperty(key)) { continue; }
-
-          value = attrs[key];
-          index = key.indexOf(':');
-
-          if (index > 0) {
-            nsURI = namespaceURIs[key.slice(0, index)];
-          }
-
-          if (!nsURI) {
-            if (value != null) {
-              $skin.setAttribute(key, value);
-            } else {
-              $skin.removeAttribute(key);
-            }
-          } else {
-            key = key.slice(index + 1);
-
-            if (value != null) {
-              $skin.setAttributeNS(nsURI, key, value);
-            } else {
-              $skin.removeAttributeNS(nsURI, key);
-            }
-          }
-        }
-      },
-
-      /**
-       * @required
-       */
-      renderProps: function renderProps($skin, props, dirty) {
-        var key, value;
-        //if (!dirty) { return; }
-        for (key in dirty) {
-          if (!dirty.hasOwnProperty(key)) { continue; }
-
-          value = props[key];
-
-          if (PROPERTIES[key]) { // MUST_USE_PROPERTY or HAS_BOOLEAN_VALUE
-            $skin[key] = value;
-          } else if (value == null) { // null or undefined
-            $skin.removeAttribute(toKebabCase(key));
-          } else if (Skin.hasProp($skin, key)) {
-            $skin.setAttribute(toKebabCase(key), value);
-          }
-        }
-      },
-
-      /**
-       * @required
-       */
-      renderStyle: function renderStyle($skin, style, dirty) {
-        var key, $style = $skin.style;
-        //if (!dirty) { return; }
-        for (key in dirty) {
-          if (!dirty.hasOwnProperty(key)) { continue; }
-
-          if (key in $style) {
-            $style[key] = style[key];
-          } else {
-            var keyCapitalized = key.charAt(0).toUpperCase() + key.slice(1);
-
-            if (!CSSVendorPrefix) {
-              CSSVendorPrefix = checkCSSVendorPrefix($style, keyCapitalized);
-            }
-
-            if (CSSVendorPrefix) {
-              $style[CSSVendorPrefix + keyCapitalized] = style[key];
-            }
-          }
-        }
-      },
-
-      /**
-       * @required
-       */
-      renderClasses: function renderClasses($skin, classes, dirty) {
-        var key, classList = $skin.classList;
-        //if (!dirty) { return; }
-        if (classList) {
-          for (key in dirty) {
-            if (!dirty.hasOwnProperty(key)) { continue; }
-
-            if (classes[key]) {
-              classList.add(key);
-            } else {
-              classList.remove(key);
-            }
-          }
-        } else {
-          var names = [];
-
-          for (key in dirty) {
-            if (dirty.hasOwnProperty(key) && classes[key]) {
-              names.push(key);
-            }
-          }
-
-          $skin.setAttribute('class', names.join(' '));
-        }
-      },
-
-      /**
-       * @required
-       */
-      renderChildren: function renderChildren($skin, children) {
-        var i, n, m, $child, $existed, $removed, $children = $skin.childNodes;
-
-        n = children.length;
-
-        if (n) {
-          for (i = 0; i < n; ++i) {
-            $existed = $children[i];
-            $child = children[i].$skin;
-
-            if (!$existed) {
-              $skin.appendChild($child);
-            } else if ($child !== $existed) {
-              $skin.insertBefore($child, $existed);
-            }
-          }
-        }
-
-        m = $children.length;
-
-        if (n < m) {
-          $removed = [];
-          for (i = m - 1; i >= n; --i) {
-            $existed = $children[i];
-            $removed.push($existed);
-            $skin.removeChild($existed);
-          }
-        }
-
-        return $removed;
-      }
-    }
-
-  });
-
-  var CONTAINERS = {
-    area: 'MAP',
-    param: 'OBJECT',
-    legend: 'FIELDSET',
-    option: 'SELECT', optgroup: 'SELECT',
-    tr: 'TBODY', 'td': 'TR', 'th': 'TR', col: 'COLGROUP',
-    tbody: 'TABLE', thead: 'TABLE', tfoot: 'TABLE', caption: 'TABLE', colgroup: 'TABLE'
-
-  };
-
-  var PARENT_NODES = {
-    DIV: Skin.createElement('div'),
-    MAP: Skin.createElement('map'),
-    //'svg': Skin.createElement('svg', 'svg'),
-    //'math': Skin.createElement('math', 'math'),
-    TR: Skin.createElement('tr'),
-    TABLE: Skin.createElement('table'),
-    TBODY: Skin.createElement('tbody'),
-    SELECT: Skin.createElement('select'),
-    OBJECT: Skin.createElement('object'),
-    COLGROUP: Skin.createElement('colgroup'),
-    FIELDSET: Skin.createElement('fieldset')
-  };
-
-  Exact.Skin = Skin;
 
 })();
 
@@ -1258,7 +604,7 @@
     this._actions = null;
   }
 
-  function getFixedEvent(info) {
+  function getFixedEvent(info) { // TODO: keyup.enter!capture|once+=""
     var event;
 
     if (info.type) {
@@ -1266,11 +612,16 @@
     } else {
       event = {};
 
-      var i = info.indexOf('.');
+      var i = info.indexOf('.');//, l = info.length;
+
+      if (info[0] === '!') {
+        event.capture = true;
+        info = info.slice(1);
+      }
 
       if (i > 0) {
         event.type = info.slice(0, i);
-        event.keyName = info.slice(i + 1);
+        event.name = info.slice(i + 1);
       } else {
         event.type = info;
       }
@@ -1285,16 +636,15 @@
    * @param {Watcher} watcher
    * @param {Object|string} type
    * @param {Function} exec
-   * @param {boolean} useCapture
    * @returns {Object}
    */
-  function register(watcher, type, exec, useCapture) {
+  function register(watcher, type, exec) {
     var actions = watcher._actions, constructor = watcher.constructor;
 
     if (typeof exec !== 'function') { return null; }
 
     if (!actions) {
-      Object.defineProperty(watcher, '_actions', {
+      Exact.defineProp(watcher, '_actions', {
         value: {}, writable: false, enumerable: false, configurable: true
       });
       actions = watcher._actions;
@@ -1302,33 +652,35 @@
 
     var event = getFixedEvent(type);
 
-    var action = actions[event.type];
+    type = (event.capture ? '!' : '') + event.type;
+
+    var action = actions[type];
 
     //  Create action
     if (!action) {
-      action = actions[event.type] = { handlers: []/*, listener: null*/ };
+      action = actions[type] = { handlers: []/*, listener: null, listenerCapture: null*/, capture: event.capture };
     }
 
-    var handlers = action.handlers, keyName = event.keyName;
+    var handlers = action.handlers, name = event.name;
 
     var handler, i, n = handlers.length;
     // Check if exec exists in handlers.
     for (i = 0; i < n; ++i) {
       handler = handlers[i];
-      if (exec === handler.exec && keyName === handler.keyName) {
+      if (exec === handler.exec && name === handler.name) {
         return action;
       }
     }
 
     handler = {exec: exec};
 
-    if (keyName) {
-      handler.keyName = keyName;
+    if (name) {
+      handler.name = name;
     }
 
-    if (useCapture) {
-      handler.useCapture = useCapture;
-    }
+    //if (useCapture) {
+    //  handler.useCapture = useCapture;
+    //}
 
     //handlers.unshift(handler);
     handlers.push(handler);
@@ -1351,33 +703,34 @@
    * @param {Watcher} watcher
    * @param {Object|string} type
    * @param {Function|string} exec
-   * @param {boolean} useCapture
    * @returns {Object}
    */
-  function remove(watcher, type, exec, useCapture) {
+  function remove(watcher, type, exec) {
     var actions = watcher._actions, constructor = watcher.constructor, all = arguments.length === 2;
 
     if (!actions) { return; }
 
     var event = getFixedEvent(type);
 
-    var action = actions[event.type];
+    type = (event.capture ? '!' : '') + event.type;
+
+    var action = actions[type];
 
     if (!action) { return; }
 
-    var handlers = action.handlers, keyName = event.keyName;
+    var handlers = action.handlers, name = event.name;
 
     //if (!handlers) { return; }
 
     var handler, i, n = handlers.length;
 
-    if (all && !keyName) {
+    if (all && !name) {
       handlers.splice(0);
     } else {
       //for (i = n-1; i >= 0; --i) {
       for (i = 0; i < n; ++i) {
         handler = handlers[i];
-        if ((all || exec === handler.exec) && (!keyName || keyName === handler.keyName)) {
+        if ((all || exec === handler.exec) && (!name || name === handler.name)) {
           handlers.splice(i--, 1);
           break;
         }
@@ -1389,7 +742,7 @@
         constructor.removeEventListener(watcher, action, event.type);
       }
 
-      delete actions[event.type];
+      delete actions[type];
     }
 
     return action;
@@ -1421,7 +774,7 @@
 
     event = getFixedEvent(event);
 
-    action = actions[event.type];
+    action = actions[(event.capture ? '!' : '') + event.type];
 
     if (action) {
       event.dispatcher = watcher;
@@ -1438,7 +791,7 @@
       //for (i = n-1; i >= 0; --i) {
         handler = handlers[i];
 
-        if (!handler || (handler.keyName && handler.keyName !== event.keyName)) { continue; }
+        if (!handler || (handler.name && handler.name !== event.name)) { continue; }
         //if ((event.eventPhase === 1) === !!handler.useCapture) {
           exec = handler.exec;
           exec.apply(null, params);
@@ -1460,10 +813,9 @@
      *
      * @param {Object|string} type
      * @param {Function} exec
-     * @param {boolean} useCapture
      * @returns {self}
      */
-    on: function on(type, exec, useCapture) {
+    on: function on(type, exec) {
       var opts, value;
 
       if (typeof type === 'object') {
@@ -1474,14 +826,14 @@
 
           value = opts[type];
 
-          if (Array.isArray(value)){  // e.g. on({click: [function(){...}}, true]); useCapture as 2nd argument
-            register(this, type, value[0], value[1]);
-          } else {                    // e.g. on({click: function(){...}});
+          //if (Array.isArray(value)){  // e.g. on({click: [function(){...}}, true]); useCapture as 2nd argument
+          //  register(this, type, value[0], value[1]);
+          //} else {                    // e.g. on({click: function(){...}});
             register(this, type, value);
-          }
+          //}
         }
       } else if (type) {              // e.g. on('click', context.onClick);
-        register(this, type, exec, useCapture);
+        register(this, type, exec);
       }
 
       return this;
@@ -1493,10 +845,9 @@
      *
      * @param {Object|string} type
      * @param {Function} exec
-     * @param {boolean} useCapture
      * @returns {self}
      */
-    off: function off(type, exec, useCapture) {
+    off: function off(type, exec) {
       var n = arguments.length, t = typeof type, opts, value;
 
       if (n === 0) {      // e.g. off()
@@ -1505,18 +856,18 @@
         if (n === 1) {    // e.g. off('click');
           remove(this, type);
         } else {          // e.g. off('click', context.onClick);
-          remove(this, type, exec, useCapture);
+          remove(this, type, exec);
         }
       } else if (t === 'object') {
         opts = type;
         for (type in opts) {
           if (!opts.hasOwnProperty(type)) { continue; }
           value = opts[type];
-          if (Array.isArray(value)) {   // e.g. off({click: [context.onClick, true]});
-            remove(this, type, value[0], value[1]);
-          } else {                      // e.g. off({click: context.onClick});
+          //if (Array.isArray(value)) {   // e.g. off({click: [context.onClick, true]});
+          //  remove(this, type, value[0], value[1]);
+          //} else {                      // e.g. off({click: context.onClick});
             remove(this, type, value);
-          }
+          //}
         }
       }
 
@@ -1528,18 +879,35 @@
      *
      * @param {Object|string} type
      * @param {Function} exec
-     * @param {boolean} useCapture
      * @returns {self}
      */
-    once: function(type, exec, useCapture) {
-      var self = this;
+    once: function(type, exec) {
+      var t = typeof type;
 
-      function func() {
-        self.off(type, func, useCapture);
-        exec.apply(null, arguments);
+      if (t === 'object') {
+        var opts = type, value;
+
+        for (type in opts) {
+          if (!opts.hasOwnProperty(type)) { continue; }
+
+          value = opts[type];
+
+          //if (Array.isArray(value)){  // e.g. once({click: [function(){...}}, true]); useCapture as 2nd argument
+          //  this.once(type, value[0], value[1]);
+          //} else {                    // e.g. once({click: function(){...}});
+            this.once(type, value);
+          //}
+        }
+      } else {
+        var self = this;
+
+        var func = function() {
+          self.off(type, func);
+          exec.apply(null, arguments);
+        };
+
+        this.on(type, func);
       }
-
-      this.on(type, func, useCapture);
 
       return this;
     },
@@ -1571,6 +939,8 @@
     }
 
   });
+
+  Watcher.getFixedEvent = getFixedEvent;
 
   Exact.Watcher = Watcher;
 
@@ -1619,7 +989,7 @@
       define: function define(prototype, key) {
         descriptorShared.get = makeGetter(key);
         descriptorShared.set = makeSetter(key);
-        Object.defineProperty(prototype, key, descriptorShared);
+        Exact.defineProp(prototype, key, descriptorShared);
       }
     },
 
@@ -1637,12 +1007,13 @@
           this.set(key, props[key]);
         }
       }
-      //return this;
+      return this;
     },
 
     unset: function unset(key) {
       this.set(key, undefined);
       delete this[key];
+      return this;
     }
   });
 
@@ -1657,34 +1028,35 @@
 
   var setImmediate = Exact.setImmediate;
 
-  var pool = [], queue = [], cursor = 0, waiting = false, running = false;
+  var buffers = [[], []], updaters = [], cursor = 0, index = 0, waiting = false, running = false;
 
   function run() {
-
     cursor = 0;
     running = true;
 
     var target; //TODO: func, args
 
-    while (cursor < pool.length) {
-      target = pool[cursor];
-
+    while (cursor < updaters.length) {
+      target = updaters[cursor];
       target.update();
-
       ++cursor;
     }
 
-    for (var i = 0, n = queue.length; i < n; ++i) {
-      target = queue[i];
+    cursor = 0;
+    updaters.splice(0); //renderers.length = 0;
+    running = false;
+    waiting = false;
 
+    var renderers = buffers[index];
+    
+    index = index ? 0 : 1;
+
+    for (var i = 0, n = renderers.length; i < n; ++i) {
+      target = renderers[i];
       target.render();
     }
 
-    waiting = false;
-    running = false;
-    queue.splice(0); //queue.length = 0;
-    pool.splice(0); //pool.length = 0;
-    cursor = 0;
+    renderers.splice(0); //updaters.length = 0;
   }
 
   Exact.Schedule = {
@@ -1694,22 +1066,22 @@
      */
     insert: function(target) {
       //if (!target || !target.update) { return; }
-      var i, n = pool.length, id = target.guid;
+      var i, n = updaters.length, id = target.guid;
 
       if (!running) {
         i = n - 1;
-        while (i >= 0 && id < pool[i].guid) {
+        while (i >= 0 && id < updaters[i].guid) {
           --i;
         }
         ++i;
       } else {
-        i = cursor;
-        while (i < n && id >= pool[i].guid) {
+        i = cursor + 1;
+        while (i < n && id >= updaters[i].guid) {
           ++i;
         }
       }
 
-      pool.splice(i, 0, target);
+      updaters.splice(i, 0, target);
 
       if (!waiting) {
         waiting = true;
@@ -1723,7 +1095,8 @@
      */
     append: function(target) {
       //if (!target || !target.render) { return; }
-      queue.push(target);
+      var renderers = buffers[index];
+      renderers.push(target);
     }
   };
 
@@ -2029,7 +1402,7 @@
         if (!_dirty) {
           _dirty = {};
 
-          Object.defineProperty(object, '_dirty', {
+          Exact.defineProp(object, '_dirty', {
               value: _dirty, enumerable: false, writable: true, configurable: true}
           );
         }
@@ -2409,7 +1782,7 @@
 
       initialize: function initialize(store, props) {
         if (!store._props) {
-          Object.defineProperty(store, '_props', {value: {}/*, configurable: true*/});
+          Exact.defineProp(store, '_props', {value: {}/*, configurable: true*/});
         }
 
         store.save(props);
@@ -2433,11 +1806,12 @@
       if (val !== old) {
         props[key] = val;
 
-        if ('>=ES5' === '<ES5') {
+        if (Exact.env === '<ES5') {
           this[key] = val;
         }
 
-        this.send('changed.' + key, val, old);
+        //this.send('changed.' + key, val, old);
+        this.send({type: 'changed', name: key}, val, old);
       }
     }
   });
@@ -2451,7 +1825,7 @@
 //######################################################################################################################
 (function() {
 
-  var Skin = Exact.Skin;
+  //var Skin = ExactSkin || Exact.Skin;
 
   var Container = Exact.Container;
   var Collection = Exact.Collection;
@@ -2484,7 +1858,7 @@
    */
   function getAttrs() {
     if (!this._attrs/* && this.tag*/) {
-      Object.defineProperty(this, '_attrs', {value: createContainer(this), configurable: true});
+      Exact.defineProp(this, '_attrs', {value: createContainer(this), configurable: true});
     }
     return this._attrs;
   }
@@ -2496,7 +1870,7 @@
    */
   function getProps() {
     //if (!this._props/* && this.tag*/) {
-    //  Object.defineProperty(this, '_props', {value: createContainer(this), configurable: true});
+    //  Exact.defineProp(this, '_props', {value: createContainer(this), configurable: true});
     //}
     return this._props;
   }
@@ -2508,7 +1882,7 @@
    */
   function getStyle() {
     if (!this._style/* && this.tag*/) {
-      Object.defineProperty(this, '_style', {value: createContainer(this), configurable: true});
+      Exact.defineProp(this, '_style', {value: createContainer(this), configurable: true});
     }
     return this._style;
   }
@@ -2520,7 +1894,7 @@
    */
   function getClasses() { // TODO: class ClassList extends Container { append, remove }
     if (!this._classes/* && this.tag*/) {
-      Object.defineProperty(this, '_classes', {value: createContainer(this), configurable: true});
+      Exact.defineProp(this, '_classes', {value: createContainer(this), configurable: true});
     }
     return this._classes;
   }
@@ -2532,7 +1906,7 @@
    */
   function getChildren() {
     if (!this._children /*&& this.tag*/) {
-      Object.defineProperty(this, '_children', {value: createCollection(this), configurable: true});
+      Exact.defineProp(this, '_children', {value: createCollection(this), configurable: true});
     }
     return this._children;
   }
@@ -2543,41 +1917,41 @@
   // * @returns {Collection}
   // */
   //function getContents() {
-  //  if (!this._contents && Skin.isElement(this.$skin)) {
-  //    Object.defineProperty(this, '_contents', {value: createCollection(this), configurable: true});
+  //  if (!this._contents && ExactSkin.isElement(this.$skin)) {
+  //    Exact.defineProp(this, '_contents', {value: createCollection(this), configurable: true});
   //  }
   //  return this._contents;
   //}
 
   // lazy mode when getter is supported
   var defineMembersOf = function(shadow) {
-    Object.defineProperty(shadow, '_props', {
+    Exact.defineProp(shadow, '_props', {
       value: {}, writable: false, enumerable: false, configurable: false
     });
-    Object.defineProperty(shadow, 'props', {get: getProps});
+    Exact.defineProp(shadow, 'props', {get: getProps});
 
     if (shadow.tag) {
-      Object.defineProperty(shadow, 'attrs', {get: getAttrs});
-      Object.defineProperty(shadow, 'style', {get: getStyle});
-      Object.defineProperty(shadow, 'classes', {get: getClasses});
-      Object.defineProperty(shadow, 'children', {get: getChildren});
+      Exact.defineProp(shadow, 'attrs', {get: getAttrs});
+      Exact.defineProp(shadow, 'style', {get: getStyle});
+      Exact.defineProp(shadow, 'classes', {get: getClasses});
+      Exact.defineProp(shadow, 'children', {get: getChildren});
       //ObjectUtil.defineProperty(shadow, 'contents', {get: getContents});  //TODO: set('contents', []) is ok
     }
   };
 
-  if ('>=ES5' === '<ES5') {
+  if (Exact.env === '<ES5') {
     // immediate mode when getter is not supported
     defineMembersOf = function(shadow) {
-      Object.defineProperty(shadow, '_props', {
+      Exact.defineProp(shadow, '_props', {
         value: {}, writable: false, enumerable: false, configurable: false
       });
       shadow.props = shadow._props;
 
       if (shadow.tag) {
-        Object.defineProperty(shadow, 'attrs', {value: createContainer(shadow)});
-        Object.defineProperty(shadow, 'style', {value: createContainer(shadow)});
-        Object.defineProperty(shadow, 'classes', {value: createContainer(shadow)});
-        Object.defineProperty(shadow, 'children', {value: createCollection(shadow)});
+        Exact.defineProp(shadow, 'attrs', {value: createContainer(shadow)});
+        Exact.defineProp(shadow, 'style', {value: createContainer(shadow)});
+        Exact.defineProp(shadow, 'classes', {value: createContainer(shadow)});
+        Exact.defineProp(shadow, 'children', {value: createCollection(shadow)});
         //ObjectUtil_defineProp(shadow, 'contents', {value: createCollection(shadow)});
 
         shadow._attrs = shadow.attrs;
@@ -2590,11 +1964,11 @@
   }
 
   function initSkin(shadow, $skin) {
-    var ns = shadow.ns, tag = shadow.tag, _shadow;
+    var ns = shadow.ns, tag = shadow.tag, _shadow, Skin = Exact.Skin;
 
     if (!$skin || tag !== Skin.getTagName($skin) || ns !== Skin.getNameSpace($skin)
       || ((_shadow = $skin ? Skin.getShadow($skin) : null) && _shadow !== shadow)) {
-      $skin = tag ? Skin.createElement(tag, ns) : Skin.createText('');
+      $skin = tag ? Skin.createElement(ns, tag, shadow._props && shadow._props.type) : Skin.createText('');
     }
 
     shadow.attach($skin);
@@ -2620,6 +1994,7 @@
         this.isInvalidated = true;
         Schedule.insert(this);
       }
+      return this;
     },
 
     /**
@@ -2632,9 +2007,14 @@
         this.refresh();
       }
 
-      //this.send('updated');
+      this.send('updated');
 
       var $skin = this.$skin;
+
+      //if (!$skin) {
+      //  initSkin(this);
+      //  $skin = this.$skin;
+      //}
 
       if ($skin) {
         var child, children = this._children, $children;
@@ -2643,20 +2023,20 @@
           for (var i = 0, n = children.length; i < n; ++i) {
             child = children[i];
             if (!child.$skin) {
-              $children = $children || Skin.getChildren($skin);
+              $children = $children || Exact.Skin.getChildren($skin);
               initSkin(child, $children[i]);
             }
           }
         }
       } else {
-        initSkin(this);
+      //  initSkin(this);
       }
 
-      Schedule.append(this); //this.render(); TODO: immediate rendering is ok
+      Schedule.append(this); // this.render(); // TODO: immediate rendering is ok
 
       this.isInvalidated = false;
 
-      this.send('updated');
+      return this;
     },
 
     /**
@@ -2666,6 +2046,8 @@
       var $skin = this.$skin;
 
       if (!$skin) { return; }
+
+      var Skin = Exact.Skin;
 
       var dirty = this._dirty,
         props = this._props,
@@ -2698,7 +2080,7 @@
         if (children && (children.isInvalidated)) {
           if ('development' === 'development') {
             if (props.hasOwnProperty('innerHTML') && children.length) {
-              console.error("You'd better not use innerHTML and children together.");
+              console.error("You'd better not use innerHTML and children together for ", this); // TODO: check when parsing
             }
           }
 
@@ -2718,8 +2100,8 @@
           Collection.clean(children);
         }
       }
-
       //this.send('rendered');//TODO: beforeRefresh, refreshing
+      return this;
     },
 
     /**
@@ -2727,8 +2109,8 @@
      * @param {HTMLElement} $skin
      */
     attach: function attach($skin) {
+      var Skin = Exact.Skin;
       var shadow = Skin.getShadow($skin);
-
       // check
       if (shadow) {
         if (shadow === this) {
@@ -2745,9 +2127,8 @@
       if (this.ns !== Skin.getNameSpace($skin)) {
         throw new Error('a shadow can not attach a $skin that has a different namespace');
       }
-
       // define
-      Object.defineProperty(this, '$skin', {
+      Exact.defineProp(this, '$skin', {
         value: $skin,
         writable: true,
         enumerable: false,
@@ -2757,7 +2138,7 @@
       Skin.setShadow($skin, this);
 
       // finish
-      var type, action, actions = this._actions;
+      var type, event, action, actions = this._actions;
 
       if (actions) {
         for (type in actions) {
@@ -2765,22 +2146,26 @@
 
           action = actions[type];
 
+          event = Watcher.getFixedEvent(type);
+
           if (action) {
-            Shadow.addEventListener(this, action, type);
+            Shadow.addEventListener(this, action, event.type, event.capture);
           }
         }
       }
 
+      this.send('attached');
+
       this.invalidate();
-      //this.send('attached');
-      //return this;
+
+      return this;
     },
 
     /**
      *
      */
     detach: function detach() {
-      var type, action, actions = this._actions, $skin = this.$skin;
+      var type, event, action, actions = this._actions, $skin = this.$skin;
 
       if (actions) {
         for (type in actions) {
@@ -2788,17 +2173,21 @@
 
           action = actions[type];
 
+          event = Watcher.getFixedEvent(type);
+
           if (action) {
-            Shadow.removeEventListener(this, action, type);
+            Shadow.removeEventListener(this, action, event.type, event.capture);
           }
         }
       }
 
-      Skin.setShadow($skin, null);
+      Exact.Skin.setShadow($skin, null);
+
+      this.send('detached');
 
       this.$skin = null;
-      //this.send('detached');
-      //return this;
+
+      return this;
     },
 
     toString: function toString() {
@@ -2810,18 +2199,20 @@
       var $skin = this.$skin;
 
       $skin && setImmediate(function() {
-        Skin.call($skin, 'blur');
+        Exact.Skin.call($skin, 'blur');
       });
-      //return this;
+
+      return this;
     },
 
     focus: function focus() { //TODO: remove
       var $skin = this.$skin;
 
       $skin && setImmediate(function() {
-        Skin.call($skin, 'focus');
+        Exact.Skin.call($skin, 'focus');
       });
-      //return this;
+
+      return this;
     },
 
     get: function(key) {
@@ -2836,7 +2227,7 @@
       if (val !== old) {
         props[key] = val;
     
-        if ('>=ES5' === '<ES5') {
+        if (Exact.env === '<ES5') {
           this[key] = val;
         }
     
@@ -2844,6 +2235,8 @@
 
         this.invalidate();
       }
+
+      return this;
     },
 
     statics: {
@@ -2855,15 +2248,15 @@
       initialize: function initialize(shadow, tag, ns) {
         shadow.invalidate = shadow.invalidate.bind(shadow);
 
-        Object.defineProperty(shadow, 'guid', {
+        Exact.defineProp(shadow, 'guid', {
           value: ++guid, writable: false, enumerable: false, configurable: false
         });
 
-        Object.defineProperty(shadow, 'tag', {
+        Exact.defineProp(shadow, 'tag', {
           value: tag, writable: false, enumerable: false, configurable: false
         });
 
-        Object.defineProperty(shadow, 'ns', {
+        Exact.defineProp(shadow, 'ns', {
           value: ns, writable: false, enumerable: false, configurable: false
         });
 
@@ -2899,28 +2292,29 @@
       },
 
       addEventListener: function(shadow, action, type) {
-        var $skin = shadow.$skin;
+        var $skin = shadow.$skin, Skin = Exact.Skin;
 
         if (!$skin) { return; }
 
         if (Skin.mayDispatchEvent($skin, type)) { // TODO: No problem?
           action.listener = function (event) {
+            event.capture = action.capture;
             shadow.send(Skin.getFixedEvent(event)); // TODO: Shadow.getShadow(domEvent.currentTarget).send(Skin.getFixedEvent(domEvent))
           };
 
-          Skin.addEventListener($skin, type, action.listener, action.useCapture);
+          Skin.addEventListener($skin, type, action.listener, action.capture);
         } else {
           action.listener = null;
         }
       },
 
       removeEventListener: function(shadow, action, type) {
-        var $skin = shadow.$skin;
+        var $skin = shadow.$skin, Skin = Exact.Skin;
 
         if (!$skin) { return; }
 
         if (action.listener && Skin.mayDispatchEvent($skin, type)) {
-          Skin.removeEventListener($skin, type, action.listener, action.useCapture);
+          Skin.removeEventListener($skin, type, action.listener, action.capture);
 
           delete action.listener;
         }
@@ -2966,12 +2360,14 @@
     },
 
     toString: function() {
-      return '"' + (this.data.length < 24 ? this.data : (this.data.slice(0, 21) + '...'))  + '"(' + this.guid +')';
+      return (this.data == null) ? '' : '"' + (this.data.length < 24 ? this.data : (this.data.slice(0, 21) + '...'))  + '"(' + this.guid +')';
     }
 
   });
 
   Exact.Text = Text;
+
+  //Exact.RES.register('Text', Text);
 
 })();
 
@@ -3047,6 +2443,7 @@
   function applyDescriptorsAndDefaults(prototype, descriptors, defaults) {
     if (Array.isArray(descriptors)) {
       var i, n, names = descriptors;
+      descriptors = {};
       for (i = 0, n = names.length; i < n; ++i) {
         descriptors[names[i]] = emptyDesc;
       }
@@ -3072,7 +2469,7 @@
       }
     }
 
-    Object.defineProperty(prototype, '__descriptors__', {value: descriptors});
+    Exact.defineProp(prototype, '__descriptors__', {value: descriptors});
   }
 
   function Component(props) {
@@ -3088,7 +2485,7 @@
 
     mixins: [Watcher.prototype, Accessor.prototype],
 
-    __descriptors__: { contents: emptyDesc },
+    __descriptors__: { contents: emptyDesc }, // TODO: __exact_descriptors__
 
     statics: {
       //descriptors: { contents: null },
@@ -3118,7 +2515,7 @@
           var template = constructor.template;
 
           if (template) {
-            _template = Exact.HTMXParser.parse(template, resources);
+            _template = Exact.HTMXEngine.parse(template, resources);
           }
 
           if (_template) {
@@ -3138,7 +2535,7 @@
 
         component.save(props ? assign({}, defaults, props) : defaults);
 
-        Exact.HTMXCompiler.compile(_template, component);
+        Exact.HTMXEngine.start(_template, component);
 
         //component.send('initialized');
       }
@@ -3177,11 +2574,16 @@
             props[key] = val;
           }
 
+          if (Exact.env === '<ES5') {
+            this[key] = val;
+          }
+
           if (desc.native) {
             DirtyMarker.check(this, key, val, old);
           }
 
-          this.send('changed.' + key, val, old);
+          //this.send('changed.' + key, val, old);
+          this.send({type: 'changed', name: key}, val, old);
 
           this.invalidate();//TODO:
         }
@@ -3190,6 +2592,10 @@
 
         if (val !== old) {
           props[key] = val;
+
+          if (Exact.env === '<ES5') {
+            this[key] = val;
+          }
 
           DirtyMarker.check(this, key, val, old);
 
@@ -3249,7 +2655,7 @@
         if (_bindings) {
           _bindings.push(binding);
         } else {
-          Object.defineProperty(target, '_bindings', {
+          Exact.defineProp(target, '_bindings', {
             value: [binding], writable: false, enumerable: false, configurable: true
           });
         }
@@ -3541,7 +2947,7 @@
 
         flag = 1;
       } else {
-        paths[i] = null;
+        //paths[i] = null;
       }
     }
 
@@ -3595,7 +3001,7 @@
           if (piece instanceof Expression) {
             Expression.activate(piece, i, container, context, locals);
           } else {
-            container[i] = piece;
+            container.set(i, piece);
           }
         }
 
@@ -3654,7 +3060,18 @@
     var handler = template.handler, evaluator = template.evaluator;
 
     if (handler) {
-      target.on(type, context[handler]/*.bind(context)*/);
+      var func = context[handler];
+      if (!func) {
+        throw new ReferenceError('no such handler named ' + handler + ' in ' + context);
+      }
+      //if (!func.__bound__to__) { // TODO: __exact__bound__
+      //  func = func.bind(context);
+      //  Exact.defineProp(func, '__bound__to__', {
+      //    value: context, writable: false, enumerable: false, configurable: true
+      //  });
+      //  context[handler] = func;
+      //}
+      target.on(type, func);
     } else {
       locals = [null].concat(locals || []);
       target.on(type, function(event) {
@@ -3669,114 +3086,18 @@
 })();
 
 //######################################################################################################################
-// src/core/templates/HTMXTemplate.js
+// src/core/compilers/HTMXEngine.js
 //######################################################################################################################
 (function() {
 
-  function HTMXTemplate() {
-    this.ns = '';
-    this.tag = '';
-    this.type = null;
-
-    this.key = '';
-    this.ref = '';
-
-    this.props = null;
-    this.attrs = null;
-    this.style = null;
-    this.classes = null;
-    this.actions = null;
-    this.directs = null;
-    this.children = null;
-
-    this.actual = false; // if prop value is actual
-  }
-
-  /**
-   * e.g. create('div', null, [
-   *        create('h1', null, 'title'),
-   *        create('ul', null,
-   *          create('a', {
-   *              'href@': 'link.url',
-   *              classes: {link: true, 'active@': 'link.active'},
-   *              directs: {'for': 'link of $.links', key: 'link.url'}
-   *            },
-   *            ['tip: @{ link.tip }']
-   *          )
-   *        ),
-   *        create(Button, { label: 'OK', 'click+': '$.onClick' })
-   *      ])
-   *
-   * @param {string|Function} tagOrType
-   * @param {Object} params
-   * @param {string|Array|HTMXTemplate} children
-   * @returns {HTMXTemplate}
-   */
-  function create(tagOrType, params, children) {
-    var template = new HTMXTemplate();
-    // if there is no expression for prop, the value assigned to the prop must be actual,
-    // e.g. { score: 10 } instead of { score: '10' } if `score` is number
-    template.actual = true;
-
-    if (typeof tagOrType === 'string') {
-      template.tag = tagOrType;
-    } else if (typeof tagOrType === 'function') {
-      template.type = tagOrType;
-    } else {
-      throw new TypeError('');
-    }
-
-    if (params) {
-      if (!template.type) {
-        template.ns = params.ns || '';
-      }
-
-      template.key = params.key;    // not for string or DOM template
-      template.actions = params.on; // not for string or DOM template
-
-      template.ref = params.ref;
-      template.style = params.style;
-      template.attrs = params.attrs;
-      template.classes = params.classes;
-      template.directs = params.directs;
-
-      var props = template.props = {};
-
-      for (var key in params) {
-        if (params.hasOwnProperty(key) && !template.hasOwnProperty(key)) {
-          props[key] = params[key];
-        }
-      }
-    }
-
-    if (children != null && !Array.isArray(children)) {
-      children = [children];
-    }
-
-    template.children = children;
-
-    return template;
-  }
-
-  HTMXTemplate.create = create;
-  //HTMXTemplate.parse = null;
-
-  Exact.HTMXTemplate = HTMXTemplate;
-
-})();
-//######################################################################################################################
-// src/core/compilers/HTMXCompiler.js
-//######################################################################################################################
-(function() {
-  
   var Text = Exact.Text;
   var Shadow = Exact.Shadow;
   var Element = Exact.Element;
   var Component = Exact.Component;
 
   var RES = Exact.RES;
-  var Collection = Exact.Collection;
   var Container = Exact.Container;
+  var Collection = Exact.Collection;
 
   var Evaluator = Exact.Evaluator;
   var Expression = Exact.Expression;
@@ -3875,7 +3196,7 @@
           content = Component.create(type);
         }
 
-        initialize(child, content, context, locals, todos);
+        build(child, content, context, locals, todos);
 
         if (child.ref) {
           context[child.ref] = content; //TODO: addPart
@@ -3927,17 +3248,19 @@
 
       if (Array.isArray(path)) {
         container.mode = 1;
-        
+
         var local = locals[path.origin];
         var prop = path[path.length - 1];
         var src = path.length < 2 ? local : RES.search(path.slice(0, path.length - 1), local, true);
 
-        if (src && src.on) {
+        if (src && src.on && src.send) {
           var handler = function() {
-            src.send('changed.' + prop, src[prop], src[prop]);
+            //src.send('changed.' + prop, src[prop], src[prop]);
+            src.send({type: 'changed', name: prop}, src[prop], src[prop]);
           };
-          
+
           var dst = src[prop];
+
           if (dst && dst instanceof Collection) {
             dst.on('changed', handler);
           }
@@ -3976,11 +3299,11 @@
       var container = containers[i];
 
       if (container instanceof Container) {
-        container.onChange = context.invalidate;
+        container.onChange = arrange;//context.invalidate;
       }
     }
 
-    context.on('updated', arrange);
+    //context.on('updated', arrange);
 
     arrange();
 
@@ -4035,7 +3358,7 @@
 
   function getFragmentOnCondition(template, context, locals) {
     var content = template.type ? Component.create(template.type) : Element.create(template.tag, template.ns);
-    compile(template, content, context, locals);
+    start(template, content, context, locals);
     return  [content];
   }
 
@@ -4069,16 +3392,16 @@
 
         if (index != null) {
           content = oldFrag[index];
+          content.key = key;
           oldFrag[index] = null;
         }
       }
 
       if (!content) {
         content = template.type ? Component.create(template.type) : Element.create(template.tag, template.ns);
-        compile(template, content, context, temp);
+        start(template, content, context, temp);
       }
 
-      content.key = key;
       fragment.push(content);
     }
 
@@ -4122,13 +3445,13 @@
       }
     }
   }
-  // TODO: initialize, update, build, write, patch
-  function initialize(template, target, context, locals, todos) {
+  // TODO: build, update, build, write, patch
+  function build(template, target, context, locals, todos) {
     initSelf(template, target, context, locals, todos);
     initChildrenOrContents(template, target, context, locals, todos);
   }
 
-  function compile(template, target, context, locals) { // TODO: host, data, event
+  function start(template, target, context, locals) { // TODO: host, data, event
     context = context || target;
 
     if (context === target) {
@@ -4137,22 +3460,126 @@
 
     var todos = [];
 
-    initialize(template, target, context, locals, todos);
+    build(template, target, context, locals, todos);
 
     complete(context, todos); // TODO: later
 
-    context._template = template;
+    //context._template = template;
+    Exact.defineProp(context, '_template', {
+      value: template,
+      writable: true,
+      enumerable: false,
+      configurable: true
+    });
   }
 
-  Exact.HTMXCompiler = {
-    initialize: initialize,
-    compile: compile
+  Exact.HTMXEngine = {
+    start: start, // start to use the template
+    build: build, // build self and children or contents
+    parse: null   // parse template from HTML string or DOM element
   };
 
 })();
 
 //######################################################################################################################
-// src/core/parsers/EvaluatorParser.js
+// src/core/templates/HTMXTemplate.js
+//######################################################################################################################
+(function() {
+
+  function HTMXTemplate(virtual) {
+    this.ns = '';
+    this.tag = '';
+    this.type = null;
+
+    //this.key = '';
+    this.ref = '';
+
+    this.props = null;
+    this.attrs = null;
+    this.style = null;
+    this.classes = null;
+    this.actions = null;
+    this.directs = null;
+    this.children = null;
+
+    this.virtual = virtual; // if prop value is virtual or actual
+  }
+
+  /**
+   * e.g. create('div', null, [
+   *        create('h1', null, 'title'),
+   *        create('ul', null,
+   *          create('a', {
+   *              'href@': 'link.url',
+   *              classes: {link: true, 'active@': 'link.active'},
+   *              directs: {'for': 'link of $.links', key: 'link.url'}
+   *            },
+   *            ['tip: @{ link.tip }']
+   *          )
+   *        ),
+   *        create(Button, { label: 'OK', 'click+': '$.onClick' })
+   *      ])
+   *
+   * @param {string|Function} tagOrType
+   * @param {Object} params
+   * @param {string|Array|HTMXTemplate} children
+   * @returns {HTMXTemplate}
+   */
+  function create(tagOrType, params, children) {
+    var template = new HTMXTemplate(false);
+    // if there is no expression for the prop, the value assigned to the prop must be actual, not virtual,
+    // e.g. { score: 10 } instead of { score: '10' } if `score` is number
+    //template.virtual = false;
+
+    if (typeof tagOrType === 'string') {
+      template.tag = tagOrType;
+    } else if (typeof tagOrType === 'function') {
+      template.type = tagOrType;
+    } else {
+      throw new TypeError('');
+    }
+
+    if (params) {
+      if (!template.type) {
+        template.ns = params.ns || '';
+      }
+
+      //template.key = params.key;    // not for string or DOM template
+      //template.actions = params.on; // not for string or DOM template
+
+      template.ref = params.ref;
+      template.style = params.style;
+      template.attrs = params.attrs;
+      template.classes = params.classes;
+      template.directs = params.directs;
+
+      var props = template.props = {};
+
+      for (var key in params) {
+        if (params.hasOwnProperty(key) && !template.hasOwnProperty(key)) {
+          props[key] = params[key];
+        }
+      }
+    }
+
+    if (children != null && !Array.isArray(children)) {
+      children = [children];
+    }
+
+    template.children = children;
+
+    return template;
+  }
+
+  HTMXTemplate.create = create;
+  //HTMXTemplate.compile = null;
+  //HTMXTemplate.parse = null;
+
+  Exact.HTMXTemplate = HTMXTemplate;
+
+})();
+//######################################################################################################################
+// src/core/template/parsers/EvaluatorParser.js
 //######################################################################################################################
 (function() {
 
@@ -4206,9 +3633,9 @@
 
   function makeFunctionBody(expr) {
     if ('development' === 'development') {
-      return 'try { return ' + expr + '; } catch (error) { console.error("the expression `' + expr + '` is illegal"); throw error; }';
+      return 'try { return ' + expr + ' } catch (error) { console.error("the expression `' + expr.replace(/('|")/g, '\\$1') + '` is illegal"); throw error; }';
     } else {
-      return 'return ' + expr + ';';
+      return 'return ' + expr;
     }
   }
 
@@ -4345,7 +3772,7 @@
 })();
 
 //######################################################################################################################
-// src/core/parsers/EventBindingParser.js
+// src/core/template/parsers/EventBindingParser.js
 //######################################################################################################################
 (function() {
 
@@ -4378,7 +3805,7 @@
 })();
 
 //######################################################################################################################
-// src/core/parsers/DataBindingParser.js
+// src/core/template/parsers/DataBindingParser.js
 //######################################################################################################################
 (function() {
 
@@ -4526,7 +3953,7 @@
 })();
 
 //######################################################################################################################
-// src/core/parsers/TextBindingParser.js
+// src/core/template/parsers/TextBindingParser.js
 //######################################################################################################################
 (function() {
 
@@ -4559,7 +3986,7 @@
       var range0 = StringUtil.range(expr, -1, BINDING_OPERATORS.ONE_TIME, DATA_BINDING_BRACKETS);
       var range1 = StringUtil.range(expr, -1, BINDING_OPERATORS.ONE_WAY, DATA_BINDING_BRACKETS);
 
-      if (!range0 && !range1) { return null; }
+      //if (!range0 && !range1) { return null; } // maybe attrs: {'style?': 'red'}
 
       while (range1 || range0) {
         if (range1) {
@@ -4606,12 +4033,23 @@
 })();
 
 //######################################################################################################################
-// src/core/parsers/HTMLParser.js
+// src/core/template/parsers/HTMLParser.js
 //######################################################################################################################
 (function() {
   var RES = Exact.RES;
-  var Skin = Exact.Skin;
+  //var Skin = ExactSkin || Exact.Skin;
   var HTMXTemplate = Exact.HTMXTemplate;
+
+  var BINDING_OPERATORS = Exact.BINDING_OPERATORS;
+
+  /* /[\&\@\#\+\?]/ */
+  var BINDING_OPERATORS_REGEXP = new RegExp(
+    '[\\' + BINDING_OPERATORS.ONE_TIME +
+    '\\' + BINDING_OPERATORS.ONE_WAY +
+    '\\' + BINDING_OPERATORS.TWO_WAY +
+    '\\' + BINDING_OPERATORS.EVENT +
+    '\\' + BINDING_OPERATORS.TEXT + ']'
+  );
 
   function parseData(expr, camel) {
     var pieces = expr.split(/;/g), piece, data = {}, name, key, n, i, j;
@@ -4625,7 +4063,7 @@
         expr = piece.slice(j + 1).trim();
         name = piece.slice(0, j).trim();
 
-        key = camel ? Skin.toCamelCase(name) : name;
+        key = camel ? Exact.Skin.toCamelCase(name) : name;
 
         data[key] = expr;
       }
@@ -4635,10 +4073,12 @@
   }
 
   function parseSelf(template, $template, resources) {
+    var Skin = Exact.Skin;
+
     template.ns = Skin.getNameSpace($template);
     template.tag = Skin.getTagName($template);
 
-    var type = Skin.toCamelCase(template.tag);
+    var type = Exact.Skin.toCamelCase(template.tag);
     template.type = RES.search(type[0].toUpperCase() + type.slice(1), resources);
 
     var $attrs = Skin.getAttrs($template);
@@ -4665,11 +4105,12 @@
       //template.attrs['x-ref'] = $attrs['x-type'];
 
       template.type = RES.search($attrs['x-type'], resources);
-      delete $attrs['x-type'];
 
       if (!template.type) {
         throw new TypeError('can not find such type `' + $attrs['x-type'] + '`');
       }
+
+      delete $attrs['x-type'];
     }
 
     if ($attrs['x-ref']) {
@@ -4705,11 +4146,17 @@
     }
 
     // props and events
-    var props = {}, name, key;
+    var props = {}, name, key, operator;
 
     for (name in $attrs) {
       if ($attrs.hasOwnProperty(name)) {
-        key = Skin.toCamelCase(name);
+        operator = name[name.length - 1];
+        if (BINDING_OPERATORS_REGEXP.test(operator)) {
+          key = Skin.toCamelCase(name.slice(0, name.length - 1)) + operator;
+        } else {
+          key = Skin.toCamelCase(name);
+        }
+
         props[key] = $attrs[name];
       }
     }
@@ -4718,6 +4165,8 @@
   }
 
   function parseChildren(template, $template, resources) {
+    var Skin = Exact.Skin;
+
     var $children = Skin.getChildren($template);
 
     var $child, children = [], i, n;
@@ -4728,7 +4177,7 @@
       if (Skin.isComment($child)) { continue; }
 
       if (Skin.isElement($child)) {
-        var child = new HTMXTemplate();
+        var child = new HTMXTemplate(true);
 
         parseSelf(child, $child, resources);
         parseChildren(child, $child, resources);
@@ -4744,7 +4193,14 @@
     }
   }
 
+  /**
+   *
+   * @param {HTMLElement|string} $template
+   * @param {Object} resources
+   * @returns {HTMXTemplate}
+   */
   function parse($template, resources) {
+    var Skin = Exact.Skin;
     resources = resources || {};
 
     if (typeof $template === 'string') {
@@ -4755,7 +4211,7 @@
       throw new TypeError('template must be DOM element or HTML string that contains a root tag');
     }
 
-    var template = new HTMXTemplate();
+    var template = new HTMXTemplate(true);
 
     parseSelf(template, $template, resources);
 
@@ -4772,7 +4228,7 @@
 
 })();
 //######################################################################################################################
-// src/core/parsers/HTMXParser.js
+// src/core/template/parsers/HTMXParser.js
 //######################################################################################################################
 (function() {
   var LiteralUtil = Exact.LiteralUtil;
@@ -4815,7 +4271,7 @@
 
   function getExpressions(data) {
     if (!data.expressions) {
-      Object.defineProperty(data, 'expressions', {
+      Exact.defineProp(data, 'expressions', {
         value: {}
       });
     }
@@ -4934,7 +4390,7 @@
     }
   }
 
-  function parseParams(_template, parameters, resources, name, actual) {
+  function parseParams(_template, parameters, resources, name, virtual) {
     if (!parameters) { return; }
     
     var identifiers = _template.identifiers, operator, expr, key, n_1;
@@ -4958,7 +4414,7 @@
             getData(_template, name), key, operator, expr, resources, identifiers
           );
         }
-      } else if (!actual) {
+      } else if (virtual) {
         parsePropFromExpr(
           getData(_template, name), key, expr, '*'
         );
@@ -5036,7 +4492,7 @@
 
     parseDirects(_template, template.directs, resources);
 
-    parseParams(_template, template.props, resources, 'props', template.actual);
+    parseParams(_template, template.props, resources, 'props', template.virtual);
     parseParams(_template, template.style, resources, 'style', false);
     parseParams(_template, template.attrs, resources, 'attrs', false);
     parseParams(_template, template.classes, resources, 'classes', true);
@@ -5106,10 +4562,12 @@
     parse: parse
   };
 
+  Exact.HTMXEngine.parse = parse;
+
 })();
 
 //######################################################################################################################
-// src/core/compilers/HTMXCompiler.js
+// src/more/updaters/HTMXUpdater.js
 //######################################################################################################################
 (function() {
 
@@ -5117,8 +4575,8 @@
   var Element = Exact.Element;
   var Component = Exact.Component;
 
+  var HTMXEngine = Exact.HTMXEngine;
   var HTMXTemplate = Exact.HTMXTemplate;
-  var HTMXCompiler = Exact.HTMXCompiler;
 
   var emptyObject = {}, emptyArray = [];
 
@@ -5180,10 +4638,10 @@
 
     if (template.type) {
       child = Component.create(template.type);
-      HTMXCompiler.initialize(template, child, context);
+      HTMXEngine.build(template, child, context);
     } else if (template.tag) {
       child = Element.create(template.tag, template.ns);
-      HTMXCompiler.initialize(template, child, context);
+      HTMXEngine.build(template, child, context);
     } else {
       child = Text.create(template);
     }
@@ -5195,7 +4653,7 @@
     return child;
   }
 
-  function updateChildrenOrContents(template, target, context) {
+  function updateChildrenOrContents(template, target, context) { // refer to Vue.js
     var _children = (target instanceof Component && target !== context) ? (target.contents || []) : target.children;
 
     if (_children === template.children) { return; }
@@ -5211,7 +4669,7 @@
     while (oldBeginIndex <= oldEndIndex && newBeginIndex <= newEndIndex) {
 
       if (oldBeginChild == null) {
-        oldBeginChild = _children[++oldBeginIndex]; // Vnode has been moved left
+        oldBeginChild = _children[++oldBeginIndex];
       } else if (oldEndChild == null) {
         oldEndChild = _children[--oldEndIndex];
       } else if (isMatched(oldBeginChild, newBeginChild)) {
@@ -5299,13 +4757,26 @@
 
 //######################################################################################################################
 // src/exit.js
-//######################################################################################################################
+////######################################################################################################################
 //(function(global, module) {
 //  'use strict';
 //
-//  var Exact = { version: '0.0.8' };
-
-  global = global || window || {};
+//  global = global || window || {};
+//
+//  var Exact = { version: '0.0.9' };
+//
+//  try {
+//    Exact['env'] = '>=ES5';
+//    Exact.defineProp = Object.defineProperty;
+//    Exact.defineProp({}, 'x', {get: function() {}})
+//  } catch (e) {
+//    Exact['env'] = '<ES5';
+//    Exact.defineProp = function defineProp(target, property, descriptor) {
+//      target[property] = descriptor.value;
+//    };
+//  }
+//
+//  Exact.Skin = global && global.ExactSkin;
 
   if (module) {
     module.exports = Exact;
@@ -5315,4 +4786,7 @@
 
   Exact.global = global;
 
-})(typeof global !== 'undefined' ? global : null, typeof module !== 'undefined' ? module : null);
+})(
+  typeof global !== 'undefined' ? global : null,
+  typeof module !== 'undefined' ? module : null
+);

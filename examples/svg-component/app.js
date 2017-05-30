@@ -1,6 +1,5 @@
 (function() {
   var Component = Exact.Component;
-  var Skin = Exact.Skin;
 
   function Slider() {
     Component.apply(this, arguments);
@@ -16,7 +15,7 @@
           value: 0
         };
       },
-      template: Skin.query(document, '.template .slider')
+      template: Exact.Skin.query('.template .slider')
     },
     onMouseChange: function(event) {
       switch (event.type) {
@@ -25,7 +24,7 @@
             var max = Number(this.max);
             var min = Number(this.min);
             //var cx = event.clientX - this.$skin.getBoundingClientRect().left;
-            var cx = event.clientX - Skin.call(this.$skin, 'getBoundingClientRect').left;
+            var cx = event.clientX - Exact.Skin.call(this.$skin, 'getBoundingClientRect').left;
             cx = cx < 0 ? 0 : cx;
             cx = cx > 100 ? 100 : cx;
             this.set('value', (cx * 0.01 * (max - min) + min).toFixed(1));
@@ -71,7 +70,7 @@
   Exact.defineClass({
     constructor: TextSlider, extend: Component,
     statics: {
-      template: Skin.query(document, '.template .text-slider'),
+      template: Exact.Skin.query('.template .text-slider'),
       resources: {
         Slider: Slider
       },
@@ -94,12 +93,12 @@
   Exact.defineClass({
     constructor: App, extend: Component,
     statics: {
-      template: Skin.query(document, '.template .app'),
+      template: Exact.Skin.query('.template .app'),
       resources: {
         TextSlider: TextSlider
       }
     }
   });
 
-  Component.create(App).attach(Skin.query(document, '#app'));
+  Component.create(App).attach(Exact.Skin.query('#app'));
 })();

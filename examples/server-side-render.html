@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html>
+<head lang="en">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+  <title>Exact |　Server Side Render</title>
+
+  <link href="../stylesheets/codemirror.css" rel="stylesheet">
+  <link href="../stylesheets/alice.css" rel="stylesheet">
+  <link href="../stylesheets/defaults.css" rel="stylesheet">
+  <!--<link href="../stylesheets/index.css" rel="stylesheet">-->
+</head>
+<body>
+<header class="header">
+  <nav class="nav-bar">
+    <h3 class="brand"><a href="../" class="logo">Exact</a></h3>
+    <a class="menu-btn"></a>
+    <ul class="menu-bar">
+      <li><a href="#" class="menu-item active"> Examples </a></li>
+      <li><a href="../downloads/index.html" class="menu-item"> Downloads </a></li>
+      <li><a href="../documents/index.html" class="menu-item"> Documents </a></li>
+      <li><a href="../apis/index.html" class="menu-item"> APIs </a></li>
+      <li><a href="https://github.com/enjolras1024/exact" class="menu-item"> GitHub </a></li>
+    </ul>
+  </nav>
+</header>
+<div class="main">
+  <aside class="side-bar">
+    <div class="card">
+      <h4>Examples</h4>
+      <ul class="list">
+        <li><a href="./color-palette.html" class="link">Color Palette</a></li>
+        <li><a href="./svg-component.html" class="link">SVG Component</a></li>
+        <li><a href="./todomvc.html" class="link">TodoMVC</a></li>
+        <li><a href="./tiny-editor.html" class="link">Tiny Editor</a></li>
+        <li><a href="./server-side-render.html" class="link">Server Side Render</a></li>
+      </ul>
+    </div>
+
+  </aside>
+  <a class="side-btn">&gt;</a>
+  <article class="article">
+    <h2>Server Side Render</h2>
+    <header class="tab-header">
+      <ul class="tab-bar">
+        <li><a href="#" class="tab-item active"> JavaScript </a></li>
+      </ul>
+    </header>
+    <section class="tab-content code-box scroll">
+      <div class="CodeMirror cm-s-alice">
+        <div class="CodeMirror-code"><pre class=" CodeMirror-line "><span style="padding-right: 0.1px;"><span class="cm-keyword">var</span> <span class="cm-def">Exact</span> <span class="cm-operator">=</span> <span class="cm-variable">require</span>(<span class="cm-string">'exact'</span>);</span></pre><pre class=" CodeMirror-line "><span style="padding-right: 0.1px;"><span cm-text="">​</span></span></pre><pre class=" CodeMirror-line "><span style="padding-right: 0.1px;"><span class="cm-variable">Exact</span>.<span class="cm-property">Skin</span> <span class="cm-operator">=</span> <span class="cm-variable">require</span>(<span class="cm-string">'exact-skin-cheerio'</span>); <span class="cm-comment">// important!</span></span></pre><pre class=" CodeMirror-line "><span style="padding-right: 0.1px;"><span cm-text="">​</span></span></pre><pre class=" CodeMirror-line "><span style="padding-right: 0.1px;"><span class="cm-keyword">var</span> <span class="cm-def">Demo</span> <span class="cm-operator">=</span> <span class="cm-variable">Exact</span>.<span class="cm-property">defineClass</span>({</span></pre><pre class=" CodeMirror-line "><span style="padding-right: 0.1px;">  <span class="cm-property">extend</span>: <span class="cm-variable">Exact</span>.<span class="cm-property">Component</span>,</span></pre><pre class=" CodeMirror-line "><span style="padding-right: 0.1px;">  <span class="cm-property">statics</span>: {</span></pre><pre class=" CodeMirror-line "><span style="padding-right: 0.1px;">    <span class="cm-property">template</span>: <span class="cm-string">'&lt;div title@="$.tooltip"&gt;@{ $.message }&lt;/div&gt;'</span>,</span></pre><pre class=" CodeMirror-line "><span style="padding-right: 0.1px;">    <span class="cm-property">descriptors</span>: [<span class="cm-string">'tooltip'</span>, <span class="cm-string">'message'</span>]</span></pre><pre class=" CodeMirror-line "><span style="padding-right: 0.1px;">  }</span></pre><pre class=" CodeMirror-line "><span style="padding-right: 0.1px;">});</span></pre><pre class=" CodeMirror-line "><span style="padding-right: 0.1px;"><span cm-text="">​</span></span></pre><pre class=" CodeMirror-line "><span style="padding-right: 0.1px;"><span class="cm-keyword">var</span> <span class="cm-def">demo</span> <span class="cm-operator">=</span> <span class="cm-variable">Exact</span>.<span class="cm-property">Component</span>.<span class="cm-property">create</span>(<span class="cm-variable">Demo</span>, {<span class="cm-property">tooltip</span>: <span class="cm-string">'123'</span>, <span class="cm-property">message</span>: <span class="cm-string">'456'</span>});</span></pre><pre class=" CodeMirror-line "><span style="padding-right: 0.1px;"><span cm-text="">​</span></span></pre><pre class=" CodeMirror-line "><span style="padding-right: 0.1px;"><span class="cm-variable">demo</span>.<span class="cm-property">attach</span>(<span class="cm-variable">Exact</span>.<span class="cm-property">Skin</span>.<span class="cm-property">parse</span>(<span class="cm-string">'&lt;div&gt;&lt;/div&gt;'</span>)[<span class="cm-number">0</span>]);</span></pre><pre class=" CodeMirror-line "><span style="padding-right: 0.1px;"><span cm-text="">​</span></span></pre><pre class=" CodeMirror-line "><span style="padding-right: 0.1px;"><span class="cm-variable">setImmediate</span>(<span class="cm-keyword">function</span>() { <span class="cm-comment">// due to async rendering</span></span></pre><pre class=" CodeMirror-line "><span style="padding-right: 0.1px;">  <span class="cm-variable">console</span>.<span class="cm-property">log</span>(<span class="cm-variable">Exact</span>.<span class="cm-property">Skin</span>.<span class="cm-property">renderToString</span>(<span class="cm-variable">demo</span>.<span class="cm-property">$skin</span>)); <span class="cm-comment">// output: &lt;div title="123"&gt;456&lt;/div&gt;</span></span></pre><pre class=" CodeMirror-line "><span style="padding-right: 0.1px;">}, <span class="cm-number">0</span>);</span></pre></div>
+      </div>
+    </section>
+
+
+  </article>
+
+</div>
+
+<script src="../javascripts/codemirror.js"></script>
+<script src="../javascripts/xml-mode.js"></script>
+<script src="../javascripts/javascript-mode.js"></script>
+<script src="../javascripts/site.js"></script>
+<!--<footer class="footer">
+  <p>Released under the MIT license<br>
+    © 2015 Chen Junyong. All rights reserved.</p>
+</footer>-->
+</body>
+</html>
