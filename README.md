@@ -1,6 +1,6 @@
 ## [Exact](https://enjolras1024.github.io/exact/)
 
-Exact is a JavaScript library for building web user interfaces with simple APIs in a flexible way. It gives you elements to create components and helps you render data to DOM.
+Exact is an event-driven and component-based JavaScript library for building web user interfaces with simple APIs in a flexible way.
 
 > **Events & Bindings:** Exact is [event-driven](https://enjolras1024.github.io/exact/documents/event.html) firstly. So custom events are supported in Exact, besides DOM events. Exact is data-driven based on custom property-changed events. [Data binding](https://enjolras1024.github.io/exact/documents/template.html#data-binding) expressions embedded in a component template are used for passing data in an intuitive way. They will work when some property-changed events are dispatched.
 
@@ -48,7 +48,7 @@ app.on('changed.what', function() {
 
 app.save({what: 'World'});  // Or app.set('what', 'World'). It will dispatch event `changed.what`
 
-app.attach(Exact.Skin.query('#app'))
+app.attach(Exact.Skin.query('#app'));
 ```
 
 [Go here](https://enjolras1024.github.io/exact/examples/) to see more examples.
