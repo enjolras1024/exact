@@ -57,12 +57,6 @@ var files = [
   'src/core/template/parsers/HTMXParser.js',
 
   'src/more/updaters/HTMXUpdater.js',
-  //'src/more/inputs/Input.js',
-  //'src/more/inputs/TextBox.js',
-  //'src/more/inputs/CheckBox.js',
-  //'src/more/inputs/Radio.js',
-  //'src/more/inputs/Select.js',
-  //'src/more/inputs/TextArea.js',
 
   'src/exit'
 ];
