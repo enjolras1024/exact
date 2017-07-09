@@ -4,7 +4,7 @@ Exact is an event-driven and component-based JavaScript library for building web
 
 > **Events & Bindings:** Exact is [event-driven](https://enjolras1024.github.io/exact/documents/event.html) firstly. So custom events are supported in Exact, besides DOM events. Exact is data-driven based on custom property-changed events. [Data binding](https://enjolras1024.github.io/exact/documents/template.html#data-binding) expressions embedded in a component template are used for passing data in an intuitive way. They will work when some property-changed events are dispatched.
 
-> **Elements + Components:** Exact elements, which have attributes, classes, style and children, are shadows of DOM elements. An Exact component, as the enhanced edition of Exact element, supports [template](https://enjolras1024.github.io/exact/documents/template.html), [property descriptors](https://enjolras1024.github.io/exact/documents/component.html##defaults-and-descriptors) and so on. When you update the shadow tree, Exact helps you render the dirty parts of a DOM tree in a batch mode asynchronously.
+> **Elements + Components:** Exact elements, which have attributes, classes, style and children, are shadows of DOM elements. An Exact component, as the enhanced edition of Exact element, supports [template](https://enjolras1024.github.io/exact/documents/template.html), [property descriptors](https://enjolras1024.github.io/exact/documents/component.html#defaults-and-descriptors) and so on. When you update the shadow tree, Exact helps you render the dirty parts of a DOM tree in a batch mode asynchronously.
 
 > **Declaration | Procedure:** Usually you can declaratively define a rich template, which contains some binding expressions, for a component class. The once compiled template will be used for initializing a component. Or sometimes you just need an empty template, and add some children, event handlers later (after initialization) in procedure.
 
@@ -51,7 +51,7 @@ app.save({what: 'World'});  // Or app.set('what', 'World'). It will dispatch eve
 app.attach(Exact.Skin.query('#app'));
 ```
 
-[Go here](https://enjolras1024.github.io/exact/examples/) to see more examples.
+[Go here](https://enjolras1024.github.io/exact/examples/color-palette.html) to see more examples.
 
 #### License
-Released under the MIT license. Copyright © 2017 Enjolras1024. All rights reserved.
+Released under the MIT license. Copyright ? 2017 Enjolras1024. All rights reserved.
