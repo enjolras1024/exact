@@ -1,19 +1,16 @@
-var Text = Exact.Text;
-var Element = Exact.Element;
-var Component = Exact.Component;
-
 var App = Exact.defineClass({
-  extend: Component,
+  extend: Exact.Component,
   statics: {
     descriptors: ['what'],
     template: '<div></div>'
   }
 });
 
-var app = Component.create(App);
-var h1 = Element.create('h1');
-var text = Text.create('');
+var app = Exact.Component.create(App);
+var h1 = Exact.Element.create('h1');
+var text = Exact.Text.create('');
 
+h1.style.set('color', '#0066dd');
 h1.children.insert(text);
 app.children.insert(h1);
 

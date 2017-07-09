@@ -3,23 +3,40 @@
 //######################################################################################################################
 (function() {
 
+  var TEMPLATE_BASE = {
+    ns: '',
+    tag: '',
+    ref: '',
+    //type: null,
+    props: null,
+    attrs: null,
+    style: null,
+    classes: null,
+    actions: null,
+    directs: null,
+    children: null
+  };
+
   function HTMXTemplate(virtual) {
-    this.ns = '';
-    this.tag = '';
-    this.type = null;
 
-    //this.key = '';
-    this.ref = '';
-
-    this.props = null;
-    this.attrs = null;
-    this.style = null;
-    this.classes = null;
-    this.actions = null;
-    this.directs = null;
-    this.children = null;
-
+    //this.ns = '';
+    //this.tag = '';
+    //this.type = null;
+    //
+    ////this.key = '';
+    //this.ref = '';
+    //
+    //this.props = null;
+    //this.attrs = null;
+    //this.style = null;
+    //this.classes = null;
+    //this.actions = null;
+    //this.directs = null;
+    //this.children = null;
+    //
+    Exact.assign(this, TEMPLATE_BASE);
     this.virtual = virtual; // if prop value is virtual or actual
+    this.type = null;
   }
 
   /**
@@ -48,12 +65,13 @@
     // e.g. { score: 10 } instead of { score: '10' } if `score` is number
     //template.virtual = false;
 
-    if (typeof tagOrType === 'string') {
+    var t = typeof tagOrType;
+    if (t === 'string') {
       template.tag = tagOrType;
-    } else if (typeof tagOrType === 'function') {
+    } else if (t === 'function') {
       template.type = tagOrType;
     } else {
-      throw new TypeError('');
+      throw new TypeError('First argument must be string or constructor');
     }
 
     if (params) {
@@ -68,12 +86,13 @@
       template.style = params.style;
       template.attrs = params.attrs;
       template.classes = params.classes;
+      template.actions = params.actions;// || params.on;
       template.directs = params.directs;
 
       var props = template.props = {};
 
       for (var key in params) {
-        if (params.hasOwnProperty(key) && !template.hasOwnProperty(key)) {
+        if (params.hasOwnProperty(key) && !TEMPLATE_BASE.hasOwnProperty(key)) {
           props[key] = params[key];
         }
       }

@@ -17,6 +17,8 @@
     '\\' + BINDING_OPERATORS.TEXT + ']'
   );
 
+  var X_TAG_REGEXP = /^x-/i;
+
   function parseData(expr, camel) {
     var pieces = expr.split(/;/g), piece, data = {}, name, key, n, i, j;
 
@@ -46,6 +48,10 @@
 
     //var type = Exact.Skin.toCamelCase(template.tag);
     //template.type = RES.search(type[0].toUpperCase() + type.slice(1), resources);
+    if (X_TAG_REGEXP.test(template.tag)) {
+      var type = Exact.Skin.toCamelCase(template.tag).slice(1); // e.g. x-button => xButton => Button
+      template.type = RES.search(type, resources);
+    }
 
     var $attrs = Skin.getAttrs($template);
 

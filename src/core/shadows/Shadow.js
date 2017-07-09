@@ -462,6 +462,7 @@
             binding = bindings[i];
             binding.constructor.clean(binding);
           }
+          delete shadow._bindings;
         }
 
         if (shadow.release) {

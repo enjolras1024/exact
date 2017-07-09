@@ -4,7 +4,7 @@ var App = Exact.defineClass({
   extend: Component,
   statics: {
     descriptors: ['what'], // or {what: null}, so `what` is bindable
-    template: '<div><h1>Hello, @{ $.what }!</h1></div>'
+    template: '<div><h1 style="color: #0066dd;">Hello, @{ $.what }!</h1></div>'
   }
 });
 

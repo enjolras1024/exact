@@ -17,11 +17,13 @@
 
   /* /[\&\@\#\+\?]/ */
   var BINDING_OPERATORS_REGEXP = new RegExp(
-    '[\\' + BINDING_OPERATORS.ONE_TIME +
+    '[' +
+    '\\' + BINDING_OPERATORS.ONE_TIME +
     '\\' + BINDING_OPERATORS.ONE_WAY +
     '\\' + BINDING_OPERATORS.TWO_WAY +
     '\\' + BINDING_OPERATORS.EVENT +
-    '\\' + BINDING_OPERATORS.TEXT + ']'
+    '\\' + BINDING_OPERATORS.TEXT +
+    ']'
   );
 
   var BLANK_REGEXP = /^ *\r?\n *$/;///[\f\n\r\t\v]/g; // TODO: how about <pre>
@@ -257,7 +259,9 @@
     _template.tag = template.tag;
     _template.type = template.type;
 
-    if (template.tag === 'slot') {
+    _template.actions = template.actions;
+
+    if (template.tag === 'x-slot') {
       getData(template, 'directs').xSlot = (template.props && template.props.name) || '';
     }
 
@@ -266,7 +270,7 @@
     parseParams(_template, template.props, resources, 'props', template.virtual);
     parseParams(_template, template.style, resources, 'style', false);
     parseParams(_template, template.attrs, resources, 'attrs', false);
-    parseParams(_template, template.classes, resources, 'classes', true);
+    parseParams(_template, template.classes, resources, 'classes', template.virtual);
 
     optimize(_template, template);
   }

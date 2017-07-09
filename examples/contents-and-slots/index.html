@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Exact | Contents and x-slots</title>
+</head>
+<body>
+  <div id="app"></div>
+  <div class="template" style="display: none;">
+    <div class="panel">
+      <header>
+        <x-slot name="header"></x-slot>
+      </header>
+      <section>
+        <x-slot></x-slot>
+      </section>
+      <footer>
+        <x-slot name="footer"></x-slot>
+      </footer>
+    </div>
+    <div class="app">
+      ...
+      <div x-type="Panel">
+        <h2 x-slot="header">title</h2>
+        <p>(1) ...</p>
+        <p>(2) ...</p>
+        <span x-slot="footer">tips</span>
+        <span x-slot="footer">time</span>
+      </div>
+      ...
+    </div>
+  </div>
+  <script src="../../dist/exact-skin.js"></script>
+  <script src="../../dist/exact.js"></script>
+  <script>
+    var Panel = Exact.defineClass({
+      extend: Exact.Component,
+      statics: {
+        template: Exact.Skin.query('.template .panel')
+      }
+    });
+    var App = Exact.defineClass({
+      extend: Exact.Component,
+      statics: {
+        template: Exact.Skin.query('.template .app')
+      }
+    });
+    Exact.Component.create(App).attach(Exact.Skin.query('#app'));
+  </script>
+</body>
+</html>

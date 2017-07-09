@@ -13,7 +13,7 @@
 
   var BINDING_LIKE_REGEXP = new RegExp(
     '['+ BINDING_OPERATORS.ONE_TIME + BINDING_OPERATORS.ONE_WAY + BINDING_OPERATORS.TWO_WAY +']\\'
-    + DATA_BINDING_BRACKETS[0]// + '.+\\' + DATA_BINDING_BRACKETS[1]
+    + DATA_BINDING_BRACKETS[0] + '.+?\\' + DATA_BINDING_BRACKETS[1]
   );
 
   Exact.TextBindingParser = {
@@ -27,7 +27,7 @@
      * @returns {*}
      */
     parse: function(expr, resources, parameters) { //TODO:
-      var i, j, indices = [0], template = [], piece;
+      var i, j, indices = [0], template = [], piece, found;
 
       var range0 = StringUtil.range(expr, -1, BINDING_OPERATORS.ONE_TIME, DATA_BINDING_BRACKETS);
       var range1 = StringUtil.range(expr, -1, BINDING_OPERATORS.ONE_WAY, DATA_BINDING_BRACKETS);
@@ -66,13 +66,19 @@
         piece = expr.slice(indices[i], indices[i+1]);
 
         if (i % 2) {
-          template[i] = DataBindingParser.parse(piece[0], piece.slice(2, piece.length - 1), resources, parameters);
+          template[i] = DataBindingParser.parse(piece[0], piece.slice(2, piece.length - 1), resources, parameters);// || piece;
+
+          if (template[i] instanceof Expression) {
+            found = true;
+          } else {
+            template[i] = piece;
+          }
         } else {
           template[i] = piece;
         }
       }
 
-      return Expression.create(TextBinding, template);
+      return found ? Expression.create(TextBinding, template) : null;
     }
   };
 

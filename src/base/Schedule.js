@@ -20,7 +20,7 @@
     }
 
     cursor = 0;
-    updaters.splice(0); //renderers.length = 0;
+    updaters.length = 0;  // updaters.splice(0);
     running = false;
     waiting = false;
 
@@ -33,7 +33,7 @@
       target.render();
     }
 
-    renderers.splice(0); //updaters.length = 0;
+    renderers.length = 0;   // renderers.splice(0);
   }
 
   Exact.Schedule = {

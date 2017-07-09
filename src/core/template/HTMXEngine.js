@@ -327,7 +327,7 @@
     if (contents) {
       for (var i = 0, n = contents.length; i < n; ++i) {
         var content = contents[i];
-        if (name === (content.props.slot || '')) {
+        if (name === (content.props.xSlot || '')) {
           fragment.push(content);
         }
       }

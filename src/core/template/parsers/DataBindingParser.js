@@ -63,6 +63,11 @@
   function parse(operator, expr, resources, identifiers) { //TODO: parse(operator, expression, resources)
     var mode = -1, tail = '', event, i, j;
 
+    if (!expr.trim()){
+      return null;
+      //throw new Error('expression must be not empty!');
+    }
+
     switch (operator) {
       case BINDING_OPERATORS.ONE_TIME:
         mode = DATA_BINDING_MODES.ONE_TIME;

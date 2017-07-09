@@ -725,7 +725,7 @@
     var handler, i, n = handlers.length;
 
     if (all && !name) {
-      handlers.splice(0);
+      handlers.length = 0; // handlers.splice(0);
     } else {
       //for (i = n-1; i >= 0; --i) {
       for (i = 0; i < n; ++i) {
@@ -1043,7 +1043,7 @@
     }
 
     cursor = 0;
-    updaters.splice(0); //renderers.length = 0;
+    updaters.length = 0;  // updaters.splice(0);
     running = false;
     waiting = false;
 
@@ -1056,7 +1056,7 @@
       target.render();
     }
 
-    renderers.splice(0); //updaters.length = 0;
+    renderers.length = 0;   // renderers.splice(0);
   }
 
   Exact.Schedule = {
@@ -1588,7 +1588,7 @@
 
 
       if (n > m) {
-        base.splice.call(this, m);
+        base.splice.call(this, m, n);
         flag = true;
       }
 
@@ -2284,6 +2284,7 @@
             binding = bindings[i];
             binding.constructor.clean(binding);
           }
+          delete shadow._bindings;
         }
 
         if (shadow.release) {
@@ -2578,7 +2579,7 @@
             this[key] = val;
           }
 
-          if (desc.native) {
+          if (desc.native) { // rendered as attr
             DirtyMarker.check(this, key, val, old);
           }
 
@@ -3414,7 +3415,7 @@
     if (contents) {
       for (var i = 0, n = contents.length; i < n; ++i) {
         var content = contents[i];
-        if (name === (content.props.slot || '')) {
+        if (name === (content.props.xSlot || '')) {
           fragment.push(content);
         }
       }
@@ -3486,23 +3487,40 @@
 //######################################################################################################################
 (function() {
 
+  var TEMPLATE_BASE = {
+    ns: '',
+    tag: '',
+    ref: '',
+    //type: null,
+    props: null,
+    attrs: null,
+    style: null,
+    classes: null,
+    actions: null,
+    directs: null,
+    children: null
+  };
+
   function HTMXTemplate(virtual) {
-    this.ns = '';
-    this.tag = '';
-    this.type = null;
 
-    //this.key = '';
-    this.ref = '';
-
-    this.props = null;
-    this.attrs = null;
-    this.style = null;
-    this.classes = null;
-    this.actions = null;
-    this.directs = null;
-    this.children = null;
-
+    //this.ns = '';
+    //this.tag = '';
+    //this.type = null;
+    //
+    ////this.key = '';
+    //this.ref = '';
+    //
+    //this.props = null;
+    //this.attrs = null;
+    //this.style = null;
+    //this.classes = null;
+    //this.actions = null;
+    //this.directs = null;
+    //this.children = null;
+    //
+    Exact.assign(this, TEMPLATE_BASE);
     this.virtual = virtual; // if prop value is virtual or actual
+    this.type = null;
   }
 
   /**
@@ -3531,12 +3549,13 @@
     // e.g. { score: 10 } instead of { score: '10' } if `score` is number
     //template.virtual = false;
 
-    if (typeof tagOrType === 'string') {
+    var t = typeof tagOrType;
+    if (t === 'string') {
       template.tag = tagOrType;
-    } else if (typeof tagOrType === 'function') {
+    } else if (t === 'function') {
       template.type = tagOrType;
     } else {
-      throw new TypeError('');
+      throw new TypeError('First argument must be string or constructor');
     }
 
     if (params) {
@@ -3551,12 +3570,13 @@
       template.style = params.style;
       template.attrs = params.attrs;
       template.classes = params.classes;
+      template.actions = params.actions;// || params.on;
       template.directs = params.directs;
 
       var props = template.props = {};
 
       for (var key in params) {
-        if (params.hasOwnProperty(key) && !template.hasOwnProperty(key)) {
+        if (params.hasOwnProperty(key) && !TEMPLATE_BASE.hasOwnProperty(key)) {
           props[key] = params[key];
         }
       }
@@ -3869,6 +3889,11 @@
   function parse(operator, expr, resources, identifiers) { //TODO: parse(operator, expression, resources)
     var mode = -1, tail = '', event, i, j;
 
+    if (!expr.trim()){
+      return null;
+      //throw new Error('expression must be not empty!');
+    }
+
     switch (operator) {
       case BINDING_OPERATORS.ONE_TIME:
         mode = DATA_BINDING_MODES.ONE_TIME;
@@ -3967,7 +3992,7 @@
 
   var BINDING_LIKE_REGEXP = new RegExp(
     '['+ BINDING_OPERATORS.ONE_TIME + BINDING_OPERATORS.ONE_WAY + BINDING_OPERATORS.TWO_WAY +']\\'
-    + DATA_BINDING_BRACKETS[0]// + '.+\\' + DATA_BINDING_BRACKETS[1]
+    + DATA_BINDING_BRACKETS[0] + '.+?\\' + DATA_BINDING_BRACKETS[1]
   );
 
   Exact.TextBindingParser = {
@@ -3981,7 +4006,7 @@
      * @returns {*}
      */
     parse: function(expr, resources, parameters) { //TODO:
-      var i, j, indices = [0], template = [], piece;
+      var i, j, indices = [0], template = [], piece, found;
 
       var range0 = StringUtil.range(expr, -1, BINDING_OPERATORS.ONE_TIME, DATA_BINDING_BRACKETS);
       var range1 = StringUtil.range(expr, -1, BINDING_OPERATORS.ONE_WAY, DATA_BINDING_BRACKETS);
@@ -4020,13 +4045,19 @@
         piece = expr.slice(indices[i], indices[i+1]);
 
         if (i % 2) {
-          template[i] = DataBindingParser.parse(piece[0], piece.slice(2, piece.length - 1), resources, parameters);
+          template[i] = DataBindingParser.parse(piece[0], piece.slice(2, piece.length - 1), resources, parameters);// || piece;
+
+          if (template[i] instanceof Expression) {
+            found = true;
+          } else {
+            template[i] = piece;
+          }
         } else {
           template[i] = piece;
         }
       }
 
-      return Expression.create(TextBinding, template);
+      return found ? Expression.create(TextBinding, template) : null;
     }
   };
 
@@ -4050,6 +4081,8 @@
     '\\' + BINDING_OPERATORS.EVENT +
     '\\' + BINDING_OPERATORS.TEXT + ']'
   );
+
+  var X_TAG_REGEXP = /^x-/i;
 
   function parseData(expr, camel) {
     var pieces = expr.split(/;/g), piece, data = {}, name, key, n, i, j;
@@ -4080,6 +4113,10 @@
 
     //var type = Exact.Skin.toCamelCase(template.tag);
     //template.type = RES.search(type[0].toUpperCase() + type.slice(1), resources);
+    if (X_TAG_REGEXP.test(template.tag)) {
+      var type = Exact.Skin.toCamelCase(template.tag).slice(1); // e.g. x-button => xButton => Button
+      template.type = RES.search(type, resources);
+    }
 
     var $attrs = Skin.getAttrs($template);
 
@@ -4246,11 +4283,13 @@
 
   /* /[\&\@\#\+\?]/ */
   var BINDING_OPERATORS_REGEXP = new RegExp(
-    '[\\' + BINDING_OPERATORS.ONE_TIME +
+    '[' +
+    '\\' + BINDING_OPERATORS.ONE_TIME +
     '\\' + BINDING_OPERATORS.ONE_WAY +
     '\\' + BINDING_OPERATORS.TWO_WAY +
     '\\' + BINDING_OPERATORS.EVENT +
-    '\\' + BINDING_OPERATORS.TEXT + ']'
+    '\\' + BINDING_OPERATORS.TEXT +
+    ']'
   );
 
   var BLANK_REGEXP = /^ *\r?\n *$/;///[\f\n\r\t\v]/g; // TODO: how about <pre>
@@ -4486,7 +4525,9 @@
     _template.tag = template.tag;
     _template.type = template.type;
 
-    if (template.tag === 'slot') {
+    _template.actions = template.actions;
+
+    if (template.tag === 'x-slot') {
       getData(template, 'directs').xSlot = (template.props && template.props.name) || '';
     }
 
@@ -4495,7 +4536,7 @@
     parseParams(_template, template.props, resources, 'props', template.virtual);
     parseParams(_template, template.style, resources, 'style', false);
     parseParams(_template, template.attrs, resources, 'attrs', false);
-    parseParams(_template, template.classes, resources, 'classes', true);
+    parseParams(_template, template.classes, resources, 'classes', template.virtual);
 
     optimize(_template, template);
   }

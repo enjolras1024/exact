@@ -153,7 +153,7 @@
             this[key] = val;
           }
 
-          if (desc.native) {
+          if (desc.native) { // rendered as attr
             DirtyMarker.check(this, key, val, old);
           }
 

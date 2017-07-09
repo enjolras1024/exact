@@ -130,7 +130,7 @@
     var handler, i, n = handlers.length;
 
     if (all && !name) {
-      handlers.splice(0);
+      handlers.length = 0; // handlers.splice(0);
     } else {
       //for (i = n-1; i >= 0; --i) {
       for (i = 0; i < n; ++i) {

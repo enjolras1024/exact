@@ -141,7 +141,7 @@
 
 
       if (n > m) {
-        base.splice.call(this, m);
+        base.splice.call(this, m, n);
         flag = true;
       }
 
