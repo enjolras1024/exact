@@ -155,7 +155,7 @@
     },
 
     addTodo: function(todo) {
-      todo.on('changed.completed', this.invalidate);
+      todo.on('changed', this.invalidate);
       todo.id = ++id;
       this.todos.insert(todo);
       this.invalidate();

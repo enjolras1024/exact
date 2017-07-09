@@ -185,9 +185,9 @@ article p {
 
 .face > .panel {
   /*width: 960px;*/
-  height: 100px;
+  /*height: 100px;*/
 
-  padding-top: 20px;
+  padding-top: 30px;
   padding-bottom: 10px;
   /*text-align: center;*/
   color: #ddd;
@@ -198,17 +198,19 @@ article p {
   /*font-style: italic;*/
 }
 
-.desc {
-  width: 50%;
-  float: left;
-  font-size: 2.1em;
+.face .desc {
+  width: 60%;
+  /*float: left;*/
+  margin: 0 auto;
+  font-size: 2.4em;
+  text-align: center;
 }
 
-.button-bar {
-  width: 50%;
-  float: right;
+.face .button-bar {
+  /*width: 50%;*/
+  /*float: right;*/
   text-align: center;
-  margin: 20px 0;
+  margin: 10px 0;
 }
 
 .button {
@@ -418,17 +420,17 @@ article p {
     text-align: center;
   }
 
-  .desc {
+  .face .desc {
     width: auto;
     float: none;
     padding: 0 10px;
-    font-size: 21px;
+    font-size: 24px;
   }
 
-  .button-bar {
+  .face .button-bar {
     width: auto;
     float: none;
-    margin: 20px 0;
+    margin: 10px 0;
   }
 
   .col-4 {

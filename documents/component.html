@@ -57,7 +57,7 @@
         <li><a href="./component.html#component-element-and-text" class="link">Component, Element and Text</a></li>
         <li><a href="./component.html#props-attrs-style-and-classes" class="link">Props, Attrs, Style and Classes</a></li>
         <li><a href="./component.html#defaults-and-descriptors" class="link">Defaults and Descriptors</a></li>
-        <li><a href="./component.html#property-validtion" class="link">Property Validation</a></li>
+        <li><a href="./component.html#property-validation" class="link">Property Validation</a></li>
         <li><a href="./component.html#property-interception" class="link">Property Interception</a></li>
         <li><a href="./component.html#property-denpendcy" class="link">Property Dependency</a></li>
         <li><a href="./component.html#children-and-contents" class="link">Children and Contents</a></li>
@@ -75,7 +75,7 @@
         <li><a href="./template.html#condition-rendering" class="link">Condition Rendering</a></li>
         <li><a href="./template.html#child-components" class="link">Child Components</a></li>
         <li><a href="./template.html#contents-and-slots" class="link">Contents and Slots</a></li>
-        <li><a href="./template.html#refrence-to-part" class="link">Reference to Part</a></li>
+        <li><a href="./template.html#reference-to-part" class="link">Reference to Part</a></li>
         <li><a href="./template.html#camlecase-vs-kebabcase" class="link">camelCase vs kebab-case</a></li>
       </ul>
     </div>
@@ -91,7 +91,7 @@
   <a class="side-btn">&gt;</a>
   <article class="article">
     <a id="component-element-and-text"></a>
-    <h2>Components</h2>
+    <h2>Component</h2>
     <p>组件系统是Exact的重中之重，其他模块和类几乎都是在为组件的实现做铺垫。组件是对一般标签元素的扩展，支持模板、属性更改通知、属性验证等高级功能。</p>
     <h4>Component, Element and Text</h4>
     <p>组件、元素和文本共同组成了Shadow层。文本是最简单的，元素则可以设置样式、插入或移除子节点等。
@@ -120,7 +120,7 @@
     </div>
     <p>注意，`defaults`或`descriptors`中自定义的属性，默认是没有脏标记功能的，不会被渲染到真实DOM层。如果希望原生DOM属性更改时派发通知，或者希望自定以属性能渲染到真实DOM上，可以在`descriptors`中进行特别声明。
     下面创建的组件TextBox，它的属性`value`是支持双向绑定的。</p>
-    <a id="property-validtion"></a>
+    <a id="property-validation"></a>
     <div class="code-box scroll">
       <div class="CodeMirror cm-s-alice">
         <div class="CodeMirror-code"><pre class=" CodeMirror-line "><span style="padding-right: 0.1px;"><span class="cm-keyword">var</span> <span class="cm-def">TextBox</span> <span class="cm-operator">=</span> <span class="cm-variable">Exact</span>.<span class="cm-property">defineClass</span>({</span></pre><pre class=" CodeMirror-line "><span style="padding-right: 0.1px;">  <span class="cm-property">extend</span>: <span class="cm-variable">Exact</span>.<span class="cm-property">Component</span>,</span></pre><pre class=" CodeMirror-line "><span style="padding-right: 0.1px;">  <span class="cm-property">statics</span>: {</span></pre><pre class=" CodeMirror-line "><span style="padding-right: 0.1px;">    <span class="cm-property">descriptors</span>: { </span></pre><pre class=" CodeMirror-line "><span style="padding-right: 0.1px;">      <span class="cm-property">value</span>: {</span></pre><pre class=" CodeMirror-line "><span style="padding-right: 0.1px;">        <span class="cm-property">native</span>: <span class="cm-atom">true</span> <span class="cm-comment">// 指示该属性为原生DOM属性，方可渲染到真实DOM</span></span></pre><pre class=" CodeMirror-line "><span style="padding-right: 0.1px;">      }</span></pre><pre class=" CodeMirror-line "><span style="padding-right: 0.1px;">    },</span></pre><pre class=" CodeMirror-line "><span style="padding-right: 0.1px;">    <span class="cm-property">template</span>: <span class="cm-string">'&lt;input type="text" change+="$.onChange(event)"&gt;'</span></span></pre><pre class=" CodeMirror-line "><span style="padding-right: 0.1px;">  },</span></pre><pre class=" CodeMirror-line "><span style="padding-right: 0.1px;">  <span class="cm-property">onChange</span>: <span class="cm-keyword">function</span>(<span class="cm-def">event</span>) {</span></pre><pre class=" CodeMirror-line "><span style="padding-right: 0.1px;">    <span class="cm-keyword">this</span>.<span class="cm-property">value</span> <span class="cm-operator">=</span> <span class="cm-variable-2">event</span>.<span class="cm-property">target</span>.<span class="cm-property">value</span>;</span></pre><pre class=" CodeMirror-line "><span style="padding-right: 0.1px;">  }</span></pre><pre class=" CodeMirror-line "><span style="padding-right: 0.1px;">});</span></pre></div>
