@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Exact | Text, Element and Component</title>
+  <style>
+    .panel .head {
+      margin: 0;
+      padding-left: 5px;
+    }
+
+    .panel .body {
+      padding: 5px;
+    }
+
+    .dark-bg {
+      background-color: #666;
+    }
+  </style>
+</head>
+<body>
+<div id="panel"></div>
+<script src="../../javascripts/exact-skin.js"></script>
+<script src="../../javascripts/exact.js"></script>
+<script>
+  var text = Exact.Text.create('');
+  text.set('data', "It's a rect");
+
+  var span = Exact.Element.create('span');
+  span.set('title', '...');
+  span.style.set('color', 'white');
+//  span.attrs.set('data-time', '12');
+  span.classes.set('dark-bg', true); // 第二个参数表示是否包含该类名
+  span.children.insert(text);
+
+  var rect = Exact.Element.create('rect', 'svg'); //第二个参数为命名空间
+  rect.save({width: 100, height: 100});
+  rect.style.save({fill: 'rgb(0, 120, 240)'});
+  rect.attrs.save({transform: 'translate(10, 10)'});
+
+  var svg = Exact.Element.create('svg', 'svg');
+  svg.children.insert(rect);
+
+var Panel = Exact.defineClass({
+  extend: Exact.Component,
+  statics: {
+    $template:  '<div class="panel" x-style="border?: solid 2px @{$.color};">' +
+                  '<h3 class="head" x-style="background-color@: $.color;">@{ $.title }</h3>' +
+                  '<div class="body"><slot></slot></div>' +
+                '</div>'
+  }
+});
+
+  var Panel = Exact.defineClass({
+    extend: Exact.Component,
+    statics: {
+      template:  '<div class="panel" x-style="border?: solid 2px @{$.color};">' +
+                    '<h3 class="head" x-style="background-color@: $.color;">@{ $.title }</h3>' +
+                    '<div class="body" x-ref="body"></div>' +
+                  '</div>',
+      descriptors: { title: null, color: null }
+    },
+    ready: function() {
+      this.once('changed.contents', (function() {
+        var children = this.body.children;
+        children.push.apply(children, this.contents);
+      }).bind(this));
+    }
+  });
+
+  var panel = Exact.Component.create(Panel);
+  panel.save({title: 'SVG', color: '#eee'}); // 设置DOM属性或自定义属性
+  panel.set('contents', [svg, span]); // 模板中slot处会被替换为svg和span
+  // 同样可以手动设置style、classes，一般不会手动更新组件的attrs和children
+
+  panel.attach(document.getElementById('panel'));
+
+</script>
+</body>
+</html>
