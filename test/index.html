@@ -1,0 +1,134 @@
+<html>
+<head>
+  <meta charset="utf-8">
+  <title>Mocha Tests</title>
+  <link href="../node_modules/mocha/mocha.css" rel="stylesheet" />
+</head>
+<body>
+  <div id="mocha"></div>
+
+  <!--<script src="https://cdnjs.cloudflare.com/ajax/libs/es5-shim/4.5.7/es5-shim.min.js"></script>-->
+  <!--<script src="https://cdnjs.cloudflare.com/ajax/libs/es5-shim/4.5.7/es5-sham.min.js"></script>-->
+  <!--<script src="jquery-2.1.4.min.js"></script>-->
+  <!--<script src="https://cdn.rawgit.com/Automattic/expect.js/0.3.1/index.js"></script>-->
+  <script src="../node_modules/mocha/mocha.js"></script>
+  <script src="../node_modules/chai/chai.js"></script>
+
+  <script>
+//    __DEV__ = 'development';
+    mocha.setup('bdd');
+//    mocha.setup({globals: ['hasCert']});
+  </script>
+
+  <script src="../src/skins/Skin.js"></script>
+
+  <script src="../src/entry-exit.js"></script>
+
+  <script src="../src/utils/PathUtil.js"></script>
+  <script src="../src/utils/StringUtil.js"></script>
+  <script src="../src/utils/LiteralUtil.js"></script>
+
+  <script src="../src/share/constants.js"></script>
+  <script src="../src/share/functions.js"></script>
+  <script src="../src/share/RES.js"></script>
+
+  <!--<script src="../src/skins/Skin.js"></script>-->
+
+
+  <!--<script src="../src/abc/Action.js"></script>-->
+
+  <script src="../src/base/Watcher.js"></script>
+  <script src="../src/base/Accessor.js"></script>
+  <script src="../src/base/Schedule.js"></script>
+  <script src="../src/base/Validator.js"></script>
+  <script src="../src/base/Evaluator.js"></script>
+  <script src="../src/base/Expression.js"></script>
+  <script src="../src/base/DirtyMarker.js"></script>
+
+
+  <!--<script src="../src/core/commands/Command.js"></script>-->
+  <!--<script src="../src/core/commands/BindingOneWay.js"></script>-->
+  <!--<script src="../src/core/commands/BindingTwoWay.js"></script>-->
+
+  <script src="../src/core/bindings/Binding.js"></script>
+
+  <!--<script src="../src/core/models/Store.js"></script>-->
+
+  <script src="../src/core/models/Store.js"></script>
+  <script src="../src/core/models/Container.js"></script>
+  <script src="../src/core/models/Collection.js"></script>
+
+  <script src="../src/core/shadows/Shadow.js"></script>
+  <script src="../src/core/shadows/Text.js"></script>
+  <script src="../src/core/shadows/Element.js"></script>
+  <script src="../src/core/shadows/Component.js"></script>
+
+  <script src="../src/core/bindings/Binding.js"></script>
+  <script src="../src/core/bindings/DataBinding.js"></script>
+  <script src="../src/core/bindings/TextBinding.js"></script>
+  <script src="../src/core/bindings/EventBinding.js"></script>
+
+  <script src="../src/core/template/HTMXEngine.js"></script>
+  <script src="../src/core/template/HTMXTemplate.js"></script>
+
+  <script src="../src/core/template/parsers/EvaluatorParser.js"></script>
+  <script src="../src/core/template/parsers/DataBindingParser.js"></script>
+  <script src="../src/core/template/parsers/EventBindingParser.js"></script>
+  <script src="../src/core/template/parsers/TextBindingParser.js"></script>
+  <script src="../src/core/template/parsers/HTMLParser.js"></script>
+  <script src="../src/core/template/parsers/HTMXParser.js"></script>
+
+
+
+  <!--<script src="../src/htmx/parsers/ExpressionParser.js"></script>-->
+
+
+
+  <script src="./share/functions.test.js"></script>
+  <script src="./share/RES.test.js"></script>
+
+  <script src="./utils/PathUtil.test.js"></script>
+  <script src="./utils/StringUtil.test.js"></script>
+  <script src="./utils/LiteralUtil.test.js"></script>
+
+
+  <script src="./base/Watcher.test.js"></script>
+  <script src="./base/Accessor.test.js"></script>
+  <script src="./base/Schedule.test.js"></script>
+  <script src="./base/Validator.test.js"></script>
+  <script src="./base/Evaluator.test.js"></script>
+  <script src="./base/Expression.test.js"></script>
+  <script src="./base/DirtyMarker.test.js"></script>
+
+  <script src="./core/bindings/Binding.test.js"></script>
+
+  <!--<script src="./base/Context.test.js"></script>-->
+
+  <script src="./core/models/Store.test.js"></script>
+  <script src="./core/models/Container.test.js"></script>
+  <script src="./core/models/Collection.test.js"></script>
+
+  <script src="./core/shadows/Text.test.js"></script>
+  <script src="./core/shadows/Shadow.test.js"></script>
+  <script src="./core/shadows/Element.test.js"></script>
+
+  <script src="./core/template/HTMXTemplate.test.js"></script>
+  <script src="./core/template/parsers/HTMLParser.test.js"></script>
+  <script src="./core/template/parsers/HTMXParser.test.js"></script>
+  <script src="./core/template/parsers/EvaluatorParser.test.js"></script>
+  <script src="./core/template/parsers/DataBindingParser.test.js"></script>
+  <script src="./core/template/parsers/EventBindingParser.test.js"></script>
+  <script src="./core/template/parsers/TextBindingParser.test.js"></script>
+
+  <!--<script src="./core/template/parsers/EvaluatorParser.test.js"></script>-->
+
+
+
+  <script>
+    mocha.checkLeaks();
+    mocha.globals(['jQuery']);
+    mocha.run();
+  </script>
+
+</body>
+</html>

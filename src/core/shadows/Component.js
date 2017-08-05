@@ -132,7 +132,7 @@
       var old, desc = descriptors[key];
       
       if (desc) {
-        if (!Validator.validate(this, key, val, desc)) { return; }
+        if (!Validator.validate(this, key, val, desc)) { return this; }
 
         var coerce = desc.coerce, get = desc.get, set = desc.set;
 
@@ -177,6 +177,8 @@
           this.invalidate();
         }
       }
+
+      return this;
     },
 
     /**

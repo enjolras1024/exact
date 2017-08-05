@@ -179,7 +179,7 @@
      * Update this shadow and append it to the schedule
      */
     update: function update() { //TODO: enumerable = false
-      if (!this.isInvalidated) { return; }
+      if (!this.isInvalidated) { return this; }
       //console.log('update', this.toString());
       if (this.refresh) {
         this.refresh();
@@ -223,7 +223,7 @@
     render: function render() {
       var $skin = this.$skin;
 
-      if (!$skin) { return; }
+      if (!$skin) { return this; }
 
       var Skin = Exact.Skin;
 
@@ -292,7 +292,7 @@
       // check
       if (shadow) {
         if (shadow === this) {
-          return;
+          return this;
         } else {
           throw new Error('a shadow can not attach a $skin that has been attached');
         }
@@ -324,9 +324,8 @@
 
           action = actions[type];
 
-          event = Watcher.getFixedEvent(type);
-
           if (action) {
+            event = Watcher.getFixedEvent(type);
             Shadow.addEventListener(this, action, event.type, event.capture);
           }
         }
@@ -351,9 +350,8 @@
 
           action = actions[type];
 
-          event = Watcher.getFixedEvent(type);
-
           if (action) {
+            event = Watcher.getFixedEvent(type);
             Shadow.removeEventListener(this, action, event.type, event.capture);
           }
         }
