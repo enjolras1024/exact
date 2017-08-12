@@ -54,4 +54,4 @@ app.attach(Exact.Skin.query('#app'));
 [Go here](https://enjolras1024.github.io/exact/examples/color-palette.html) to see more examples.
 
 #### License
-Released under the MIT license. Copyright ? 2017 Enjolras1024. All rights reserved.
+Released under the MIT license. Copyright (c) 2015-2017 Enjolras1024. All rights reserved.

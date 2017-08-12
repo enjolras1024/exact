@@ -495,8 +495,8 @@
         return ($skin || $doc).querySelector(selector);
       },
 
-      //queryAll: function queryAll($skin, selector) {
-      //  return $skin.querySelectorAll(selector);
+      //queryAll: function queryAll(selector, $skin) {
+      //  return ($skin || $doc).querySelectorAll(selector);
       //},
 
       /**

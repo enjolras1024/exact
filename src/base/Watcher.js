@@ -9,7 +9,7 @@
     this._actions = null;
   }
 
-  function getFixedEvent(info) { // TODO: keyup.enter!capture|once+=""
+  function parseEvent(info) { // TODO: keyup.enter!capture|once+=""
     var event;
 
     if (info.type) {
@@ -55,7 +55,7 @@
       actions = watcher._actions;
     }
 
-    var event = getFixedEvent(type);
+    var event = parseEvent(type);
 
     type = (event.capture ? '!' : '') + event.type;
 
@@ -115,7 +115,7 @@
 
     if (!actions) { return; }
 
-    var event = getFixedEvent(type);
+    var event = parseEvent(type);
 
     type = (event.capture ? '!' : '') + event.type;
 
@@ -177,7 +177,7 @@
 
     if (!actions) { return; }
 
-    event = getFixedEvent(event);
+    event = parseEvent(event);
 
     action = actions[(event.capture ? '!' : '') + event.type];
 
@@ -345,7 +345,7 @@
 
   });
 
-  Watcher.getFixedEvent = getFixedEvent;
+  Watcher.parseEvent = parseEvent;
 
   Exact.Watcher = Watcher;
 

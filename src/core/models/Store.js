@@ -53,6 +53,8 @@
         //this.send('changed.' + key, val, old);
         this.send({type: 'changed', name: key}, val, old);
       }
+
+      return this;
     }
   });
 

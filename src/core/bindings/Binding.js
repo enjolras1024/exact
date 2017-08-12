@@ -32,7 +32,9 @@
       remove: function remove(target, binding) {
         var _bindings = target._bindings;
 
-        _bindings.splice(_bindings.lastIndexOf(binding), 1);
+        if (_bindings && _bindings.length) {
+          _bindings.splice(_bindings.lastIndexOf(binding), 1);
+        }
       }
     }
   });

@@ -85,7 +85,7 @@
     return child;
   }
 
-  function updateChildrenOrContents(template, target, context) { // refer to Vue.js
+  function updateChildrenOrContents(template, target, context) { // refer to Vue (http://vuejs.org/)
     var _children = (target instanceof Component && target !== context) ? (target.contents || []) : target.children;
 
     if (_children === template.children) { return; }

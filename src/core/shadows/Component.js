@@ -60,7 +60,12 @@
 
     mixins: [Watcher.prototype, Accessor.prototype],
 
-    __descriptors__: { contents: emptyDesc }, // TODO: __exact_descriptors__
+    __descriptors__: {
+      contents: emptyDesc,
+      data: {
+        uncertain: true
+      }
+    }, // TODO: __exact_descriptors__
 
     statics: {
       //descriptors: { contents: null },
@@ -121,7 +126,7 @@
 
     get: function(key) {
       var props = this._props, descriptors = this.__descriptors__;
-      var desc = descriptors[key], get = desc.get;
+      var desc = descriptors[key], get = desc && desc.get;
 
       return get ? get.call(this, props) : props[key];
     },
@@ -153,12 +158,11 @@
             this[key] = val;
           }
 
-          if (desc.native) { // rendered as attr
+          if (desc.native) { // will be rendered to DOM prop or attr
             DirtyMarker.check(this, key, val, old);
           }
 
-          //this.send('changed.' + key, val, old);
-          this.send({type: 'changed', name: key}, val, old);
+          this.send({type: 'changed', name: key}, val, old); //this.send('changed.' + key, val, old);
 
           this.invalidate();//TODO:
         }

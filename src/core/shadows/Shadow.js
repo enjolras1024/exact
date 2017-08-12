@@ -163,6 +163,14 @@
 
     mixins: [Watcher.prototype, Accessor.prototype, DirtyMarker.prototype],
 
+    __configs__: {
+      autoDestroy: true
+    }, // TODO: __exact_configs__
+
+    config: function(opts) {
+      Exact.defineProp(this, '__configs__', {value: Exact.assign({}, this.__configs__, opts)});
+    },
+
     /**
      * invalidate this shadow and insert it to the schedule
      */
@@ -270,7 +278,9 @@
               var shadow = Skin.getShadow($removed[i]);
               if (!$parent && shadow) { // TODO: && !shadow._secrets.reuse
                 shadow.detach();
-                Shadow.destroy(shadow);
+                if (shadow.__configs__.autoDestroy) {
+                  Shadow.destroy(shadow);
+                }
               }
             }
           }
@@ -325,7 +335,7 @@
           action = actions[type];
 
           if (action) {
-            event = Watcher.getFixedEvent(type);
+            event = Watcher.parseEvent(type);
             Shadow.addEventListener(this, action, event.type, event.capture);
           }
         }
@@ -351,7 +361,7 @@
           action = actions[type];
 
           if (action) {
-            event = Watcher.getFixedEvent(type);
+            event = Watcher.parseEvent(type);
             Shadow.removeEventListener(this, action, event.type, event.capture);
           }
         }

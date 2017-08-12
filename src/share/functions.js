@@ -23,7 +23,7 @@
     return helper;
   };
 
-  Exact.assign = function assign(target/*,..sources*/) { // Object.assign
+  Exact.assign = Object.assign || function assign(target/*,..sources*/) { // Object.assign
     if (target == null) {
       throw  new TypeError('Cannot convert undefined or null to object');
     }

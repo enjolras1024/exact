@@ -7,7 +7,6 @@
   var Binding = Exact.Binding;
   var PathUtil = Exact.PathUtil;
   var Evaluator = Exact.Evaluator;
-  var Collection = Exact.Collection;
 
   var MODES = { ONE_TIME: 0, ONE_WAY: 1, TWO_WAY: 2 };
 
@@ -29,6 +28,7 @@
     paths
   ) {
     this.mode = mode;
+    this.active = true;
 
     this.context = context;
     this.locals = locals;
@@ -95,27 +95,30 @@
         );
         // TODO: use different exec in different mode
 
-        //var collection = Exact.Dep.begin(binding);
-        binding.exec();
-        //Exact.Dep.end();
-        //console.log(collection);
-
-        var flag;
+        var flag = 0;
 
         var method = mode === MODES.ONE_TIME ? 'once' : 'on';
 
         if (!event) {
-          flag = eye(method, paths, locals, binding.exec);
+          flag = eye(method, paths, locals, binding);
         } else {
           context.on(event, binding.exec);
-          flag = 1;
         }
 
         if (flag) {
           Binding.record(target, binding);
         }
 
-        if (mode === MODES.TWO_WAY && target.on) {
+        if (flag >= 0) {
+          //var collection = Exact.Dep.begin(binding);
+          binding.exec();
+          //Exact.Dep.end();
+        } else {
+          //DataBinding.clean(binding);
+          binding.active = false;
+        }
+
+        if (mode === MODES.TWO_WAY && target.on && source) {
           target.on('changed.' + targetProp, binding.back);
           //record(source, binding);
         }
@@ -124,7 +127,7 @@
       },
 
       clean: function(binding) {
-        var flag,
+        var flag = 0,
           mode = binding.mode,
           target = binding.target,
           locals = binding.locals,
@@ -133,13 +136,13 @@
         if (mode === MODES.ONE_TIME) { return; }
 
         if (!binding.event) {
-          flag = eye('off', binding.paths, locals, binding.exec);
+          flag = eye('off', binding.paths, locals, binding);
         } else if (context.off) {
           context.off(binding.event, binding.exec);
-          flag = 1;
+          flag = -1;
         }
 
-        if (flag) {
+        if (flag > 0) {
           Binding.remove(target, binding);
         }
 
@@ -147,10 +150,14 @@
           target.off('changed.' + binding.targetProp, binding.back);
           //remove(binding.source, binding);
         }
+
+        binding.active = false;
       }
     },
 
-    exec: function() { // TODO: back()
+    exec: function() {
+      if (!this.active) { return; }
+      
       var value,
 
         locals = this.locals,
@@ -232,7 +239,7 @@
     }
   }
 
-  function eye(method, paths, locals, handler) {
+  function eye(method, paths, locals, binding) {
     if (!locals || !paths || !paths.length) { return 0; }
 
     var i, j, path, prop, flag = 0, local, source;
@@ -247,29 +254,19 @@
       prop = path[j];
       source = j < 1 ? local : RES.search(path.slice(0, j), local, true);
 
-      if (method === 'on' && dep(i, prop, paths, source, path.origin)) {
+      if (!source) {
+        if (j > 0 && method !== 'off' && listen(method, path, locals, binding)) {
+          flag = -1;
+        }
         continue;
       }
 
-      if (source && source[method] /*&& source.bindable*/) {
-        source[method]('changed.' + prop, handler);
-        // TODO:
-        //if (i === 0) { // Check if the first variable is a collection. It is important for `x-for` expression.
-        //  source.on('changed.' + prop, function(event, target, old) {
-        //    if (old && old instanceof Collection) {
-        //      old.off('changed', handler);
-        //    }
-        //    if (target && target instanceof Collection) {
-        //      target[method]('changed', handler);
-        //    }
-        //  });
-        //
-        //  var target = source[prop];
-        //  if (target && target instanceof Collection) {
-        //    target[method]('changed', handler);
-        //  }
-        //}
+      if (method !== 'off' && dep(i, prop, paths, source, path.origin)) {
+        continue;
+      }
 
+      if (flag >= 0 && source[method] /*&& source.bindable*/) {
+        source[method]('changed.' + prop, binding.exec);
         flag = 1;
       } else {
         //paths[i] = null;
@@ -277,6 +274,35 @@
     }
 
     return flag;
+  }
+
+  function listen(method, path, locals, binding) {
+    var target, source, i = 0;
+    source = locals[path.origin];
+    target = source[path[i]];
+
+    while (target) {
+      source = target;
+      target = source[path[++i]];
+    }
+
+    var descriptors = source.__descriptors__;
+    var desc = descriptors && descriptors[path[i]];
+
+    if (desc && desc.uncertain && source[method]) {
+      source[method]('changed.' + path[i], function() { // util some unknown dependency has changed
+        var flag = eye('off', [path], locals, binding);
+        flag = eye(method, [path], locals, binding);
+        if (flag >= 0) {
+          binding.active = true;
+          binding.exec();
+        }
+      });
+
+      return true;
+    }
+
+    return false;
   }
 
   Exact.DataBinding = DataBinding;

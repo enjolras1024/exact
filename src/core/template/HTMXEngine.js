@@ -282,7 +282,7 @@
     results = results || emptyArray;
 
     for (i = 0, n = oldFrag.length; i < n; ++i) {
-      key = oldFrag[i].key;
+      key = oldFrag[i].__key__;
       if (key) {
         indices[key] = i;
       }
@@ -295,6 +295,7 @@
     }
 
     for (i = 0, n = results.length; i < n; ++i) {
+      key = null;
       content = null;
       item = results[i];
       temp = locals.concat([item]);
@@ -305,7 +306,6 @@
 
         if (index != null) {
           content = oldFrag[index];
-          content.key = key;
           oldFrag[index] = null;
         }
       }
@@ -313,6 +313,7 @@
       if (!content) {
         content = template.type ? Component.create(template.type) : Element.create(template.tag, template.ns);
         start(template, content, context, temp);
+        content.__key__ = key;
       }
 
       fragment.push(content);
